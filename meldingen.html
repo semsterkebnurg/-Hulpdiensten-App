@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111111">
+<title>Brandweer Meldingen</title>
+<style>
+:root{
+    --bg:#111;
+    --kaart:#1e1e1e;
+    --tekst:#f2f2f2;
+    --grijs:#9a9a9a;
+    --rood:#d62828;
+    --oranje:#f4a261;
+    --groen:#2a9d8f;
+}
+*{box-sizing:border-box;}
+body{
+    font-family:Arial,sans-serif;
+    background:var(--bg);
+    color:var(--tekst);
+    margin:0;
+    padding:0 16px 40px;
+}
+header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:16px 0;
+    border-bottom:3px solid var(--rood);
+}
+h1{margin:0;font-size:26px;}
+#klok{font-size:28px;font-weight:bold;font-variant-numeric:tabular-nums;}
+#status{font-size:14px;color:var(--grijs);margin:10px 0;}
+#status.ok::before{content:"● ";color:var(--groen);}
+#status.fout::before{content:"● ";color:var(--rood);}
+.knoppen{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+button{
+    background:#333;
+    color:white;
+    border:0;
+    border-radius:10px;
+    padding:12px 16px;
+    font-size:16px;
+    cursor:pointer;
+}
+button.groot{background:var(--rood);font-size:22px;padding:20px;width:100%;}
+#start{text-align:center;padding:40px 0;}
+#start p{color:var(--grijs);}
+.melding{
+    background:var(--kaart);
+    border-left:8px solid var(--grijs);
+    border-radius:12px;
+    padding:14px 16px;
+    margin:12px 0;
+}
+.melding.p1{border-left-color:var(--rood);}
+.melding.p2{border-left-color:var(--oranje);}
+.melding.eigen{outline:3px solid #ffd60a;}
+.melding .kop{display:flex;justify-content:space-between;gap:10px;color:var(--grijs);font-size:15px;}
+.melding .titel{font-size:22px;font-weight:bold;margin:6px 0;overflow-wrap:anywhere;}
+.melding .tekst{font-size:15px;color:#ccc;overflow-wrap:anywhere;}
+.label{display:inline-block;padding:2px 8px;border-radius:6px;background:#444;color:white;font-weight:bold;font-size:14px;}
+.p1 .label{background:var(--rood);}
+.p2 .label{background:var(--oranje);color:#111;}
+#alarm{
+    display:none;
+    position:fixed;inset:0;
+    background:var(--rood);
+    color:white;
+    z-index:10;
+    padding:24px 16px;
+    text-align:center;
+    flex-direction:column;
+    justify-content:center;
+    animation:knipper 1s steps(2) infinite;
+}
+#alarm.aan{display:flex;}
+#alarm h2{font-size:48px;margin:0 0 20px;}
+#alarm #alarmTekst{font-size:28px;font-weight:bold;overflow-wrap:anywhere;}
+#alarm button{margin-top:30px;font-size:22px;background:white;color:var(--rood);}
+@keyframes knipper{50%{background:#7a0000;}}
+#instellingen{display:none;background:var(--kaart);border-radius:12px;padding:16px;margin:12px 0;}
+#instellingen.open{display:block;}
+#instellingen label{display:block;margin:12px 0 4px;font-weight:bold;}
+#instellingen input{width:100%;padding:10px;font-size:16px;border-radius:8px;border:1px solid #555;background:#000;color:white;}
+#instellingen small{color:var(--grijs);}
+a{color:#8ecae6;}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>🚒 Brandweer Meldingen</h1>
+    <div id="klok">--:--:--</div>
+</header>
+
+<div id="start">
+    <p>Tik op start om de meldingen te volgen.<br>Dan kan de pagina ook geluid maken en blijft het scherm aan.</p>
+    <button class="groot" id="startKnop">▶ Start</button>
+</div>
+
+<div id="hoofd" style="display:none">
+    <div id="status">Bezig met laden…</div>
+    <div class="knoppen">
+        <button id="volledig">⛶ Volledig scherm</button>
+        <button id="test">🔔 Test alarm</button>
+        <button id="instKnop">⚙ Instellingen</button>
+    </div>
+
+    <div id="instellingen">
+        <label for="feedUrl">Feed (RSS-adres)</label>
+        <input id="feedUrl" type="url">
+        <small>Standaard: alle brandweermeldingen van LiveP2000.</small>
+
+        <label for="filter">Alleen meldingen met deze woorden</label>
+        <input id="filter" placeholder="bijv. Nunspeet, Elspeet, Vierhouten">
+        <small>Scheid met komma's. Leeg = alles tonen.</small>
+
+        <label for="eigen">Extra alarm bij deze woorden</label>
+        <input id="eigen" placeholder="bijv. 061641, 06-1641">
+        <small>Bijvoorbeeld je eigen voertuig. Die meldingen krijgen een geel kader en altijd een alarm.</small>
+
+        <label for="interval">Verversen elke … seconden</label>
+        <input id="interval" type="number" min="10" max="600">
+
+        <div class="knoppen" style="margin-top:16px">
+            <button id="opslaan" style="background:var(--groen)">Opslaan</button>
+        </div>
+    </div>
+
+    <div id="lijst"></div>
+
+    <p><a href="index.html">⬅ Terug</a></p>
+</div>
+
+<div id="alarm">
+    <h2>🚨 ALARM 🚨</h2>
+    <div id="alarmTekst"></div>
+    <button id="alarmUit">OK</button>
+</div>
+
+<script>
+const STANDAARD = {
+    feedUrl: "https://feeds.livep2000.nl/?d=1",
+    filter: "",
+    eigen: "061641, 06-1641, 06 1641",
+    interval: 30
+};
+
+// Feeds sturen vaak geen CORS-headers mee. Lukt het direct ophalen niet,
+// dan proberen we het via een openbare doorgeefdienst.
+const PROXIES = [
+    url => url,
+    url => "https://api.allorigins.win/raw?url=" + encodeURIComponent(url),
+    url => "https://corsproxy.io/?url=" + encodeURIComponent(url)
+];
+
+let inst = laadInstellingen();
+let gezien = new Set();
+let eersteKeer = true;
+let timer = null;
+let audioCtx = null;
+let wakeLock = null;
+let werkendeProxy = 0;
+
+function laadInstellingen(){
+    try{
+        const s = JSON.parse(localStorage.getItem("meldingenInst") || "{}");
+        return Object.assign({}, STANDAARD, s);
+    }catch(e){ return Object.assign({}, STANDAARD); }
+}
+function bewaarInstellingen(){
+    try{ localStorage.setItem("meldingenInst", JSON.stringify(inst)); }catch(e){}
+}
+function woorden(tekst){
+    return tekst.split(",").map(w => w.trim().toLowerCase()).filter(Boolean);
+}
+
+// ---- Klok ----
+function klok(){
+    document.getElementById("klok").textContent =
+        new Date().toLocaleTimeString("nl-NL");
+}
+setInterval(klok, 1000); klok();
+
+// ---- Geluid (zonder geluidsbestand) ----
+function piep(){
+    if(!audioCtx) return;
+    const nu = audioCtx.currentTime;
+    for(let i = 0; i < 6; i++){
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.value = i % 2 ? 660 : 990;
+        gain.gain.value = 0.25;
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(nu + i * 0.4);
+        osc.stop(nu + i * 0.4 + 0.35);
+    }
+}
+
+// ---- Scherm aan houden ----
+async function schermAan(){
+    try{
+        if("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
+    }catch(e){}
+}
+document.addEventListener("visibilitychange", () => {
+    if(document.visibilityState === "visible") schermAan();
+});
+
+// ---- Alarm ----
+function alarm(tekst){
+    document.getElementById("alarmTekst").textContent = tekst;
+    document.getElementById("alarm").classList.add("aan");
+    piep();
+    if(navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+}
+document.getElementById("alarmUit").onclick = () =>
+    document.getElementById("alarm").classList.remove("aan");
+
+// ---- Feed ophalen ----
+async function haalFeed(){
+    let laatsteFout = null;
+    for(let n = 0; n < PROXIES.length; n++){
+        const i = (werkendeProxy + n) % PROXIES.length;
+        try{
+            const sep = inst.feedUrl.includes("?") ? "&" : "?";
+            const url = inst.feedUrl + sep + "_=" + Date.now();
+            const r = await fetch(PROXIES[i](url), {cache: "no-store"});
+            if(!r.ok) throw new Error("HTTP " + r.status);
+            const tekst = await r.text();
+            const items = leesRss(tekst);
+            werkendeProxy = i;
+            return items;
+        }catch(e){ laatsteFout = e; }
+    }
+    throw laatsteFout;
+}
+
+function leesRss(xmlTekst){
+    const doc = new DOMParser().parseFromString(xmlTekst, "text/xml");
+    if(doc.querySelector("parsererror")) throw new Error("Geen geldige RSS");
+    const items = [...doc.querySelectorAll("item, entry")];
+    return items.map(it => {
+        const veld = n => (it.querySelector(n)?.textContent || "").trim();
+        const titel = veld("title");
+        const omschrijving = veld("description").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        const datum = veld("pubDate") || veld("updated") || veld("published");
+        const id = veld("guid") || veld("id") || veld("link") || (titel + datum);
+        return {id, titel, omschrijving, datum};
+    });
+}
+
+function prioriteit(tekst){
+    if(/\b(A ?1|P ?1|PRIO ?1)\b/i.test(tekst)) return 1;
+    if(/\b(A ?2|P ?2|PRIO ?2)\b/i.test(tekst)) return 2;
+    return 3;
+}
+
+function tijdTekst(datum){
+    const d = new Date(datum);
+    if(isNaN(d)) return datum;
+    return d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"}) +
+        " · " + d.toLocaleDateString("nl-NL", {day:"numeric", month:"short"});
+}
+
+function toon(items){
+    const lijst = document.getElementById("lijst");
+    lijst.innerHTML = "";
+    if(!items.length){
+        lijst.innerHTML = '<p style="color:var(--grijs)">Geen meldingen gevonden met dit filter.</p>';
+        return;
+    }
+    const eigen = woorden(inst.eigen);
+    for(const m of items.slice(0, 50)){
+        const alles = (m.titel + " " + m.omschrijving).toLowerCase();
+        const prio = prioriteit(m.titel + " " + m.omschrijving);
+        const div = document.createElement("div");
+        div.className = "melding" + (prio < 3 ? " p" + prio : "") +
+            (eigen.some(w => alles.includes(w)) ? " eigen" : "");
+        div.innerHTML = '<div class="kop"><span class="label"></span><span class="tijd"></span></div>' +
+            '<div class="titel"></div><div class="tekst"></div>';
+        div.querySelector(".label").textContent = prio < 3 ? "P" + prio : "Melding";
+        div.querySelector(".tijd").textContent = tijdTekst(m.datum);
+        div.querySelector(".titel").textContent = m.titel;
+        div.querySelector(".tekst").textContent = m.omschrijving;
+        lijst.appendChild(div);
+    }
+}
+
+async function ververs(){
+    const status = document.getElementById("status");
+    try{
+        let items = await haalFeed();
+        const filter = woorden(inst.filter);
+        if(filter.length){
+            items = items.filter(m => {
+                const t = (m.titel + " " + m.omschrijving).toLowerCase();
+                return filter.some(w => t.includes(w));
+            });
+        }
+        const eigen = woorden(inst.eigen);
+        const nieuw = items.filter(m => !gezien.has(m.id));
+        items.forEach(m => gezien.add(m.id));
+
+        if(!eersteKeer && nieuw.length){
+            const belangrijk = nieuw.find(m => {
+                const t = (m.titel + " " + m.omschrijving).toLowerCase();
+                return eigen.some(w => t.includes(w)) || prioriteit(t) === 1;
+            });
+            if(belangrijk) alarm(belangrijk.titel);
+            else piep();
+        }
+        eersteKeer = false;
+        toon(items);
+        status.className = "ok";
+        status.textContent = "Verbonden · laatst bijgewerkt " +
+            new Date().toLocaleTimeString("nl-NL") + " · " + items.length + " meldingen";
+    }catch(e){
+        status.className = "fout";
+        status.textContent = "Kan de feed niet ophalen (" + e.message + "). Nieuwe poging over " +
+            inst.interval + " seconden.";
+    }
+}
+
+function startTimer(){
+    clearInterval(timer);
+    timer = setInterval(ververs, Math.max(10, inst.interval) * 1000);
+}
+
+// ---- Knoppen ----
+document.getElementById("startKnop").onclick = () => {
+    try{
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume();
+    }catch(e){}
+    schermAan();
+    document.getElementById("start").style.display = "none";
+    document.getElementById("hoofd").style.display = "block";
+    ververs();
+    startTimer();
+};
+document.getElementById("test").onclick = () => alarm("TEST · P 1 Gebouwbrand Nunspeet 061641");
+document.getElementById("volledig").onclick = () => {
+    const el = document.documentElement;
+    if(document.fullscreenElement) document.exitFullscreen();
+    else if(el.requestFullscreen) el.requestFullscreen();
+};
+document.getElementById("instKnop").onclick = () => {
+    document.getElementById("feedUrl").value = inst.feedUrl;
+    document.getElementById("filter").value = inst.filter;
+    document.getElementById("eigen").value = inst.eigen;
+    document.getElementById("interval").value = inst.interval;
+    document.getElementById("instellingen").classList.toggle("open");
+};
+document.getElementById("opslaan").onclick = () => {
+    inst.feedUrl = document.getElementById("feedUrl").value.trim() || STANDAARD.feedUrl;
+    inst.filter = document.getElementById("filter").value;
+    inst.eigen = document.getElementById("eigen").value;
+    inst.interval = parseInt(document.getElementById("interval").value) || STANDAARD.interval;
+    bewaarInstellingen();
+    document.getElementById("instellingen").classList.remove("open");
+    gezien = new Set(); eersteKeer = true;
+    ververs();
+    startTimer();
+};
+</script>
+</body>
+</html>
