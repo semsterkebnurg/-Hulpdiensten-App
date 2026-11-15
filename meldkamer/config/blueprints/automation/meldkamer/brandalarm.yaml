@@ -1,0 +1,199 @@
+blueprint:
+  name: "Meldkamer: brandalarm"
+  description: >
+    Bij een nieuwe brandmelding in jouw plaats (of voor jouw eigen voertuig):
+    een pop-up op je telefoon met navigatieknoppen, de slaapkamerlamp knippert
+    rood, de lamp beneden gaat aan en de Google Home spreekt de melding uit.
+  domain: automation
+  input:
+    telefoons:
+      name: Telefoons
+      description: Welke telefoons krijgen een pop-up? (Home Assistant-app nodig)
+      default: []
+      selector:
+        device:
+          multiple: true
+          filter:
+            - integration: mobile_app
+    knipperlampen:
+      name: Lampen die rood knipperen
+      description: Bijvoorbeeld de slaapkamerlamp boven.
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: light
+    lampen_aan:
+      name: Lampen die aan gaan
+      description: Bijvoorbeeld een lamp beneden in de gang of woonkamer.
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: light
+    speakers:
+      name: Speakers (Google Home)
+      description: Laat de melding hardop uitspreken.
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: media_player
+    tts:
+      name: Spraakdienst
+      description: Meestal "Google Translate". Laat leeg om niets uit te spreken.
+      default: ""
+      selector:
+        entity:
+          filter:
+            - domain: tts
+    alleen_p1:
+      name: Alleen bij spoed (P1) of eigen voertuig
+      description: Aan = geen alarm bij P2/P3 meldingen.
+      default: false
+      selector:
+        boolean:
+    knipper_seconden:
+      name: Hoe lang knipperen (seconden)
+      default: 30
+      selector:
+        number:
+          min: 5
+          max: 300
+          unit_of_measurement: s
+
+mode: queued
+max: 5
+
+triggers:
+  - trigger: event
+    event_type: meldkamer_melding
+
+variables:
+  m: "{{ trigger.event.data }}"
+  telefoons: !input telefoons
+  knipperlampen: !input knipperlampen
+  lampen_aan: !input lampen_aan
+  speakers: !input speakers
+  tts: !input tts
+  alleen_p1: !input alleen_p1
+  knipper_seconden: !input knipper_seconden
+  route: "{{ m.route if m.route is mapping else {} }}"
+  titel: >-
+    {{ '🚒 TEST · ' if m.test else '🚒 ' }}{{ 'P' ~ m.prio ~ ' · ' if m.prio else '' }}{{ 'EIGEN VOERTUIG · ' if m.eigen else '' }}Brandmelding
+  regel_route: >-
+    {% if route.auto %}🚗 {{ route.auto.minuten }} min{% endif %}{% if route.fiets %} · 🚲 {{ route.fiets.minuten }} min{% endif %}{% if route.advies %} · {{ route.advies }}{% endif %}
+  bericht: >-
+    {{ m.kort or m.titel }}{% if m.adres %}
+
+    📍 {{ m.adres }}{% endif %}{% if regel_route %}
+
+    {{ regel_route }}{% endif %}
+  knoppen: >-
+    {% if route.maps_auto %}
+    [{"action": "URI", "title": "🚗 Navigeer met auto", "uri": "{{ route.maps_auto }}"},
+     {"action": "URI", "title": "🚲 Navigeer met fiets", "uri": "{{ route.maps_fiets }}"}]
+    {% else %}[]{% endif %}
+  uitspraak: >-
+    Let op. Brandmelding{{ ', prioriteit ' ~ m.prio if m.prio else '' }}. {{ m.kort or m.titel }}.
+    {%- if route.auto %} Rijtijd {{ route.auto.minuten }} minuten.{% endif %}
+    {%- if route.advies %} {{ route.advies }}.{% endif %}
+
+conditions:
+  - condition: template
+    value_template: "{{ m.relevant }}"
+  - condition: state
+    entity_id: input_boolean.meldkamer_brandalarm_pauze
+    state: "off"
+  - condition: template
+    value_template: "{{ not alleen_p1 or m.prio == 1 or m.eigen }}"
+
+actions:
+  - parallel:
+      # 1. Pop-up op de telefoon (kritieke melding: komt ook door bij stil)
+      - repeat:
+          for_each: "{{ telefoons }}"
+          sequence:
+            - action: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | slugify }}"
+              continue_on_error: true
+              data:
+                title: "{{ titel }}"
+                message: "{{ bericht }}"
+                data:
+                  url: /meldkamer
+                  clickAction: /meldkamer
+                  tag: meldkamer
+                  actions: "{{ knoppen }}"
+                  push:
+                    interruption-level: critical
+                    sound:
+                      name: default
+                      critical: 1
+                      volume: 1.0
+
+      # 2. Lampen beneden aan
+      - if:
+          - condition: template
+            value_template: "{{ lampen_aan | length > 0 }}"
+        then:
+          - action: light.turn_on
+            target:
+              entity_id: "{{ lampen_aan }}"
+            data:
+              brightness_pct: 100
+
+      # 3. Slaapkamerlamp rood laten knipperen en daarna terug zoals hij was
+      - if:
+          - condition: template
+            value_template: "{{ knipperlampen | length > 0 }}"
+        then:
+          - action: scene.create
+            data:
+              scene_id: meldkamer_voor_alarm
+              snapshot_entities: "{{ knipperlampen }}"
+          - repeat:
+              count: "{{ (knipper_seconden / 1.6) | round(0, 'ceil') | int }}"
+              sequence:
+                - action: light.turn_on
+                  target:
+                    entity_id: "{{ knipperlampen }}"
+                  data:
+                    rgb_color: [255, 0, 0]
+                    brightness: 255
+                    transition: 0
+                - delay:
+                    milliseconds: 800
+                - action: light.turn_on
+                  target:
+                    entity_id: "{{ knipperlampen }}"
+                  data:
+                    rgb_color: [255, 0, 0]
+                    brightness: 25
+                    transition: 0
+                - delay:
+                    milliseconds: 800
+          - action: scene.turn_on
+            target:
+              entity_id: scene.meldkamer_voor_alarm
+
+      # 4. Google Home spreekt de melding uit (twee keer)
+      - if:
+          - condition: template
+            value_template: "{{ speakers | length > 0 and tts != '' }}"
+        then:
+          - repeat:
+              count: 2
+              sequence:
+                - action: tts.speak
+                  continue_on_error: true
+                  target:
+                    entity_id: "{{ tts }}"
+                  data:
+                    media_player_entity_id: "{{ speakers }}"
+                    message: "{{ uitspraak }}"
+                    cache: false
+                - delay:
+                    seconds: 12

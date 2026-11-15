@@ -1,0 +1,86 @@
+blueprint:
+  name: "Meldkamer: rolluiken automatisch"
+  description: >
+    Rolluiken gaan dicht als het donker wordt en 's ochtends weer open.
+    Pauzeren kan met de schakelaar op het dashboard.
+  domain: automation
+  input:
+    rolluiken:
+      name: Rolluiken
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: cover
+    donker:
+      name: Hoe donker voordat ze dicht gaan
+      description: "Zonnestand in graden. 0 = zonsondergang, -4 = schemering (aanrader), -6 = echt donker."
+      default: -4
+      selector:
+        number:
+          min: -10
+          max: 5
+          step: 0.5
+          unit_of_measurement: "°"
+    open_doordeweeks:
+      name: Open op werkdagen om
+      default: "07:30:00"
+      selector:
+        time:
+    open_weekend:
+      name: Open in het weekend om
+      default: "09:00:00"
+      selector:
+        time:
+
+mode: single
+
+triggers:
+  - trigger: numeric_state
+    entity_id: sun.sun
+    attribute: elevation
+    below: !input donker
+    id: dicht
+  - trigger: time
+    at: !input open_doordeweeks
+    id: open_werkdag
+  - trigger: time
+    at: !input open_weekend
+    id: open_weekend
+
+conditions:
+  - condition: state
+    entity_id: input_boolean.meldkamer_rolluiken_pauze
+    state: "off"
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: dicht
+          - condition: state
+            entity_id: sun.sun
+            attribute: rising
+            state: false
+        sequence:
+          - action: cover.close_cover
+            target:
+              entity_id: !input rolluiken
+      - conditions:
+          - condition: trigger
+            id: open_werkdag
+          - condition: time
+            weekday: [mon, tue, wed, thu, fri]
+        sequence:
+          - action: cover.open_cover
+            target:
+              entity_id: !input rolluiken
+      - conditions:
+          - condition: trigger
+            id: open_weekend
+          - condition: time
+            weekday: [sat, sun]
+        sequence:
+          - action: cover.open_cover
+            target:
+              entity_id: !input rolluiken

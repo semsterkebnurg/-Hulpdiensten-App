@@ -1,0 +1,10 @@
+{
+  "domain": "meldkamer",
+  "name": "Meldkamer",
+  "codeowners": [],
+  "dependencies": ["http"],
+  "documentation": "https://github.com/semsterkebnurg/-Hulpdiensten-App",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#07090d">
+<title>Meldkamer Handleiding</title>
+<style>
+:root{
+  --bg:#07090d; --kaart:#141921; --rand:rgba(255,255,255,.08);
+  --tekst:#e8edf3; --zacht:#8b96a5; --rood:#ff3b30; --groen:#30d158; --geel:#ffd60a; --blauw:#0a84ff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tekst);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55;
+  background-image:radial-gradient(900px 400px at 0 -10%,rgba(255,59,48,.18),transparent 60%)}
+main{max-width:760px;margin:0 auto;padding:0 16px 80px}
+header{padding:28px 0 12px}
+header .bol{width:54px;height:54px;border-radius:14px;display:grid;place-items:center;font-size:28px;
+  background:linear-gradient(135deg,#ff3b30,#ff6b3d);box-shadow:0 0 30px rgba(255,59,48,.45)}
+h1{font-size:28px;margin:14px 0 4px;letter-spacing:.02em}
+.sub{color:var(--zacht);margin:0}
+.voortgang{position:sticky;top:0;z-index:5;background:rgba(7,9,13,.92);backdrop-filter:blur(8px);padding:10px 0;margin:10px 0 6px}
+.balk{height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.balk div{height:100%;width:0;background:linear-gradient(90deg,var(--rood),var(--geel));transition:.3s}
+.voortgang small{color:var(--zacht);font-size:13px}
+.stap{background:var(--kaart);border:1px solid var(--rand);border-radius:16px;padding:18px;margin:14px 0}
+.stap.klaar{border-color:rgba(48,209,88,.5);opacity:.75}
+.stap h2{display:flex;gap:12px;align-items:center;font-size:19px;margin:0 0 10px}
+.nr{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--rood);font-weight:800;font-size:16px}
+.stap.klaar .nr{background:var(--groen);color:#000}
+.tijd{margin-left:auto;font-size:12px;color:var(--zacht);font-weight:500;white-space:nowrap}
+ol,ul{padding-left:22px;margin:8px 0}
+li{margin:6px 0}
+b{color:#fff}
+.tip{background:rgba(10,132,255,.12);border:1px solid rgba(10,132,255,.35);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:15px}
+.let{background:rgba(255,214,10,.10);border:1px solid rgba(255,214,10,.4);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:15px}
+.code{display:flex;gap:8px;align-items:stretch;margin:10px 0}
+.code code{flex:1;background:#000;border:1px solid var(--rand);border-radius:10px;padding:12px;font-family:ui-monospace,Menlo,monospace;font-size:14px;overflow-wrap:anywhere;color:#7ee787}
+.code button{border:0;border-radius:10px;background:var(--blauw);color:#fff;font-weight:700;padding:0 14px;font-size:14px;cursor:pointer}
+.knop{display:inline-block;background:var(--rood);color:#fff;text-decoration:none;font-weight:700;padding:10px 16px;border-radius:10px;margin:4px 0}
+.knop.grijs{background:#2a313b}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+td,th{padding:7px 8px;border-bottom:1px solid var(--rand);text-align:left}
+th{color:var(--zacht);font-weight:600}
+kbd{background:#2a313b;border:1px solid #3a424e;border-bottom-width:3px;border-radius:6px;padding:1px 7px;font-family:inherit;font-size:14px;white-space:nowrap}
+.vink{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rand);cursor:pointer;font-weight:600;color:var(--zacht)}
+.vink input{width:22px;height:22px;accent-color:var(--groen)}
+details{background:rgba(255,255,255,.03);border-radius:10px;padding:8px 12px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+h3{font-size:16px;margin:18px 0 6px}
+a{color:#64d2ff}
+footer{color:var(--zacht);font-size:14px;text-align:center;margin-top:30px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="bol">🚒</div>
+  <h1>Meldkamer-dashboard installeren</h1>
+  <p class="sub">Stap voor stap. Vink elke stap af als hij klaar is. Loop je vast? Stuur een foto of screenshot naar Claude.</p>
+</header>
+
+<div class="voortgang"><div class="balk"><div id="balk"></div></div><small id="teller">0 van 0 stappen klaar</small></div>
+
+<section class="stap">
+  <h2><span class="nr">✓</span>Wat heb je nodig?</h2>
+  <ul>
+    <li>🖥️ De <b>oude laptop</b> (die wordt helemaal leeggemaakt)</li>
+    <li>💻 Een <b>tweede computer</b> om de USB-stick klaar te maken</li>
+    <li>🔌 Een <b>USB-stick</b> van 8 GB of meer (alles erop wordt gewist!)</li>
+    <li>📶 Je <b>wifi-wachtwoord</b>, of een netwerkkabel naar je modem</li>
+    <li>📱 Je <b>iPhone</b></li>
+    <li>⏱️ Ongeveer <b>1,5 uur</b> tijd</li>
+  </ul>
+  <div class="let">⚠️ Staan er nog foto's of bestanden op de oude laptop die je wilt houden? Zet die <b>eerst</b> ergens anders neer.</div>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">1</span>USB-stick klaarmaken <span class="tijd">± 20 min</span></h2>
+  <p>Dit doe je op de <b>andere</b> computer.</p>
+  <ol>
+    <li>Download <b>Xubuntu 24.04</b> (een gratis en licht besturingssysteem, zoals Windows):<br>
+      <a class="knop" href="https://xubuntu.org/download/" target="_blank" rel="noopener">⬇ xubuntu.org/download</a><br>
+      Kies <b>24.04 LTS</b>, dan een downloadlink bij <b>Netherlands</b>. Het bestand eindigt op <code>.iso</code> en is ongeveer 4 GB.</li>
+    <li>Download en installeer <b>balenaEtcher</b> (programma om de stick te maken):<br>
+      <a class="knop grijs" href="https://etcher.balena.io/" target="_blank" rel="noopener">⬇ etcher.balena.io</a></li>
+    <li>Stop de USB-stick in de computer en open balenaEtcher.</li>
+    <li>Klik op <b>Flash from file</b> → kies het <code>.iso</code>-bestand.</li>
+    <li>Klik op <b>Select target</b> → kies je USB-stick.</li>
+    <li>Klik op <b>Flash!</b> en wacht tot het klaar is.</li>
+  </ol>
+  <label class="vink"><input type="checkbox"> Stap 1 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">2</span>Laptop opstarten vanaf de stick <span class="tijd">± 5 min</span></h2>
+  <ol>
+    <li>Zet de oude laptop <b>uit</b>. Doe de <b>lader</b> erin en de <b>USB-stick</b>.</li>
+    <li>Zet de laptop aan en druk <b>meteen</b> een paar keer op de opstartknop uit de tabel hieronder.</li>
+    <li>Er verschijnt een menu. Kies met de pijltjes de <b>USB-stick</b> en druk op <kbd>Enter</kbd>.</li>
+  </ol>
+  <table>
+    <tr><th>Merk laptop</th><th>Druk op</th></tr>
+    <tr><td>HP</td><td><kbd>F9</kbd> (of <kbd>Esc</kbd>, dan <kbd>F9</kbd>)</td></tr>
+    <tr><td>Dell</td><td><kbd>F12</kbd></td></tr>
+    <tr><td>Lenovo</td><td><kbd>F12</kbd> (of <kbd>Fn</kbd> + <kbd>F12</kbd>)</td></tr>
+    <tr><td>Acer</td><td><kbd>F12</kbd></td></tr>
+    <tr><td>Asus</td><td><kbd>Esc</kbd> of <kbd>F8</kbd></td></tr>
+    <tr><td>Toshiba</td><td><kbd>F12</kbd></td></tr>
+    <tr><td>MSI</td><td><kbd>F11</kbd></td></tr>
+  </table>
+  <div class="tip">💡 Start de laptop gewoon in Windows op? Dan was je te laat. Zet hem uit en probeer het opnieuw. Lukt het niet? Stuur Claude het merk en type van de laptop.</div>
+  <label class="vink"><input type="checkbox"> Stap 2 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">3</span>Xubuntu installeren <span class="tijd">± 20 min</span></h2>
+  <ol>
+    <li>Kies in het zwarte menu <b>Try or Install Xubuntu</b> en druk op <kbd>Enter</kbd>.</li>
+    <li>Kies de taal <b>Nederlands</b> en klik op <b>Xubuntu installeren</b>.</li>
+    <li>Toetsenbord: <b>English (US)</b> laten staan (dat is het normale Nederlandse toetsenbord).</li>
+    <li><b>Wifi</b>: kies je netwerk en vul het wachtwoord in. Een netwerkkabel kan ook.</li>
+    <li>Kies <b>Normale installatie</b>. Vink <b>"Updates downloaden"</b> en <b>"Software van derden"</b> aan.</li>
+    <li>Kies <b>"Schijf wissen en Xubuntu installeren"</b>. Bevestig met <b>Doorgaan</b>.</li>
+    <li>Tijdzone: <b>Amsterdam</b>.</li>
+    <li>Vul je gegevens in:
+      <ul>
+        <li>Naam: bijv. <b>Meldkamer</b></li>
+        <li>Computernaam: <b>meldkamer</b></li>
+        <li>Een <b>wachtwoord</b> dat je onthoudt (schrijf het op!)</li>
+        <li>✅ Kies <b>"Automatisch aanmelden"</b>, belangrijk!</li>
+      </ul></li>
+    <li>Wacht tot het klaar is → <b>Nu herstarten</b> → haal de USB-stick eruit als daarom gevraagd wordt en druk op <kbd>Enter</kbd>.</li>
+  </ol>
+  <div class="tip">💡 De schermen kunnen er net iets anders uitzien. Het gaat om: <b>schijf wissen</b> en <b>automatisch aanmelden</b>.</div>
+  <label class="vink"><input type="checkbox"> Stap 3 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">4</span>Het Meldkamer-script draaien <span class="tijd">± 20 min</span></h2>
+  <ol>
+    <li>Je ziet nu het bureaublad van Xubuntu. Open een <b>Terminal</b>: druk tegelijk op <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd>.</li>
+    <li>Typ precies deze regel over (of open deze pagina op de laptop en kopieer hem):
+      <div class="code"><code id="cmd">wget -qO- semsterkebnurg.github.io/-Hulpdiensten-App/i | bash</code><button data-kopieer="cmd">Kopieer</button></div>
+      Plakken in de terminal doe je met <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>. Druk daarna op <kbd>Enter</kbd>.</li>
+    <li>Vul je <b>wachtwoord</b> in (je ziet geen tekens tijdens het typen, dat is normaal) en druk op <kbd>Enter</kbd>.</li>
+    <li>Het script stelt 3 vragen:
+      <ul>
+        <li>Je <b>adres</b> (voor de rijtijden; dit blijft alleen op de laptop)</li>
+        <li>Je <b>woonplaats</b> (druk op <kbd>Enter</kbd> voor Nunspeet)</li>
+        <li>Het <b>roepnummer</b> van "jouw" brandweerauto (druk op <kbd>Enter</kbd> voor 06-1641)</li>
+      </ul></li>
+    <li>Wacht tot je <b style="color:var(--groen)">✅ KLAAR!</b> ziet. Er staat dan een adres zoals <code>http://192.168.1.25:8123</code>. <b>Maak hier een foto van!</b> Dat heb je straks nodig voor je iPhone.</li>
+  </ol>
+  <label class="vink"><input type="checkbox"> Stap 4 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">5</span>Home Assistant-account maken <span class="tijd">± 5 min</span></h2>
+  <ol>
+    <li>Er gaat vanzelf een browser open met Home Assistant. Klik op <b>Mijn smart home maken</b>.</li>
+    <li>Vul je naam, een <b>gebruikersnaam</b> en een <b>wachtwoord</b> in. <b>Schrijf ze op!</b> Je hebt ze ook nodig op je iPhone.</li>
+    <li>Kies je <b>locatie</b> op de kaart (je huis) en klik steeds op <b>Volgende</b>.</li>
+    <li>Ziet hij al apparaten (zoals Hue of Google Home)? Klik dan gewoon op <b>Voltooien</b>. Die koppelen we in stap 7.</li>
+    <li><b>Herstart de laptop</b>: klik rechtsboven op je naam → <b>Afsluiten</b> → <b>Herstarten</b>.</li>
+    <li>Na het opstarten opent het <b>Meldkamer-dashboard</b> vanzelf op het hele scherm. 🎉</li>
+  </ol>
+  <div class="tip">💡 Wil je het menu van Home Assistant zien? Klik linksboven op <b>☰</b>. Volledig scherm verlaten doe je met <kbd>F11</kbd>.</div>
+  <label class="vink"><input type="checkbox"> Stap 5 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">6</span>iPhone koppelen (voor pop-ups) <span class="tijd">± 5 min</span></h2>
+  <ol>
+    <li>Installeer de app <b>Home Assistant</b> uit de App Store (gratis).</li>
+    <li>Open de app. Wordt de laptop niet vanzelf gevonden? Kies <b>Handmatig invoeren</b> en typ het adres van de foto uit stap 4 (bijv. <code>http://192.168.1.25:8123</code>).</li>
+    <li>Log in met je gebruikersnaam en wachtwoord uit stap 5.</li>
+    <li>Sta <b>meldingen</b> en <b>kritieke meldingen</b> toe als de app daarom vraagt. Gemist? Ga op je iPhone naar <b>Instellingen → Home Assistant → Meldingen</b> en zet <b>Kritieke meldingen</b> aan. Dan komt een brandmelding ook door als je telefoon op stil staat.</li>
+    <li>In het menu van de app staat nu <b>Meldkamer</b>: dat is je dashboard op de telefoon.</li>
+  </ol>
+  <div class="tip">💡 Pop-ups komen <b>overal</b> binnen, ook als je niet thuis bent. Het dashboard zelf kun je alleen thuis via je wifi openen.</div>
+  <label class="vink"><input type="checkbox"> Stap 6 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">7</span>Lampen, rolluiken en Google Home koppelen <span class="tijd">± 15 min</span></h2>
+  <p>Dit kan op de laptop of in de app op je iPhone: <b>Instellingen → Apparaten & diensten</b>.</p>
+  <h3>💡 Philips Hue</h3>
+  <ol>
+    <li>Staat <b>Philips Hue</b> bovenaan bij "Ontdekt"? Klik op <b>Configureren</b>.<br>Zo niet: rechtsonder <b>+ Integratie toevoegen</b> → zoek <b>Philips Hue</b>.</li>
+    <li>Druk op de <b>ronde knop bovenop je Hue Bridge</b> en klik daarna op <b>Verzenden</b>.</li>
+    <li>Kies voor elke lamp de juiste ruimte (mag ook later).</li>
+  </ol>
+  <h3>🪟 Rolluiken (Somfy TaHoma)</h3>
+  <ol>
+    <li><b>+ Integratie toevoegen</b> → zoek <b>Overkiz</b>.</li>
+    <li>Kies <b>Somfy (Europe)</b> en log in met je <b>Somfy/TaHoma-account</b> (hetzelfde als in de TaHoma-app).</li>
+  </ol>
+  <h3>🔊 Google Home</h3>
+  <ol>
+    <li>Staat <b>Google Cast</b> bij "Ontdekt"? Klik op <b>Configureren</b> → <b>Verzenden</b>. Zo niet: <b>+ Integratie toevoegen</b> → <b>Google Cast</b>.</li>
+  </ol>
+  <h3>📷 Ring-camera's</h3>
+  <ol>
+    <li><b>+ Integratie toevoegen</b> → zoek <b>Ring</b> → log in met je Ring-account → vul de code in die je per sms of e-mail krijgt.</li>
+  </ol>
+  <div class="tip">💡 Alles wat je koppelt verschijnt <b>vanzelf</b> op het dashboard.</div>
+  <label class="vink"><input type="checkbox"> Stap 7 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">8</span>Brandalarm instellen <span class="tijd">± 5 min</span></h2>
+  <ol>
+    <li>Ga naar <b>Instellingen → Automatiseringen & scènes → Blauwdrukken</b>.</li>
+    <li>Klik op <b>Meldkamer: brandalarm</b>.</li>
+    <li>Vul in:
+      <ul>
+        <li><b>Telefoons</b>: je iPhone</li>
+        <li><b>Lampen die rood knipperen</b>: je slaapkamerlamp boven</li>
+        <li><b>Lampen die aan gaan</b>: de lamp beneden</li>
+        <li><b>Speakers</b>: je Google Home</li>
+        <li><b>Spraakdienst</b>: Google Translate</li>
+      </ul></li>
+    <li>Klik op <b>Opslaan</b> en geef het de naam <b>Brandalarm</b>.</li>
+    <li><b>Testen:</b> klik op het dashboard op <b>🧪 Test alarm</b>. Je hoort het alarm, de lamp knippert rood, de Google Home praat en je krijgt een pop-up. 🚨</li>
+  </ol>
+  <label class="vink"><input type="checkbox"> Stap 8 klaar</label>
+</section>
+
+<section class="stap" data-stap>
+  <h2><span class="nr">9</span>Rolluiken automatisch <span class="tijd">± 2 min</span></h2>
+  <ol>
+    <li>Ga weer naar <b>Blauwdrukken</b> → <b>Meldkamer: rolluiken automatisch</b>.</li>
+    <li>Kies je rolluiken en de tijden waarop ze 's ochtends open moeten.</li>
+    <li>Klik op <b>Opslaan</b>. Ze gaan nu dicht als het donker wordt.</li>
+  </ol>
+  <div class="tip">💡 Wil je even niet dat ze automatisch gaan? Zet op het dashboard <b>🪟 Rolluiken auto</b> uit.</div>
+  <label class="vink"><input type="checkbox"> Stap 9 klaar</label>
+</section>
+
+<section class="stap">
+  <h2><span class="nr">🔜</span>Daarna doen we samen</h2>
+  <ul>
+    <li>⚡ <b>Slimme meter</b> (stroom en gas): stuur een foto van het witte kastje</li>
+    <li>☀️ <b>Zonnepanelen per paneel</b>: stuur het merk van de omvormer of de app die je gebruikt</li>
+    <li>🚆 <b>Treinen</b> van je station</li>
+    <li>📅 <b>Google Agenda</b></li>
+    <li>🗑️ <b>Afvalkalender</b>: stuur de ophaaldatums</li>
+    <li>🎥 <b>Webcam</b> van Nunspeet</li>
+    <li>🧭 De <b>routepunten</b> (Zeeweg-rotonde en Laan / Dokter van Loonweg) precies goed zetten</li>
+  </ul>
+</section>
+
+<details>
+  <summary>❓ Problemen oplossen</summary>
+  <ul>
+    <li><b>Scherm zwart of dashboard weg?</b> Herstart de laptop. Het dashboard komt vanzelf terug.</li>
+    <li><b>"P2000 storing" bovenaan?</b> Even wachten. Blijft het zo, stuur dan een screenshot.</li>
+    <li><b>Geen geluid bij een alarm?</b> Zet het volume van de laptop hoger (rechtsboven) en klik één keer ergens op het dashboard.</li>
+    <li><b>Bijwerken naar een nieuwe versie</b>: open een terminal (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>) en typ <code>meldkamer-bijwerken</code>.</li>
+    <li><b>Instellingen wijzigen</b> (adres, plaatsen, afval): het bestand staat in de map <code>meldkamer-config</code>. Vraag het gerust aan Claude.</li>
+  </ul>
+</details>
+
+<footer>🚒 Hulpdiensten App · <a href="index.html">Terug naar de app</a></footer>
+</main>
+
+<script>
+const stappen = [...document.querySelectorAll("[data-stap]")];
+function bewaar(){ try{ localStorage.setItem("handleiding", JSON.stringify(stappen.map(s => s.querySelector("input").checked))); }catch(e){} }
+function teken(){
+  const klaar = stappen.filter(s => s.querySelector("input").checked).length;
+  stappen.forEach(s => s.classList.toggle("klaar", s.querySelector("input").checked));
+  document.getElementById("balk").style.width = (klaar / stappen.length * 100) + "%";
+  document.getElementById("teller").textContent = `${klaar} van ${stappen.length} stappen klaar`;
+}
+try{ (JSON.parse(localStorage.getItem("handleiding")) || []).forEach((v, i) => { if (stappen[i]) stappen[i].querySelector("input").checked = v; }); }catch(e){}
+stappen.forEach(s => s.querySelector("input").addEventListener("change", () => { bewaar(); teken(); }));
+teken();
+document.querySelectorAll("[data-kopieer]").forEach(b => b.addEventListener("click", async () => {
+  const t = document.getElementById(b.dataset.kopieer).textContent;
+  try { await navigator.clipboard.writeText(t); b.textContent = "✓ Gekopieerd"; }
+  catch(e){ b.textContent = "Selecteer zelf"; }
+  setTimeout(() => b.textContent = "Kopieer", 2000);
+}));
+</script>
+</body>
+</html>

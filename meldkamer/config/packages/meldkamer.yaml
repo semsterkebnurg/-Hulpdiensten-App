@@ -1,0 +1,87 @@
+# Meldkamer: schakelaars en automatiseringen die bij het dashboard horen.
+# Dit bestand wordt bij een update overschreven. Eigen aanpassingen dus
+# liever in de Home Assistant-schermen doen.
+
+input_boolean:
+  meldkamer_stormmodus:
+    name: Stormmodus
+    icon: mdi:weather-lightning
+  # Deze drie staan standaard UIT. Aanzetten = pauzeren.
+  meldkamer_rolluiken_pauze:
+    name: Rolluiken automatisch gepauzeerd
+    icon: mdi:window-shutter-alert
+  meldkamer_nachtmodus_uit:
+    name: Nachtmodus uitgeschakeld
+    icon: mdi:weather-night
+  meldkamer_brandalarm_pauze:
+    name: Brandalarm gepauzeerd
+    icon: mdi:fire-off
+  # Checklist "Klaar voor actie"
+  meldkamer_check_powerbanks:
+    name: Powerbanks opgeladen
+    icon: mdi:battery-charging-high
+  meldkamer_check_telefoon:
+    name: Telefoon opgeladen
+    icon: mdi:cellphone-charging
+  meldkamer_check_zaklamp:
+    name: Zaklamp klaar
+    icon: mdi:flashlight
+  meldkamer_check_auto:
+    name: Auto getankt
+    icon: mdi:gas-station
+  meldkamer_check_camera:
+    name: Camera-accu vol
+    icon: mdi:camera
+  meldkamer_check_kleding:
+    name: Jas en schoenen klaar
+    icon: mdi:shoe-formal
+
+script:
+  meldkamer_checklist_reset:
+    alias: Checklist leegmaken
+    icon: mdi:restart
+    sequence:
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.meldkamer_check_powerbanks
+            - input_boolean.meldkamer_check_telefoon
+            - input_boolean.meldkamer_check_zaklamp
+            - input_boolean.meldkamer_check_auto
+            - input_boolean.meldkamer_check_camera
+            - input_boolean.meldkamer_check_kleding
+
+automation:
+  - id: meldkamer_stormmodus_automatisch_aan
+    alias: "Meldkamer: stormmodus aan bij code oranje/rood of onweer"
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: sensor.meldkamer_knmi
+        to: ["oranje", "rood"]
+      - trigger: template
+        value_template: "{{ state_attr('sensor.meldkamer_knmi', 'onweer') == true }}"
+      - trigger: homeassistant
+        event: start
+    conditions:
+      - condition: template
+        value_template: >-
+          {{ states('sensor.meldkamer_knmi') in ['oranje', 'rood']
+             or state_attr('sensor.meldkamer_knmi', 'onweer') == true }}
+    actions:
+      - action: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.meldkamer_stormmodus
+
+  - id: meldkamer_stormmodus_automatisch_uit
+    alias: "Meldkamer: stormmodus uit als alle waarschuwingen weg zijn"
+    mode: single
+    triggers:
+      - trigger: state
+        entity_id: sensor.meldkamer_knmi
+        to: "geen"
+        for: "01:00:00"
+    actions:
+      - action: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.meldkamer_stormmodus

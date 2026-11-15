@@ -1,0 +1,42 @@
+# =============================================================
+#  Jouw instellingen voor het Meldkamer-dashboard
+#  Na een wijziging: Home Assistant herstarten
+#  (Instellingen → rechtsboven ⋮ → Home Assistant herstarten)
+# =============================================================
+
+# Je woonplaats (staat bovenaan het dashboard)
+plaats: "__PLAATS__"
+
+# Je adres, voor de rijtijden. Blijft alleen op deze laptop.
+adres: "__ADRES__"
+
+# Alleen meldingen met één van deze woorden worden getoond en geven alarm
+filter: [__FILTER__]
+
+# "Jouw" brandweerauto. Staat die in een melding, dan krijg je altijd alarm.
+eigen_eenheden: ["__VOERTUIG__", "__VOERTUIG2__", "__VOERTUIG3__"]
+
+# Welke kant rijd je op? De rijtijd wordt via beide punten berekend
+# en het dashboard zegt welke sneller is.
+# Je kunt ook coördinaten invullen, bijvoorbeeld: via: "52.3712, 5.7850"
+routekeuze:
+  - naam: Zeeweg-rotonde
+    via: "Zeeweg, Nunspeet"
+  - naam: Laan / Dokter van Loonweg
+    via: "Dokter van Loonweg, Nunspeet"
+
+# Provincie voor de KNMI-waarschuwingen
+provincie: Gelderland
+
+# Vliegtuigen tonen binnen zoveel kilometer
+vliegtuig_straal_km: 30
+
+# Link naar een live webcam (laat leeg als je er geen hebt)
+webcam: ""
+
+# Afvalkalender: per soort de datums (jaar-maand-dag)
+afval:
+  GFT: []
+  Restafval: []
+  Papier: []
+  PMD: []
