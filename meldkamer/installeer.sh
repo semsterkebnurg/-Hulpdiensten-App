@@ -61,12 +61,12 @@ fi
 # ---------------------------------------------------------------
 stap "Stap 2 van 6: Programma's installeren"
 # ---------------------------------------------------------------
-sudo apt-get update -qq
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io git curl wget x11-xserver-utils python3 >/dev/null
+sudo apt-get -o DPkg::Lock::Timeout=900 update -qq
+sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=900 install -y -qq docker.io git curl wget x11-xserver-utils python3 >/dev/null
 sudo systemctl enable --now docker >/dev/null
 if ! command -v google-chrome >/dev/null; then
   wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq /tmp/chrome.deb >/dev/null
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=900 install -y -qq /tmp/chrome.deb >/dev/null
   rm -f /tmp/chrome.deb
 fi
 ok "Docker, Git en Google Chrome staan erop."
