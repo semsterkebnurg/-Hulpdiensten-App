@@ -107,6 +107,26 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .klok .d{color:var(--zacht);font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-family:Inter,sans-serif;margin-top:4px}
 .menu{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.05);font-size:18px;display:none}
 :host([kiosk]) .menu{display:block}
+/* ---- tabbladen (pagina's) ---- */
+.paginas{display:flex;gap:6px;flex:none}
+.pag-knop{padding:10px 16px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--rand);
+  font-weight:700;font-size:14px;color:var(--zacht);white-space:nowrap;transition:.15s}
+.pag-knop.aan{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 18px color-mix(in srgb,var(--accent) 40%,transparent)}
+:host([storm]) .pag-knop.aan{color:#000}
+:host([storm]) .pag-knop[data-pagina="weer"]:not(.aan){border-color:var(--geel);color:var(--geel);animation:flits 2.4s infinite}
+.pagina:not(.aan){display:none!important}
+.raster.twee{grid-template-columns:minmax(0,1fr) minmax(0,1.7fr)}
+.camgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start;overflow:auto;flex:1;min-height:0}
+.camgrid .cam{aspect-ratio:16/10}
+.camgrid .cam span{font-size:14px;left:10px;bottom:8px}
+.camgrid .cam .live{position:absolute;right:8px;top:8px;font-size:11px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:6px;inset:8px 8px auto auto}
+.knmi{padding:10px 12px;border-radius:12px;margin-bottom:8px;border:1px solid;background:rgba(0,0,0,.2)}
+.knmi b{display:block;font-size:15px}
+.knmi small{color:var(--zacht)}
+.knmi-ok{display:flex;align-items:center;gap:10px;padding:14px;border-radius:12px;background:rgba(48,209,88,.08);border:1px solid rgba(48,209,88,.3)}
+:host .p-huis .lamp{min-height:84px}
+:host .p-huis .lamp .n{font-size:15px}
+:host .p-huis .schakels{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
 /* ---- storm ---- */
 .storm{display:none;align-items:center;gap:12px;padding:8px 18px;font-weight:600;font-size:14px;
   background:repeating-linear-gradient(-45deg,rgba(255,214,10,.16) 0 14px,rgba(255,214,10,.06) 14px 28px);
@@ -292,7 +312,6 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   .kaart{padding:11px 13px}
   .kaart h2{margin-bottom:7px}
   .hero-titel{font-size:21px;margin:7px 0 2px}
-  .dagen{display:none}
   .weer-nu .ic{font-size:38px}
   .weer-nu .temp{font-size:38px}
   .weer-details{margin:8px 0}
@@ -301,7 +320,8 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 /* ---- telefoon / smal scherm ---- */
 @media (max-width:1100px){
   .raster{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-  .kolom.k3{grid-column:1 / -1}
+  .raster .kolom.k3{grid-column:1 / -1}
+  .chips .chip.extra{display:none}
 }
 @media (max-width:760px){
   .wrap{height:auto;min-height:100%;overflow:visible}
@@ -310,7 +330,10 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   .storm span[style]{margin-left:0!important}
   .kolom{overflow:visible}
   .kop{flex-wrap:wrap;padding:12px}
-  .chips{order:3;justify-content:flex-start;flex-basis:100%}
+  .chips{order:4;justify-content:flex-start;flex-basis:100%}
+  .paginas{order:3;flex-basis:100%;overflow-x:auto}
+  .pag-knop{flex:1;padding:10px 8px;font-size:13px}
+  .camgrid{grid-template-columns:minmax(0,1fr)}
   .klok .t{font-size:26px}
   .venster{min-height:340px}
   .duo{grid-template-columns:1fr}
@@ -326,6 +349,8 @@ class MeldkamerPanel extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this._tab = "kaart";
+    this._weerTab = "radar";
+    this._pagina = "meldkamer";
     this._handtekening = {};
     this._agenda = [];
     this._energie = null;
@@ -395,11 +420,16 @@ class MeldkamerPanel extends HTMLElement {
         <header class="kop">
           <button class="menu" data-actie="menu" title="Menu">☰</button>
           <div class="logo"><div class="bol">🚒</div><div><h1>MELDKAMER</h1><small id="plaats"></small></div></div>
+          <nav class="paginas" id="paginas">
+            <button class="pag-knop aan" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="huis">🏠 Huis</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="weer">⛈️ Weer & storm</button>
+          </nav>
           <div class="chips" id="chips"></div>
           <div class="klok"><div class="t" id="klok">--:--:--</div><div class="d" id="datum"></div></div>
         </header>
         <div class="storm" id="storm"></div>
-        <main class="raster">
+        <main class="raster twee pagina p-meldkamer" id="p-meldkamer">
           <section class="kolom k1">
             <div class="kaart melding-hero" id="hero"></div>
             <div class="kaart groei"><h2>📟 Recente meldingen <span class="r" id="lijst-info"></span></h2><div class="scroll" id="lijst"></div></div>
@@ -411,21 +441,40 @@ class MeldkamerPanel extends HTMLElement {
                 <div id="map"></div>
                 <div class="legenda" id="legenda">🔵 Thuis &nbsp; 🔴 Melding &nbsp; <span style="color:#64d2ff">✈</span> Vliegtuig &nbsp; <span style="color:#ff9f0a">✈</span> Heli</div>
                 <div class="vlieg-lijst" id="vlieglijst"></div>
-                <img class="radar verberg" id="radar" alt="Buienradar">
                 <iframe class="verberg" id="iframe" loading="lazy" allow="fullscreen"></iframe>
-                <div class="cams verberg" id="cams"></div>
               </div>
             </div>
-            <div class="kaart" id="weer"></div>
+          </section>
+        </main>
+        <main class="raster pagina p-huis" id="p-huis">
+          <section class="kolom k1">
+            <div class="kaart groei" id="bediening"></div>
+          </section>
+          <section class="kolom k2">
+            <div class="kaart groei lang"><h2>📷 Camera's <span class="r" id="cam-info"></span></h2><div class="camgrid" id="camgrid"></div></div>
           </section>
           <section class="kolom k3">
-            <div class="kaart groei" id="bediening"></div>
-            <div class="kaart" id="energie"></div>
             <div class="kaart" id="agenda"></div>
-            <div class="duo">
-              <div class="kaart" id="lucht"></div>
-              <div class="kaart" id="check"></div>
+            <div class="kaart" id="energie"></div>
+            <div class="kaart" id="check"></div>
+          </section>
+        </main>
+        <main class="raster pagina p-weer" id="p-weer">
+          <section class="kolom k1">
+            <div class="kaart" id="weer"></div>
+          </section>
+          <section class="kolom k2">
+            <div class="kaart groei lang">
+              <div class="tabs" id="wtabs"></div>
+              <div class="venster" id="wvenster">
+                <img class="radar" id="radar" alt="Buienradar">
+                <iframe class="verberg" id="wiframe" loading="lazy" allow="fullscreen"></iframe>
+              </div>
             </div>
+          </section>
+          <section class="kolom k3">
+            <div class="kaart" id="knmi"></div>
+            <div class="kaart" id="lucht"></div>
           </section>
         </main>
         <div class="nacht" id="nacht"><div class="t" id="nachtklok"></div><div class="s" id="nachtinfo"></div><div class="s">Tik om het scherm te wekken</div></div>
@@ -446,7 +495,12 @@ class MeldkamerPanel extends HTMLElement {
     this._audio();
     this._laadLeaflet();
     this._laadExtra();
+    this._toonPagina("meldkamer");
     this._toonTab();
+    this._toonWeerTab();
+    // Bijhouden wanneer het scherm voor het laatst is aangeraakt
+    this._actief = Date.now();
+    ["pointerdown", "keydown", "wheel"].forEach((ev) => root.addEventListener(ev, () => (this._actief = Date.now()), { passive: true }));
   }
 
   _audio() {
@@ -492,13 +546,8 @@ class MeldkamerPanel extends HTMLElement {
     const storm = this._aan("input_boolean.meldkamer_stormmodus");
     if (storm !== this.hasAttribute("storm")) {
       this.toggleAttribute("storm", storm);
-      if (storm) {
-        this._tab = "bliksem";
-        this._toonTab();
-      } else if (this._tab === "bliksem") {
-        this._tab = "kaart";
-        this._toonTab();
-      }
+      this._weerTab = storm ? "bliksem" : "radar";
+      this._toonWeerTab();
     }
     const inst = this._s("sensor.meldkamer_instellingen")?.attributes || {};
     this.shadowRoot.getElementById("plaats").textContent = inst.plaats ? `Brandweer · ${inst.plaats}` : "Brandweer";
@@ -513,7 +562,9 @@ class MeldkamerPanel extends HTMLElement {
     this._tekenEnergie();
     this._tekenAgenda();
     this._tekenLucht();
+    this._tekenKnmi();
     this._tekenCheck();
+    this._tekenCamInfo();
     this._controleerAlarm();
   }
 
@@ -529,6 +580,7 @@ class MeldkamerPanel extends HTMLElement {
     if (ge) ge.textContent = tijdGeleden(ge.dataset.t);
     r.querySelectorAll("[data-sinds]").forEach((el) => (el.textContent = tijdGeleden(el.dataset.sinds)));
     this._tekenNacht(nu);
+    if (this._pagina !== "meldkamer" && Date.now() - (this._actief || 0) > 5 * 60 * 1000) this._toonPagina("meldkamer");
   }
 
   _tekenChips() {
@@ -550,8 +602,7 @@ class MeldkamerPanel extends HTMLElement {
     if (code && code !== "geen" && code !== "unknown")
       chips.push(`<div class="chip" style="border-color:${KNMI_KLEUR[code]};color:${KNMI_KLEUR[code]}">⚠️ <b style="color:inherit">Code ${esc(code)}</b></div>`);
     else if (knmi) chips.push(`<div class="chip">✅ Geen weeralarm</div>`);
-    if (vl && vl.state !== "unknown") chips.push(`<div class="chip">✈️ <b>${esc(vl.state)}</b> in de lucht</div>`);
-    chips.push(`<div class="chip knop ${storm ? "aan" : ""}" data-actie="toggle" data-id="input_boolean.meldkamer_stormmodus">⚡ Stormmodus ${storm ? "AAN" : "uit"}</div>`);
+    if (vl && vl.state !== "unknown") chips.push(`<div class="chip extra">✈️ <b>${esc(vl.state)}</b></div>`);
     this.shadowRoot.getElementById("chips").innerHTML = chips.join("");
   }
 
@@ -635,21 +686,30 @@ class MeldkamerPanel extends HTMLElement {
 
   // ---- kaart en tabbladen ----
 
+  _toonPagina(p) {
+    this._pagina = p;
+    const r = this.shadowRoot;
+    ["meldkamer", "huis", "weer"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
+    r.querySelectorAll(".pag-knop").forEach((b) => b.classList.toggle("aan", b.dataset.pagina === p));
+    if (p === "meldkamer" && this._map) setTimeout(() => this._map.invalidateSize(), 50);
+    if (p === "huis" && this._hass) this._tekenCams();
+    if (p === "weer") {
+      this._ververstRadar();
+      this._toonWeerTab();
+    }
+  }
+
   _tekenTabs() {
-    const cams = this._ent("camera").length;
     const inst = this._s("sensor.meldkamer_instellingen")?.attributes || {};
-    const sig = `${this._tab}|${cams}|${inst.webcam || ""}`;
+    const sig = `${this._tab}|${inst.webcam || ""}`;
     if (!this._veranderd("tabs", sig)) return;
     const tabs = [
       ["kaart", "🗺️ Kaart"],
-      ["bliksem", "⚡ Bliksem", "storm-tab"],
-      ["radar", "🌧️ Buienradar"],
       ["verkeer", "🚗 Verkeer"],
     ];
-    if (cams) tabs.push(["cams", `📷 Camera's (${cams})`]);
-    if (inst.webcam) tabs.push(["webcam", "🎥 Webcam"]);
+    if (inst.webcam) tabs.push(["webcam", "🎥 Webcam Nunspeet"]);
     this.shadowRoot.getElementById("tabs").innerHTML = tabs
-      .map(([id, label, kl]) => `<button class="tab ${kl || ""} ${this._tab === id ? "aan" : ""}" data-actie="tab" data-tab="${id}">${label}</button>`)
+      .map(([id, label]) => `<button class="tab ${this._tab === id ? "aan" : ""}" data-actie="tab" data-tab="${id}">${label}</button>`)
       .join("");
   }
 
@@ -660,38 +720,82 @@ class MeldkamerPanel extends HTMLElement {
     const lon = inst.lon ?? this._hass?.config?.longitude ?? 5.78;
     const kaart = this._tab === "kaart";
     ["map", "legenda", "vlieglijst"].forEach((id) => r.getElementById(id)?.classList.toggle("verberg", !kaart));
-    r.getElementById("radar").classList.toggle("verberg", this._tab !== "radar");
-    r.getElementById("cams").classList.toggle("verberg", this._tab !== "cams");
     const iframe = r.getElementById("iframe");
     let src = "";
     if (this._tab === "verkeer") src = `https://embed.waze.com/iframe?zoom=12&lat=${lat}&lon=${lon}&ct=livemap`;
-    if (this._tab === "bliksem") src = `https://map.blitzortung.org/#8/${lat}/${lon}`;
     if (this._tab === "webcam") src = inst.webcam || "";
     iframe.classList.toggle("verberg", !src);
     if (src && iframe.getAttribute("src") !== src) iframe.setAttribute("src", src);
     if (!src && iframe.getAttribute("src")) iframe.removeAttribute("src");
-    if (this._tab === "radar") this._ververstRadar();
-    if (this._tab === "cams") this._tekenCams();
     if (kaart && this._map) setTimeout(() => this._map.invalidateSize(), 50);
     this._handtekening.tabs = null;
     if (this._hass) this._tekenTabs();
   }
 
+  _toonWeerTab() {
+    const r = this.shadowRoot;
+    const storm = this.hasAttribute("storm");
+    if (!storm && this._weerTab === "bliksem") this._weerTab = "radar";
+    const tabs = [["radar", "🌧️ Buienradar"]];
+    if (storm) tabs.push(["bliksem", "⚡ Bliksem live"]);
+    r.getElementById("wtabs").innerHTML = tabs
+      .map(([id, label]) => `<button class="tab ${this._weerTab === id ? "aan" : ""}" data-actie="wtab" data-tab="${id}">${label}</button>`)
+      .join("") + (storm ? "" : `<span class="tab" style="background:none;color:var(--zwak)">⚡ Bliksem verschijnt in stormmodus</span>`);
+    const inst = this._s("sensor.meldkamer_instellingen")?.attributes || {};
+    const lat = inst.lat ?? this._hass?.config?.latitude ?? 52.37;
+    const lon = inst.lon ?? this._hass?.config?.longitude ?? 5.78;
+    r.getElementById("radar").classList.toggle("verberg", this._weerTab !== "radar");
+    const iframe = r.getElementById("wiframe");
+    const src = this._weerTab === "bliksem" ? `https://map.blitzortung.org/#8/${lat}/${lon}` : "";
+    iframe.classList.toggle("verberg", !src);
+    if (src && iframe.getAttribute("src") !== src) iframe.setAttribute("src", src);
+    if (!src && iframe.getAttribute("src")) iframe.removeAttribute("src");
+    if (this._weerTab === "radar") this._ververstRadar();
+  }
+
   _ververstRadar() {
     const img = this.shadowRoot.getElementById("radar");
-    img.src = `https://image.buienradar.nl/2.0/image/animation/RadarMapRainNL?height=512&width=500&renderBackground=True&renderBranding=False&renderText=True&t=${Math.floor(Date.now() / 300000)}`;
+    const src = `https://image.buienradar.nl/2.0/image/animation/RadarMapRainNL?height=512&width=500&renderBackground=True&renderBranding=False&renderText=True&t=${Math.floor(Date.now() / 300000)}`;
+    if (img.getAttribute("src") !== src) img.src = src;
+  }
+
+  _tekenCamInfo() {
+    const n = this._ent("camera").length;
+    const el = this.shadowRoot.getElementById("cam-info");
+    if (el) el.textContent = n ? `${n} camera's · tik voor live beeld` : "";
+    if (this._veranderd("camlijst", this._ent("camera").map((c) => c.entity_id).join())) this._tekenCams();
   }
 
   _tekenCams() {
     const cams = this._ent("camera");
-    this.shadowRoot.getElementById("cams").innerHTML = cams.length
+    this.shadowRoot.getElementById("camgrid").innerHTML = cams.length
       ? cams
-          .map((c) => `<div class="cam" data-actie="meer" data-id="${esc(c.entity_id)}"><img src="${esc(c.attributes.entity_picture || "")}&t=${Date.now()}" alt=""><span>${esc(this._naam(c))}</span></div>`)
+          .map((c) => `<div class="cam" data-actie="meer" data-id="${esc(c.entity_id)}"><img src="${esc(c.attributes.entity_picture || "")}&t=${Date.now()}" alt=""><span>📷 ${esc(this._naam(c))}</span>${c.state === "streaming" || c.state === "recording" ? '<b class="live">LIVE</b>' : ""}</div>`)
           .join("")
-      : `<div class="leeg" style="padding:12px">Nog geen camera's gekoppeld.</div>`;
+      : `<div class="leeg" style="padding:12px">Nog geen camera's gekoppeld. Koppel je Ring-account via Instellingen → Apparaten & diensten → Ring.</div>`;
   }
   _ververstCams() {
-    if (this._tab === "cams") this._tekenCams();
+    if (this._pagina === "huis") this._tekenCams();
+  }
+
+  _tekenKnmi() {
+    if (!this._veranderd("knmi", this._sig("sensor.meldkamer_knmi", "input_boolean.meldkamer_stormmodus"))) return;
+    const k = this._s("sensor.meldkamer_knmi")?.attributes || {};
+    const lijst = k.waarschuwingen || [];
+    const storm = this._aan("input_boolean.meldkamer_stormmodus");
+    const tijd = (iso) => {
+      const d = new Date(iso);
+      return isNaN(d) ? "" : d.toLocaleString("nl-NL", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+    };
+    this.shadowRoot.getElementById("knmi").innerHTML = `
+      <h2>⚠️ KNMI-waarschuwingen <span class="r"><button class="klein-knop" data-actie="toggle" data-id="input_boolean.meldkamer_stormmodus">⚡ Stormmodus ${storm ? "uitzetten" : "aanzetten"}</button></span></h2>
+      ${lijst.length
+        ? lijst
+            .map((w) => `<div class="knmi" style="border-color:${KNMI_KLEUR[w.kleur] || "#555"}">
+                <b style="color:${KNMI_KLEUR[w.kleur] || "inherit"}">Code ${esc(w.kleur)}: ${esc(w.soort)}</b>
+                <small>${esc(w.gebied)}${w.vanaf ? " · vanaf " + tijd(w.vanaf) : ""}${w.tot ? " · tot " + tijd(w.tot) : ""}</small></div>`)
+            .join("")
+        : `<div class="knmi-ok"><span style="font-size:26px">✅</span><div><b>Geen waarschuwingen</b><div style="font-size:12px;color:var(--zacht)">Rustig weer in jouw provincie</div></div></div>`}`;
   }
 
   _laadLeaflet() {
@@ -772,6 +876,7 @@ class MeldkamerPanel extends HTMLElement {
     const m = this._meldingen()[i];
     if (!m) return;
     if (m.lat && this._map) {
+      this._toonPagina("meldkamer");
       this._tab = "kaart";
       this._toonTab();
       this._map.flyTo([m.lat, m.lon], 15, { duration: 1 });
@@ -1096,6 +1201,9 @@ class MeldkamerPanel extends HTMLElement {
 
   _toonAlarm(m) {
     this._alarmId = m.id;
+    this._toonPagina("meldkamer");
+    this._tab = "kaart";
+    this._toonTab();
     const r = m.route;
     const el = this.shadowRoot.getElementById("alarm");
     el.innerHTML = `
@@ -1208,6 +1316,13 @@ class MeldkamerPanel extends HTMLElement {
       case "tab":
         this._tab = el.dataset.tab;
         this._toonTab();
+        break;
+      case "wtab":
+        this._weerTab = el.dataset.tab;
+        this._toonWeerTab();
+        break;
+      case "pagina":
+        this._toonPagina(el.dataset.pagina);
         break;
       case "focus":
         this._focusMelding(+el.dataset.i);
