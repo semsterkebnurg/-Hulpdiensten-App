@@ -198,7 +198,24 @@ sudo tee /usr/local/bin/meldkamer-bijwerken >/dev/null <<EOF
 curl -fsSL https://raw.githubusercontent.com/semsterkebnurg/-Hulpdiensten-App/$BRANCH/meldkamer/installeer.sh | bash
 EOF
 sudo chmod +x /usr/local/bin/meldkamer-bijwerken
-ok "Het dashboard opent voortaan vanzelf."
+# Icoon in het menu en op het bureaublad om het dashboard weer te openen
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/meldkamer.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Meldkamer
+Comment=Open het Meldkamer-dashboard
+Exec=$HOME/.local/bin/meldkamer-start.sh
+Icon=google-chrome
+Terminal=false
+Categories=Utility;
+EOF
+BUREAUBLAD=$(xdg-user-dir DESKTOP 2>/dev/null || echo "$HOME/Desktop")
+mkdir -p "$BUREAUBLAD"
+cp "$HOME/.local/share/applications/meldkamer.desktop" "$BUREAUBLAD/Meldkamer.desktop"
+chmod +x "$BUREAUBLAD/Meldkamer.desktop"
+gio set "$BUREAUBLAD/Meldkamer.desktop" metadata::trusted true 2>/dev/null || true
+ok "Het dashboard opent voortaan vanzelf. Er staat ook een Meldkamer-icoon op je bureaublad."
 
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 cat <<EOF
