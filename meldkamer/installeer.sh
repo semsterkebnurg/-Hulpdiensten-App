@@ -86,7 +86,7 @@ mkdir -p "$CONFIG"
 sudo chown -R "$(id -u):$(id -g)" "$CONFIG"
 BRON="$CODE/meldkamer/config"
 # Deze onderdelen worden altijd bijgewerkt:
-sudo rm -rf"$CONFIG/custom_components/meldkamer" "$CONFIG/www/meldkamer" "$CONFIG/blueprints/automation/meldkamer"
+sudo rm -rf "$CONFIG/custom_components/meldkamer" "$CONFIG/www/meldkamer" "$CONFIG/blueprints/automation/meldkamer"
 mkdir -p "$CONFIG/custom_components" "$CONFIG/www" "$CONFIG/blueprints/automation" "$CONFIG/packages" "$CONFIG/themes"
 cp -r "$BRON/custom_components/meldkamer" "$CONFIG/custom_components/"
 cp -r "$BRON/www/meldkamer" "$CONFIG/www/"
