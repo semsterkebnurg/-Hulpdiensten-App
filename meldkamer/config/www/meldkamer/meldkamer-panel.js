@@ -203,7 +203,6 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   background:rgba(0,0,0,.6);border-radius:10px;padding:8px 10px;font-size:11px;font-family:"JetBrains Mono",monospace;color:var(--zacht)}
 .vlieg-lijst b{color:var(--tekst)}
 .leaflet-container{font-family:Inter,sans-serif}
-.donkere-kaart{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)}
 .vlieg-icoon{color:#64d2ff;font-size:18px;text-shadow:0 0 6px rgba(100,210,255,.8);line-height:1}
 .vlieg-icoon.heli{color:#ff9f0a;text-shadow:0 0 6px rgba(255,159,10,.8)}
 .thuis-icoon{width:14px;height:14px;border-radius:50%;background:var(--blauw);border:2px solid #fff;box-shadow:0 0 0 6px rgba(10,132,255,.25)}
@@ -823,11 +822,16 @@ class MeldkamerPanel extends HTMLElement {
     const lon = inst.lon ?? this._hass.config.longitude;
     const el = this.shadowRoot.getElementById("map");
     this._map = L.map(el, { zoomControl: false, attributionControl: true }).setView([lat, lon], 11);
-    // OpenStreetMap-kaart (gratis, geen sleutel nodig), donker gemaakt met een filter
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    // Donkere kaart van Esri (gratis, geen sleutel nodig) met plaatsnamen erover
+    const esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+    L.tileLayer(esri + "World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19,
-      className: "donkere-kaart",
-      attribution: "© OpenStreetMap",
+      maxNativeZoom: 16,
+      attribution: "© Esri, OpenStreetMap",
+    }).addTo(this._map);
+    L.tileLayer(esri + "World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+      maxZoom: 19,
+      maxNativeZoom: 16,
     }).addTo(this._map);
     L.control.zoom({ position: "bottomright" }).addTo(this._map);
     this._thuis = L.marker([lat, lon], { icon: L.divIcon({ className: "", html: '<div class="thuis-icoon"></div>', iconSize: [14, 14] }) }).addTo(this._map);
