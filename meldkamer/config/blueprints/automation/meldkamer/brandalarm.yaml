@@ -250,6 +250,7 @@ actions:
                       entity_id: "{{ tts }}"
                     data:
                       media_player_entity_id: "{{ speakers }}"
+                      language: nl
                       message: "Brand."
                       cache: true
               # Overdag: hele melding een paar keer
@@ -266,6 +267,7 @@ actions:
                             entity_id: "{{ tts }}"
                           data:
                             media_player_entity_id: "{{ speakers }}"
+                            language: nl
                             message: "{{ uitspraak }}"
                             cache: false
                         - delay:
