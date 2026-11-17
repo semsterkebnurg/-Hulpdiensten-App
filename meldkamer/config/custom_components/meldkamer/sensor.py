@@ -31,6 +31,7 @@ async def async_setup_platform(
             KnmiSensor(hub),
             VliegtuigSensor(hub),
             AfvalSensor(hub),
+            NieuwsSensor(hub),
             InstellingenSensor(hub),
         ]
     )
@@ -58,7 +59,8 @@ class LaatsteMeldingSensor(_Basis):
     @property
     def native_value(self) -> str | None:
         meldingen = (self.coordinator.data or {}).get("meldingen") or []
-        return meldingen[0]["titel"][:250] if meldingen else "Geen meldingen"
+        echte = [m for m in meldingen if not m.get("proef")]
+        return echte[0]["titel"][:250] if echte else "Geen meldingen"
 
     @property
     def available(self) -> bool:
@@ -68,11 +70,10 @@ class LaatsteMeldingSensor(_Basis):
     def extra_state_attributes(self) -> dict[str, Any]:
         data = self.coordinator.data or {}
         meldingen = data.get("meldingen") or []
+        echte = [m for m in meldingen if not m.get("proef")]
         return {
-            "melding": meldingen[0] if meldingen else None,
-            "meldingen": meldingen,
-            "bron": data.get("bron"),
-            "fout": data.get("fout"),
+            "melding": echte[0] if echte else None,
+            **data,
         }
 
 
@@ -160,6 +161,20 @@ class VliegtuigSensor(_Basis):
     @property
     def native_value(self):
         return len((self.coordinator.data or {}).get("lijst", []))
+
+    @property
+    def extra_state_attributes(self):
+        return self.coordinator.data or {}
+
+
+class NieuwsSensor(_Basis):
+    def __init__(self, hub) -> None:
+        super().__init__(hub.nieuws, "nieuws", "Nieuws", "mdi:newspaper")
+
+    @property
+    def native_value(self):
+        items = (self.coordinator.data or {}).get("items") or []
+        return items[0]["titel"][:250] if items else None
 
     @property
     def extra_state_attributes(self):

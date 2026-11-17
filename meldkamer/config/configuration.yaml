@@ -1,4 +1,4 @@
-# Home Assistant: Meldkamer-dashboard
+# Home Assistant: Huis Sterkenburg
 # Standaardonderdelen van Home Assistant (zoals de app, energie, agenda's)
 default_config:
 
@@ -17,8 +17,8 @@ frontend:
 # Het meldkamer-dashboard als eigen pagina in het menu
 panel_custom:
   - name: meldkamer-panel
-    sidebar_title: Meldkamer
-    sidebar_icon: mdi:fire-truck
+    sidebar_title: Huis Sterkenburg
+    sidebar_icon: mdi:home-lightning-bolt
     url_path: meldkamer
     module_url: /local/meldkamer/meldkamer-panel.js?v=1
     require_admin: false
@@ -38,6 +38,7 @@ recorder:
       - sensor.meldkamer_buienradar
       - sensor.meldkamer_instellingen
       - sensor.meldkamer_afval
+      - sensor.meldkamer_nieuws
 
 automation: !include automations.yaml
 script: !include scripts.yaml

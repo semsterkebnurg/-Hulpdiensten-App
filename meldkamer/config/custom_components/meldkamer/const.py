@@ -11,6 +11,14 @@ STANDAARD_BRONNEN = {
         "https://feeds.livep2000.nl/?d=1",
         "https://www.alarmeringen.nl/feeds/discipline/brandweer.rss",
     ],
+    "p2000_politie": [
+        "https://feeds.livep2000.nl/?d=3",
+        "https://www.alarmeringen.nl/feeds/discipline/politie.rss",
+    ],
+    "nieuws": [
+        ["NOS", "https://feeds.nos.nl/nosnieuwsalgemeen"],
+        ["Omroep Gelderland", "https://www.gld.nl/rss/index.xml"],
+    ],
     "geocoder": "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free",
     "route_auto": "https://routing.openstreetmap.de/routed-car",
     "route_fiets": "https://routing.openstreetmap.de/routed-bike",

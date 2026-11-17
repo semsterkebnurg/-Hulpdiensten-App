@@ -1,9 +1,12 @@
 blueprint:
-  name: "Meldkamer: brandalarm"
+  name: "Huis Sterkenburg: brand- en politiealarm"
   description: >
-    Bij een nieuwe brandmelding in jouw plaats (of voor jouw eigen voertuig):
-    een pop-up op je telefoon met navigatieknoppen, de slaapkamerlamp knippert
-    rood, de lamp beneden gaat aan en de Google Home spreekt de melding uit.
+    Brandweer (post Nunspeet): slaapkamerlamp knippert rood-wit, overloop en
+    voorraam 1 minuut aan, carport 4 minuten fel, buitendeur 1,5 minuut fel,
+    daarna alles terug zoals het was. Google Home roept de melding om
+    (tussen 23:00 en 08:00 alleen één keer "Brand").
+    Politie (in de ingestelde plaatsen): slaapkamerlamp knippert blauw-wit
+    en Google Home leest de melding voor (alleen tussen 08:00 en 23:00).
   domain: automation
   input:
     telefoons:
@@ -16,8 +19,8 @@ blueprint:
           filter:
             - integration: mobile_app
     knipperlampen:
-      name: Lampen die rood knipperen
-      description: Bijvoorbeeld de slaapkamerlamp boven.
+      name: Slaapkamerlamp (knippert)
+      description: Brandweer = rood-wit, politie = blauw-wit.
       default: []
       selector:
         entity:
@@ -25,8 +28,23 @@ blueprint:
           filter:
             - domain: light
     lampen_aan:
-      name: Lampen die aan gaan
-      description: Bijvoorbeeld een lamp beneden in de gang of woonkamer.
+      name: Overloop / trapgat en voorraam (1 minuut aan)
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: light
+    carport:
+      name: Carport (4 minuten fel)
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: light
+    buitendeur:
+      name: Buitendeur (1,5 minuut fel)
       default: []
       selector:
         entity:
@@ -34,8 +52,7 @@ blueprint:
           filter:
             - domain: light
     speakers:
-      name: Speakers (Google Home)
-      description: Laat de melding hardop uitspreken.
+      name: Speakers (Google Home / Sonos)
       default: []
       selector:
         entity:
@@ -44,28 +61,14 @@ blueprint:
             - domain: media_player
     tts:
       name: Spraakdienst
-      description: Meestal "Google Translate". Laat leeg om niets uit te spreken.
+      description: Meestal "Google Translate".
       default: ""
       selector:
         entity:
           filter:
             - domain: tts
-    alleen_p1:
-      name: Alleen bij spoed (P1) of eigen voertuig
-      description: Aan = geen alarm bij P2/P3 meldingen.
-      default: false
-      selector:
-        boolean:
-    knipper_seconden:
-      name: Hoe lang knipperen (seconden)
-      default: 30
-      selector:
-        number:
-          min: 5
-          max: 300
-          unit_of_measurement: s
 
-mode: queued
+mode: parallel
 max: 5
 
 triggers:
@@ -74,16 +77,20 @@ triggers:
 
 variables:
   m: "{{ trigger.event.data }}"
+  politie: "{{ m.soort == 'politie' }}"
   telefoons: !input telefoons
   knipperlampen: !input knipperlampen
   lampen_aan: !input lampen_aan
+  carport: !input carport
+  buitendeur: !input buitendeur
   speakers: !input speakers
   tts: !input tts
-  alleen_p1: !input alleen_p1
-  knipper_seconden: !input knipper_seconden
+  nacht: "{{ now().hour >= 23 or now().hour < 8 }}"
   route: "{{ m.route if m.route is mapping else {} }}"
+  kleur: "{{ [0, 60, 255] if politie else [255, 0, 0] }}"
+  knipper_keer: "{{ 15 if politie else 10 }}"
   titel: >-
-    {{ '🚒 TEST · ' if m.test else '🚒 ' }}{{ 'P' ~ m.prio ~ ' · ' if m.prio else '' }}{{ 'EIGEN VOERTUIG · ' if m.eigen else '' }}Brandmelding
+    {{ '🧪 TEST · ' if m.test else '' }}{{ '👮 Politie' if politie else '🚒 Brandweer Nunspeet' }}{{ ' · P' ~ m.prio if m.prio else '' }}
   regel_route: >-
     {% if route.auto %}🚗 {{ route.auto.minuten }} min{% endif %}{% if route.fiets %} · 🚲 {{ route.fiets.minuten }} min{% endif %}{% if route.advies %} · {{ route.advies }}{% endif %}
   bericht: >-
@@ -98,8 +105,9 @@ variables:
      {"action": "URI", "title": "🚲 Navigeer met fiets", "uri": "{{ route.maps_fiets }}"}]
     {% else %}[]{% endif %}
   uitspraak: >-
-    Let op. Brandmelding{{ ', prioriteit ' ~ m.prio if m.prio else '' }}. {{ m.kort or m.titel }}.
-    {%- if route.auto %} Rijtijd {{ route.auto.minuten }} minuten.{% endif %}
+    {{ 'Test. ' if m.test else '' }}{{ 'Politiemelding' if politie else 'Brandweer Nunspeet' }}{{ ', prioriteit ' ~ m.prio if m.prio else '' }}. {{ m.kort or m.titel }}.
+    {%- if route.auto %} Rijtijd auto {{ route.auto.minuten }} minuten.{% endif %}
+    {%- if route.fiets %} Rijtijd fiets {{ route.fiets.minuten }} minuten.{% endif %}
     {%- if route.advies %} {{ route.advies }}.{% endif %}
 
 conditions:
@@ -108,12 +116,10 @@ conditions:
   - condition: state
     entity_id: input_boolean.meldkamer_brandalarm_pauze
     state: "off"
-  - condition: template
-    value_template: "{{ not alleen_p1 or m.prio == 1 or m.eigen }}"
 
 actions:
   - parallel:
-      # 1. Pop-up op de telefoon (kritieke melding: komt ook door bij stil)
+      # 1. Pop-up op de telefoon
       - repeat:
           for_each: "{{ telefoons }}"
           sequence:
@@ -124,7 +130,6 @@ actions:
                 message: "{{ bericht }}"
                 data:
                   url: /meldkamer
-                  clickAction: /meldkamer
                   tag: meldkamer
                   actions: "{{ knoppen }}"
                   push:
@@ -134,66 +139,135 @@ actions:
                       critical: 1
                       volume: 1.0
 
-      # 2. Lampen beneden aan
-      - if:
-          - condition: template
-            value_template: "{{ lampen_aan | length > 0 }}"
-        then:
-          - action: light.turn_on
-            target:
-              entity_id: "{{ lampen_aan }}"
-            data:
-              brightness_pct: 100
-
-      # 3. Slaapkamerlamp rood laten knipperen en daarna terug zoals hij was
+      # 2. Slaapkamerlamp knipperen (rood-wit of blauw-wit), daarna terug
       - if:
           - condition: template
             value_template: "{{ knipperlampen | length > 0 }}"
         then:
           - action: scene.create
             data:
-              scene_id: meldkamer_voor_alarm
+              scene_id: alarm_voor_knipper
               snapshot_entities: "{{ knipperlampen }}"
           - repeat:
-              count: "{{ (knipper_seconden / 1.6) | round(0, 'ceil') | int }}"
+              count: "{{ knipper_keer }}"
               sequence:
                 - action: light.turn_on
                   target:
                     entity_id: "{{ knipperlampen }}"
                   data:
-                    rgb_color: [255, 0, 0]
+                    rgb_color: "{{ kleur }}"
                     brightness: 255
                     transition: 0
                 - delay:
-                    milliseconds: 800
+                    milliseconds: 500
                 - action: light.turn_on
                   target:
                     entity_id: "{{ knipperlampen }}"
                   data:
-                    rgb_color: [255, 0, 0]
-                    brightness: 25
+                    rgb_color: [255, 255, 255]
+                    brightness: 255
                     transition: 0
                 - delay:
-                    milliseconds: 800
+                    milliseconds: 500
           - action: scene.turn_on
             target:
-              entity_id: scene.meldkamer_voor_alarm
+              entity_id: scene.alarm_voor_knipper
 
-      # 4. Google Home spreekt de melding uit (twee keer)
+      # 3. Overloop en voorraam 1 minuut aan (alleen brandweer)
+      - if:
+          - condition: template
+            value_template: "{{ not politie and lampen_aan | length > 0 }}"
+        then:
+          - action: scene.create
+            data:
+              scene_id: alarm_voor_overloop
+              snapshot_entities: "{{ lampen_aan }}"
+          - action: light.turn_on
+            target:
+              entity_id: "{{ lampen_aan }}"
+            data:
+              brightness_pct: 100
+          - delay:
+              seconds: 60
+          - action: scene.turn_on
+            target:
+              entity_id: scene.alarm_voor_overloop
+
+      # 4. Carport 4 minuten fel (alleen brandweer)
+      - if:
+          - condition: template
+            value_template: "{{ not politie and carport | length > 0 }}"
+        then:
+          - action: scene.create
+            data:
+              scene_id: alarm_voor_carport
+              snapshot_entities: "{{ carport }}"
+          - action: light.turn_on
+            target:
+              entity_id: "{{ carport }}"
+            data:
+              brightness_pct: 100
+          - delay:
+              minutes: 4
+          - action: scene.turn_on
+            target:
+              entity_id: scene.alarm_voor_carport
+
+      # 5. Buitendeur 1,5 minuut fel (alleen brandweer)
+      - if:
+          - condition: template
+            value_template: "{{ not politie and buitendeur | length > 0 }}"
+        then:
+          - action: scene.create
+            data:
+              scene_id: alarm_voor_buitendeur
+              snapshot_entities: "{{ buitendeur }}"
+          - action: light.turn_on
+            target:
+              entity_id: "{{ buitendeur }}"
+            data:
+              brightness_pct: 100
+          - delay:
+              seconds: 90
+          - action: scene.turn_on
+            target:
+              entity_id: scene.alarm_voor_buitendeur
+
+      # 6. Omroepen via Google Home / Sonos
       - if:
           - condition: template
             value_template: "{{ speakers | length > 0 and tts != '' }}"
         then:
-          - repeat:
-              count: 2
-              sequence:
-                - action: tts.speak
-                  continue_on_error: true
-                  target:
-                    entity_id: "{{ tts }}"
-                  data:
-                    media_player_entity_id: "{{ speakers }}"
-                    message: "{{ uitspraak }}"
-                    cache: false
-                - delay:
-                    seconds: 12
+          - choose:
+              # 's Nachts brandweer: alleen één keer "Brand"
+              - conditions:
+                  - condition: template
+                    value_template: "{{ nacht and not politie }}"
+                sequence:
+                  - action: tts.speak
+                    continue_on_error: true
+                    target:
+                      entity_id: "{{ tts }}"
+                    data:
+                      media_player_entity_id: "{{ speakers }}"
+                      message: "Brand."
+                      cache: true
+              # Overdag: hele melding een paar keer
+              - conditions:
+                  - condition: template
+                    value_template: "{{ not nacht }}"
+                sequence:
+                  - repeat:
+                      count: "{{ 2 if politie else 3 }}"
+                      sequence:
+                        - action: tts.speak
+                          continue_on_error: true
+                          target:
+                            entity_id: "{{ tts }}"
+                          data:
+                            media_player_entity_id: "{{ speakers }}"
+                            message: "{{ uitspraak }}"
+                            cache: false
+                        - delay:
+                            seconds: 15
+              # 's Nachts politie: stil

@@ -2,6 +2,13 @@ test_melding:
   name: Test-melding
   description: Maakt een nep-brandmelding om het alarm, de lampen en de pop-up te testen.
   fields:
+    soort:
+      name: Soort
+      description: brand of politie
+      example: brand
+      selector:
+        select:
+          options: ["brand", "politie"]
     tekst:
       name: Tekst
       description: Tekst van de testmelding (mag leeg blijven).

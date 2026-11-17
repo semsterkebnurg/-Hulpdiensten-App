@@ -43,6 +43,15 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional("afval", default={}): {cv.string: vol.All(cv.ensure_list, [cv.string])},
                 vol.Optional("bronnen", default={}): dict,
                 vol.Optional("p2000_interval", default=20): vol.Coerce(int),
+                # Post Nunspeet: capcodes van bevelvoerder en kazerne
+                vol.Optional("post_naam", default="Nunspeet"): cv.string,
+                vol.Optional("post_capcodes", default=["0805283", "0805285"]): vol.All(cv.ensure_list, [cv.string]),
+                vol.Optional("proef_capcodes", default=["0803000"]): vol.All(cv.ensure_list, [cv.string]),
+                # Politie: alleen meldingen in deze plaatsen
+                vol.Optional("politie", default=True): cv.boolean,
+                vol.Optional(
+                    "politie_plaatsen", default=["Nunspeet", "Elspeet", "Vierhouten", "Hulshorst", "Doornspijk"]
+                ): vol.All(cv.ensure_list, [cv.string]),
             }
         )
     },
@@ -62,13 +71,15 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     hass.data[DOMAIN] = hub
 
     async def test_melding(call: ServiceCall) -> None:
-        await hub.p2000.async_test_melding(call.data.get("tekst"))
+        await hub.p2000.async_test_melding(call.data.get("tekst"), call.data.get("soort", "brand"))
 
     hass.services.async_register(
         DOMAIN,
         "test_melding",
         test_melding,
-        schema=vol.Schema({vol.Optional("tekst"): cv.string}),
+        schema=vol.Schema(
+            {vol.Optional("tekst"): cv.string, vol.Optional("soort", default="brand"): vol.In(["brand", "politie"])}
+        ),
     )
 
     hass.async_create_task(
@@ -111,6 +122,7 @@ class MeldkamerHub:
         self.regen = self._coordinator("regen", self._regen, timedelta(minutes=5))
         self.knmi = self._coordinator("knmi", self._knmi, timedelta(minutes=10))
         self.vliegtuigen = self._coordinator("vliegtuigen", self._vliegtuigen, timedelta(seconds=20))
+        self.nieuws = self._coordinator("nieuws", self._nieuws, timedelta(minutes=15))
 
     def _coordinator(self, naam, methode, interval) -> DataUpdateCoordinator:
         return DataUpdateCoordinator(
@@ -136,7 +148,7 @@ class MeldkamerHub:
             else:
                 _LOGGER.warning("Routepunt '%s' niet gevonden", keuze["via"])
         await self.p2000.async_laad()
-        for c in (self.p2000, self.weer, self.lucht, self.regen, self.knmi, self.vliegtuigen):
+        for c in (self.p2000, self.weer, self.lucht, self.regen, self.knmi, self.vliegtuigen, self.nieuws):
             # Eerste keer verversen, maar een kapotte bron mag het opstarten niet blokkeren.
             self.hass.async_create_task(c.async_refresh())
 
@@ -237,10 +249,10 @@ class MeldkamerHub:
             "latitude": self.lat,
             "longitude": self.lon,
             "current": "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,"
-            "wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,pressure_msl,is_day",
+            "wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,pressure_msl,is_day,visibility,dew_point_2m,uv_index",
             "hourly": "temperature_2m,precipitation_probability,precipitation,weather_code,wind_gusts_10m",
             "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,"
-            "precipitation_probability_max,sunrise,sunset,wind_gusts_10m_max",
+            "precipitation_probability_max,sunrise,sunset,wind_gusts_10m_max,uv_index_max,precipitation_hours,daylight_duration",
             "timezone": "Europe/Amsterdam",
             "forecast_days": 5,
             "forecast_hours": 24,
@@ -274,6 +286,9 @@ class MeldkamerHub:
                 "windstoten": d["wind_gusts_10m_max"][i],
                 "zonop": d["sunrise"][i],
                 "zononder": d["sunset"][i],
+                "uv": (d.get("uv_index_max") or [None] * 99)[i],
+                "regenuren": (d.get("precipitation_hours") or [None] * 99)[i],
+                "daglicht": (d.get("daylight_duration") or [None] * 99)[i],
             }
             for i, t in enumerate(d.get("time", []))
         ]
@@ -417,6 +432,22 @@ class MeldkamerHub:
         lijst.sort(key=lambda a: a["afstand_km"])
         return {"lijst": lijst[:60]}
 
+    # ---------- Nieuws ----------
+
+    async def _nieuws(self) -> dict:
+        items = []
+        for naam, url in self.bronnen["nieuws"]:
+            try:
+                tekst = await _get(self.session, url, soort="text")
+                for it in p2000.lees_feed(tekst)[:10]:
+                    items.append({"bron": naam, "titel": it["titel"], "tijd": it["tijd"], "link": it["link"]})
+            except Exception as err:  # noqa: BLE001
+                _LOGGER.debug("Nieuws van %s niet beschikbaar: %s", naam, err)
+        if not items:
+            raise UpdateFailed("Geen nieuws beschikbaar")
+        items.sort(key=lambda i: i["tijd"], reverse=True)
+        return {"items": items[:14]}
+
     # ---------- Afval ----------
 
     def afval(self) -> dict:
@@ -438,8 +469,29 @@ class MeldkamerHub:
 HELI_TYPES = {"EC35", "EC45", "EC30", "EC55", "H135", "H145", "AS65", "A139", "AW139", "NH90", "CH47", "H47", "AH64", "B06", "R44", "R22", "EC20", "AS50", "A109", "A169", "B429"}
 
 
+MAX_LIJST = 12
+HISTORIE_DAGEN = 400
+
+CATEGORIEEN = [
+    ("Proefalarm", ("proefalarm", "proef alarm")),
+    ("Brand", ("brand", "rook", "vuur", "explosie")),
+    ("Gas", ("gas",)),
+    ("OMS", ("oms", "automatische", "brandmeldinstallatie", "bmi")),
+    ("Water & dier", ("water", "dier", "zwaan", "paard", "vee")),
+    ("Hulpverlening", ("lift", "assistentie", "ongeval", "hulpverlening", "beknelling", "reanimatie", "ambu", "letsel", "persoon")),
+]
+
+
+def categorie(tekst: str) -> str:
+    laag = tekst.lower()
+    for naam, woorden in CATEGORIEEN:
+        if any(w in laag for w in woorden):
+            return naam
+    return "Overig"
+
+
 class P2000Coordinator(DataUpdateCoordinator):
-    """Haalt P2000-meldingen op en geeft een seintje bij nieuwe meldingen."""
+    """Haalt P2000-meldingen op (brandweer en politie) en geeft een seintje bij nieuwe meldingen."""
 
     def __init__(self, hub: MeldkamerHub) -> None:
         super().__init__(
@@ -452,9 +504,12 @@ class P2000Coordinator(DataUpdateCoordinator):
         self.hub = hub
         self.store = Store(hub.hass, 1, f"{DOMAIN}.p2000")
         self.gezien: list[str] = []
-        self.meldingen: list[dict] = []
-        self.tijdstippen: list[str] = []
+        self.meldingen: list[dict] = []  # post Nunspeet (incl. proefalarm)
+        self.nl: list[dict] = []  # brandmeldingen heel Nederland
+        self.politie: list[dict] = []  # politie in de buurt
+        self.historie: list[dict] = []  # {tijd, cat, prio} van post Nunspeet
         self.bron = None
+        self.bron_politie = None
         self.eerste_keer = True
         self.laatste_fout: str | None = None
 
@@ -462,7 +517,12 @@ class P2000Coordinator(DataUpdateCoordinator):
         opgeslagen = await self.store.async_load() or {}
         self.gezien = opgeslagen.get("gezien", [])
         self.meldingen = opgeslagen.get("meldingen", [])
-        self.tijdstippen = opgeslagen.get("tijdstippen", [])
+        self.nl = opgeslagen.get("nl", [])
+        self.politie = opgeslagen.get("politie", [])
+        self.historie = opgeslagen.get("historie", [])
+        if not self.historie:
+            # Overzetten van de oude opslag
+            self.historie = [{"tijd": t, "cat": "Overig", "prio": None} for t in opgeslagen.get("tijdstippen", [])]
         self.eerste_keer = not self.gezien
         self.data = self._samenvatting()
 
@@ -472,7 +532,9 @@ class P2000Coordinator(DataUpdateCoordinator):
             lambda: {
                 "gezien": self.gezien[-MAX_GEZIEN:],
                 "meldingen": self.meldingen[:MAX_MELDINGEN],
-                "tijdstippen": self.tijdstippen,
+                "nl": self.nl[:MAX_LIJST],
+                "politie": self.politie[:MAX_LIJST],
+                "historie": self.historie,
             },
             5,
         )
@@ -481,85 +543,148 @@ class P2000Coordinator(DataUpdateCoordinator):
         nu = dt_util.now()
         begin_dag = nu.replace(hour=0, minute=0, second=0, microsecond=0)
         begin_week = begin_dag - timedelta(days=nu.weekday())
-        tijden = []
-        for t in self.tijdstippen:
+        begin_maand = begin_dag.replace(day=1)
+        begin_jaar = begin_dag.replace(month=1, day=1)
+        tellers = {"vandaag": 0, "week": 0, "maand": 0, "jaar": 0}
+        per_dag = [0] * 30
+        per_cat: dict[str, int] = {}
+        per_uur = [0] * 24
+        for h in self.historie:
             try:
-                tijden.append(dt_util.as_local(datetime.fromisoformat(t)))
-            except ValueError:
+                t = dt_util.as_local(datetime.fromisoformat(h["tijd"]))
+            except (ValueError, KeyError):
                 continue
+            if t >= begin_dag:
+                tellers["vandaag"] += 1
+            if t >= begin_week:
+                tellers["week"] += 1
+            if t >= begin_maand:
+                tellers["maand"] += 1
+            if t >= begin_jaar:
+                tellers["jaar"] += 1
+            dagen_terug = (begin_dag.date() - t.date()).days
+            if 0 <= dagen_terug < 30:
+                per_dag[29 - dagen_terug] += 1
+            if dagen_terug < 365:
+                per_cat[h.get("cat", "Overig")] = per_cat.get(h.get("cat", "Overig"), 0) + 1
+                per_uur[t.hour] += 1
         return {
             "meldingen": self.meldingen[:MAX_MELDINGEN],
-            "vandaag": sum(1 for t in tijden if t >= begin_dag),
-            "week": sum(1 for t in tijden if t >= begin_week),
+            "nl": self.nl[:MAX_LIJST],
+            "politie": self.politie[:MAX_LIJST],
+            **tellers,
+            "per_dag": per_dag,
+            "per_cat": per_cat,
+            "per_uur": per_uur,
+            "totaal": len(self.historie),
             "bron": self.bron,
+            "bron_politie": self.bron_politie,
             "fout": self.laatste_fout,
         }
 
-    async def _haal_feed(self) -> list[dict]:
-        bronnen = self.hub.bronnen["p2000"]
+    async def _haal(self, sleutel: str, vorige: str | None) -> tuple[list[dict], str]:
+        bronnen = self.hub.bronnen[sleutel]
         if isinstance(bronnen, str):
             bronnen = [bronnen]
-        # Begin met de bron die de vorige keer werkte.
-        if self.bron in bronnen:
-            bronnen = [self.bron] + [b for b in bronnen if b != self.bron]
+        if vorige in bronnen:
+            bronnen = [vorige] + [b for b in bronnen if b != vorige]
         fouten = []
         for url in bronnen:
             try:
                 tekst = await _get(self.hub.session, url, soort="text")
-                items = p2000.lees_feed(tekst)
-                self.bron = url
-                return items
+                return p2000.lees_feed(tekst), url
             except Exception as err:  # noqa: BLE001
                 fouten.append(f"{url}: {err}")
         raise UpdateFailed("Geen enkele P2000-bron werkt: " + " | ".join(fouten))
 
+    def _is_post(self, tekst: str, eenheden: list[str]) -> bool:
+        conf = self.hub.conf
+        if any(c in tekst for c in conf["post_capcodes"]):
+            return True
+        if p2000.bevat_een(tekst, conf["eigen_eenheden"]):
+            return True
+        naam = conf["post_naam"].lower()
+        return any(naam in e.lower() for e in eenheden)
+
     async def _async_update_data(self) -> dict:
+        conf = self.hub.conf
         try:
-            items = await self._haal_feed()
+            items, self.bron = await self._haal("p2000", self.bron)
             self.laatste_fout = None
         except UpdateFailed as err:
             self.laatste_fout = str(err)
             raise
-        conf = self.hub.conf
-        nieuw = []
+        politie_items: list[dict] = []
+        if conf["politie"]:
+            try:
+                politie_items, self.bron_politie = await self._haal("p2000_politie", self.bron_politie)
+            except UpdateFailed as err:
+                _LOGGER.debug("Politiefeed niet beschikbaar: %s", err)
+
         gezien = set(self.gezien)
-        for item in items:
+        nieuw_post, nieuw_politie, veranderd = [], [], False
+
+        for item in sorted(items, key=lambda m: m["tijd"]):
             if item["id"] in gezien:
                 continue
             gezien.add(item["id"])
             self.gezien.append(item["id"])
+            veranderd = True
             tekst = item["titel"] + " " + " ".join(item["eenheden"])
-            eigen = p2000.bevat_een(tekst, conf["eigen_eenheden"])
-            relevant = eigen or p2000.bevat_een(tekst, conf["filter"])
-            if not relevant and not conf["toon_alles"]:
+            proef = any(c in tekst for c in conf["proef_capcodes"]) or "proefalarm" in tekst.lower()
+            if not proef:
+                self.nl.insert(0, {**item, "prio": p2000.prioriteit(item["titel"]), "kort": p2000.korte_titel(item["titel"]), "cat": categorie(item["titel"])})
+            if proef:
+                if self._is_post(tekst, item["eenheden"]) or any(c in tekst for c in conf["post_capcodes"] + conf["proef_capcodes"]):
+                    self.meldingen.insert(0, {**item, "proef": True, "soort": "brand", "relevant": False, "kort": "Proefalarm", "cat": "Proefalarm"})
                 continue
-            nieuw.append({**item, "eigen": eigen, "relevant": relevant})
+            if self._is_post(tekst, item["eenheden"]):
+                nieuw_post.append(item)
 
-        # Oudste eerst verwerken, zodat de nieuwste bovenaan komt.
-        nieuw.sort(key=lambda m: m["tijd"])
-        for melding in nieuw:
+        for item in sorted(politie_items, key=lambda m: m["tijd"]):
+            if item["id"] in gezien:
+                continue
+            gezien.add(item["id"])
+            self.gezien.append(item["id"])
+            veranderd = True
+            tekst = item["titel"] + " " + " ".join(item["eenheden"])
+            if p2000.bevat_een(tekst, conf["politie_plaatsen"]):
+                nieuw_politie.append(item)
+
+        for item in nieuw_post:
+            tekst = item["titel"] + " " + " ".join(item["eenheden"])
+            melding = {**item, "soort": "brand", "relevant": True, "eigen": True, "cat": categorie(item["titel"])}
             await self._verrijk(melding)
             self.meldingen.insert(0, melding)
-            self.tijdstippen.append(melding["tijd"])
-            # Bij de allereerste keer laden geen alarm geven voor oude meldingen.
+            self.historie.append({"tijd": melding["tijd"], "cat": melding["cat"], "prio": melding.get("prio")})
             if not self.eerste_keer:
                 self.hass.bus.async_fire(EVENT_MELDING, melding)
-        self.meldingen.sort(key=lambda m: m["tijd"], reverse=True)
+
+        for item in nieuw_politie:
+            melding = {**item, "soort": "politie", "relevant": True, "eigen": False, "cat": "Politie"}
+            await self._verrijk(melding, conf["politie_plaatsen"])
+            self.politie.insert(0, melding)
+            if not self.eerste_keer:
+                self.hass.bus.async_fire(EVENT_MELDING, melding)
+
+        for lijst in (self.meldingen, self.nl, self.politie):
+            lijst.sort(key=lambda m: m["tijd"], reverse=True)
         del self.meldingen[MAX_MELDINGEN:]
-        grens = (dt_util.utcnow() - timedelta(days=8)).isoformat()
-        self.tijdstippen = [t for t in self.tijdstippen if t >= grens]
+        del self.nl[MAX_LIJST:]
+        del self.politie[MAX_LIJST:]
+        grens = (dt_util.utcnow() - timedelta(days=HISTORIE_DAGEN)).isoformat()
+        self.historie = [h for h in self.historie if h["tijd"] >= grens]
         self.eerste_keer = False
-        if nieuw:
+        if veranderd:
             self._bewaar()
         return self._samenvatting()
 
-    async def _verrijk(self, melding: dict) -> None:
+    async def _verrijk(self, melding: dict, plaatsen: list[str] | None = None) -> None:
         titel = melding["titel"]
         melding["prio"] = p2000.prioriteit(titel)
         melding["kort"] = p2000.korte_titel(titel)
-        plaats_voorkeur = next(
-            (w for w in self.hub.conf["filter"] if w.lower() in titel.lower()), self.hub.conf["plaats"]
-        )
+        kandidaten = plaatsen or self.hub.conf["filter"]
+        plaats_voorkeur = next((w for w in kandidaten if w.lower() in titel.lower()), self.hub.conf["plaats"])
         locatie = await self.hub.geocode(p2000.adres_zoektekst(titel), plaats_voorkeur)
         if locatie and _afstand_km(self.hub.lat, self.hub.lon, locatie["lat"], locatie["lon"]) < 150:
             melding["lat"] = locatie["lat"]
@@ -570,22 +695,28 @@ class P2000Coordinator(DataUpdateCoordinator):
         else:
             melding["route"] = None
 
-    async def async_test_melding(self, tekst: str | None) -> None:
-        """Maak een nepmelding om het alarm te testen."""
+    async def async_test_melding(self, tekst: str | None, soort: str = "brand") -> None:
+        """Maak een nepmelding om het alarm te testen. Telt niet mee in de geschiedenis."""
         plaats = self.hub.conf["plaats"]
-        eenheden = [f"Brandweer TEST ({e})" for e in self.hub.conf["eigen_eenheden"][:1]] or ["Brandweer TEST"]
+        if soort == "politie":
+            titel = tekst or f"P 1 TEST Verdachte situatie Stationsplein {plaats}"
+            eenheden = ["Politie TEST"]
+        else:
+            titel = tekst or f"P 1 BDH-01 TEST Woningbrand Stationsplein {plaats}"
+            eenheden = [f"Brandweer TEST (Bevelvoerder {self.hub.conf['post_naam']})"]
         melding = {
             "id": f"test-{dt_util.utcnow().timestamp()}",
-            "titel": tekst or f"P 1 TEST Gebouwbrand Stationsplein {plaats}",
+            "titel": titel,
             "eenheden": eenheden,
             "tijd": dt_util.utcnow().isoformat(),
             "link": "",
-            "eigen": True,
+            "soort": soort,
+            "eigen": soort == "brand",
             "relevant": True,
             "test": True,
+            "cat": "Politie" if soort == "politie" else categorie(titel.replace("TEST", "")),
         }
         await self._verrijk(melding)
-        self.meldingen.insert(0, melding)
-        del self.meldingen[MAX_MELDINGEN:]
+        (self.politie if soort == "politie" else self.meldingen).insert(0, melding)
         self.hass.bus.async_fire(EVENT_MELDING, melding)
         self.async_set_updated_data(self._samenvatting())
