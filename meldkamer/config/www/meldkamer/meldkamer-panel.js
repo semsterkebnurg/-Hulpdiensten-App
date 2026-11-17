@@ -4,7 +4,7 @@
  * Dashboard (huis, lampen, camera's, energie, agenda, nieuws) en Weer & storm.
  */
 
-const FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Instrument+Serif:ital@0;1&display=swap";
 const NACHT_VAN = 23;
 const NACHT_TOT = 7;
 const ALARM_DUUR = 2 * 60 * 1000;
@@ -129,32 +129,52 @@ function maan(d = new Date()) {
 
 const CSS = `
 :host{
-  --bg:#06080c; --kaart:rgba(18,22,30,.86); --rand:rgba(255,255,255,.07);
-  --tekst:#eef2f7; --zacht:#8d97a6; --zwak:#4c5562;
-  --accent:#ff3b30; --accent2:#ff7a45; --goed:#30d158; --geel:#ffd60a; --blauw:#0a84ff; --cyaan:#64d2ff;
-  --r:18px;
+  --bg:#070d1a; --kaart:rgba(28,40,68,.55); --rand:rgba(160,190,255,.10);
+  --tekst:#f1f5fc; --zacht:#93a3c0; --zwak:#56658a;
+  --accent:#ff7a18; --accent2:#ffb347; --goed:#34d399; --geel:#ffd60a; --blauw:#0a84ff; --cyaan:#7cc4ff;
+  --r:22px; --serif:"Instrument Serif",Georgia,serif;
   display:block; height:100vh; min-height:100%; background:var(--bg); color:var(--tekst);
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; -webkit-font-smoothing:antialiased;
 }
-:host([storm]){ --accent:#ffd60a; --accent2:#bf5af2; }
+:host([storm]){ --accent:#d97706; --accent2:#f5a524; }
+:host([modus="brand"]){ --accent:#ff3b30; --accent2:#ff7a5c; }
+:host([modus="politie"]){ --accent:#1e6bff; --accent2:#5ea2ff; }
 *{box-sizing:border-box}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 a{color:inherit}
-.wrap{height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;
+.wrap{height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;animation:intro .9s cubic-bezier(.2,.8,.2,1) both;
   background:
-    radial-gradient(1100px 520px at 0% -10%, color-mix(in srgb,var(--accent) 12%,transparent), transparent 60%),
-    radial-gradient(900px 520px at 105% 110%, rgba(10,132,255,.10), transparent 60%),
-    linear-gradient(rgba(255,255,255,.016) 1px, transparent 1px) 0 0/100% 28px,
-    var(--bg);}
+    radial-gradient(900px 600px at 85% -10%, color-mix(in srgb,var(--accent) 22%,transparent), transparent 60%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(40,90,200,.28), transparent 60%),
+    linear-gradient(160deg,#0b1426 0%,#111e3a 55%,#0a1222 100%);
+  transition:background .6s;}
+@keyframes intro{from{opacity:0;transform:scale(1.015);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes binnen{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.animeer .kaart{animation:binnen .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 55ms)}
+/* ---- lijf met zijbalk ---- */
+.lijf{flex:1;min-height:0;display:flex;gap:0;margin:0 14px 14px;border-radius:30px;
+  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);
+  box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(20px);overflow:hidden}
+.inhoud{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.rail{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 0 18px 14px}
+.rail .stok{display:flex;flex-direction:column;gap:8px;padding:8px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid var(--rand)}
+.rail button{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:18px;color:var(--zacht);transition:.2s;position:relative}
+.rail button:hover{background:rgba(255,255,255,.08)}
+.rail button.aan{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 22px color-mix(in srgb,var(--accent) 55%,transparent)}
+.rail button .tip{position:absolute;left:52px;white-space:nowrap;font-size:12px;font-weight:600;background:#0b1426;border:1px solid var(--rand);padding:4px 9px;border-radius:8px;opacity:0;pointer-events:none;transition:.15s;z-index:10}
+.rail button:hover .tip{opacity:1}
+.rail .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 4px rgba(255,255,255,.08)}
 /* ---- kop ---- */
-.kop{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid var(--rand);background:linear-gradient(180deg,rgba(0,0,0,.4),transparent)}
+.kop{display:flex;align-items:center;gap:14px;padding:10px 20px}
 .menu{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.05);font-size:18px;flex:none}
 .logo{display:flex;align-items:center;gap:12px;min-width:0}
 .logo .bol{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none;
   background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
-.logo h1{margin:0;font-size:17px;letter-spacing:.16em;font-weight:800;white-space:nowrap}
+.logo h1{margin:0;font-size:24px;letter-spacing:.01em;font-weight:400;white-space:nowrap;font-family:var(--serif)}
+.logo h1 i{color:var(--accent2)}
 .logo small{display:block;color:var(--zacht);font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
-.paginas{display:flex;gap:6px;flex:none;padding:4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--rand)}
+.paginas{display:none;gap:6px;flex:none;padding:4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--rand)}
 .pag-knop{padding:8px 14px;border-radius:10px;font-weight:700;font-size:13.5px;color:var(--zacht);white-space:nowrap;transition:.15s}
 .pag-knop.aan{background:var(--accent);color:#fff;box-shadow:0 4px 18px color-mix(in srgb,var(--accent) 35%,transparent)}
 :host([storm]) .pag-knop.aan{color:#000}
@@ -176,16 +196,18 @@ a{color:inherit}
 .storm .bliksem{font-size:18px;animation:flits 2.4s infinite}
 @keyframes flits{0%,86%,100%{opacity:1}88%{opacity:.2}90%{opacity:1}92%{opacity:.3}}
 /* ---- raster ---- */
-.raster{flex:1;min-height:0;display:grid;gap:12px;padding:12px 16px 16px;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr)}
+.raster{flex:1;min-height:0;display:grid;gap:14px;padding:18px 18px 18px 16px;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr)}
 .pagina:not(.aan){display:none!important}
 .p-dashboard{grid-template-rows:auto minmax(0,1fr)}
 .p-dashboard .groet{grid-column:1/-1}
 .kolom{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;overflow:auto;scrollbar-width:none}
 .kolom::-webkit-scrollbar{display:none}
-.kaart{background:var(--kaart);border:1px solid var(--rand);border-radius:var(--r);padding:13px 15px;flex:none;
-  backdrop-filter:blur(10px);box-shadow:0 12px 30px rgba(0,0,0,.28);min-height:0;position:relative}
+.kaart{background:linear-gradient(160deg,rgba(60,80,130,.32),rgba(25,35,62,.45));border:1px solid var(--rand);border-radius:var(--r);padding:14px 16px;flex:none;
+  backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);min-height:0;position:relative}
 .kaart.groei{flex:1 1 auto;display:flex;flex-direction:column;min-height:200px}
-.kaart h2{margin:0 0 10px;font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--zacht);display:flex;align-items:center;gap:8px}
+.kaart h2{margin:0 0 11px;font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--zacht);display:flex;align-items:center;gap:8px}
+.kaart h2::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);flex:none}
+.hero h2::before,.groet h2::before{background:#fff;box-shadow:none}
 .kaart h2 .r{margin-left:auto;letter-spacing:.04em;text-transform:none;font-weight:500;display:flex;gap:6px;align-items:center}
 .scroll{overflow:auto;min-height:0;flex:1;scrollbar-width:thin;scrollbar-color:#2c323b transparent}
 .leeg{color:var(--zwak);font-size:13.5px;padding:4px 0}
@@ -193,7 +215,16 @@ a{color:inherit}
 .klein-knop:hover{color:var(--tekst)}
 .klein-knop.politie{color:#9ecbff}
 /* ---- laatste melding ---- */
-.hero{border-color:color-mix(in srgb,var(--accent) 35%,transparent);background:linear-gradient(165deg,color-mix(in srgb,var(--accent) 15%,transparent),var(--kaart) 55%)}
+.hero,.groet{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;border-color:rgba(255,255,255,.25)!important;color:#fff;
+  box-shadow:0 18px 50px color-mix(in srgb,var(--accent) 45%,transparent), inset 0 1px 0 rgba(255,255,255,.35)!important}
+.hero h2,.hero .geleden,.hero .hero-adres,.hero .teller small{color:rgba(255,255,255,.85)!important}
+.hero .teller div,.hero .route a,.hero .eenheid,.hero .advies{background:rgba(0,0,0,.18)!important;border-color:rgba(255,255,255,.2)!important}
+.hero .route a.best{background:rgba(255,255,255,.22)!important;border-color:#fff!important}
+.hero .klein-knop{background:rgba(255,255,255,.22);color:#fff}
+.hero .badge.cat{background:rgba(0,0,0,.2);color:#fff!important}
+.hero small,.hero .route a small,.hero .advies span,.groet .blokje span{color:rgba(255,255,255,.85)!important}
+.hero-adres{margin-top:6px}
+.hero-titel{font-family:var(--serif);font-weight:400!important;font-size:27px!important;line-height:1.15!important;font-style:italic;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
 .hero-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .badge{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:12.5px;padding:3px 9px;border-radius:7px;background:#3a4250;color:#fff}
 .badge.p1{background:#ff3b30;box-shadow:0 0 14px rgba(255,59,48,.55)}
@@ -240,10 +271,11 @@ a{color:inherit}
 .vlucht .k{text-align:right;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--zacht)}
 .vlucht .k b{display:block;color:var(--tekst);font-size:13px}
 /* ---- groet ---- */
-.groet{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 18px;
-  background:linear-gradient(110deg,color-mix(in srgb,var(--accent) 14%,transparent),rgba(10,132,255,.08) 60%,var(--kaart))}
-.groet h3{margin:0;font-size:22px;font-weight:800}
-.groet p{margin:3px 0 0;color:var(--zacht);font-size:13.5px}
+.groet{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 20px}
+.groet h3{margin:0;font-size:32px;font-weight:400;font-family:var(--serif)}
+.groet h3 i{font-style:italic}
+.groet p{margin:3px 0 0;color:rgba(255,255,255,.85);font-size:13.5px}
+.groet .blokje{background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.85)}
 .groet .blokjes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .blokje{background:rgba(0,0,0,.25);border:1px solid var(--rand);border-radius:12px;padding:7px 12px;font-size:11.5px;color:var(--zacht);min-width:92px}
 .blokje b{display:block;color:var(--tekst);font-size:16px;margin-top:1px}
@@ -340,7 +372,7 @@ a{color:inherit}
 .dag b{color:var(--tekst)}
 .tabs{display:flex;gap:4px;margin:-3px 0 10px;overflow-x:auto;scrollbar-width:none;flex:none}
 .tab{white-space:nowrap;padding:6px 12px;border-radius:999px;font-size:12.5px;color:var(--zacht);background:rgba(255,255,255,.04)}
-.tab.aan{background:var(--accent);color:#000;font-weight:700}
+.tab.aan{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700}
 .venster{flex:1;min-height:260px;border-radius:13px;overflow:hidden;position:relative;background:#0b0f14}
 .venster > *{position:absolute;inset:0;width:100%;height:100%;border:0}
 .verberg{display:none!important}
@@ -393,7 +425,7 @@ a{color:inherit}
 .test-knop.blauw{border-color:rgba(10,132,255,.45);background:rgba(10,132,255,.10)}
 .veld{display:flex;gap:8px;margin-bottom:8px}
 .veld input,.veld select{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1px solid var(--rand);color:var(--tekst);border-radius:10px;padding:9px 11px;font:inherit;font-size:13px}
-.veld button{padding:9px 14px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;font-size:13px}
+.veld button{padding:9px 14px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:13px}
 .uitleg-klein{font-size:12px;color:var(--zacht);line-height:1.45;margin:0 0 10px}
 /* ---- deurbel ---- */
 .deurbel{position:absolute;inset:0;z-index:1900;display:none;flex-direction:column;background:#04060a;padding:14px}
@@ -456,6 +488,10 @@ a{color:inherit}
   .chips{display:none}
 }
 @media (max-width:760px){
+  .rail{display:none}
+  .paginas{display:flex}
+  .lijf{margin:0 8px 8px;border-radius:22px;flex:none}
+  .hero-titel{font-size:25px!important}
   :host{height:auto;min-height:100vh}
   .wrap{height:auto;min-height:100vh;overflow:visible}
   .raster{grid-template-columns:minmax(0,1fr);padding:10px}
@@ -541,7 +577,7 @@ class HuisPanel extends HTMLElement {
       <div class="wrap">
         <header class="kop">
           <button class="menu" data-actie="menu" title="Menu">☰</button>
-          <div class="logo"><div class="bol">🏠</div><div><h1>HUIS STERKENBURG</h1><small>Nunspeet</small></div></div>
+          <div class="logo"><div class="bol">🏠</div><div><h1>Huis <i>Sterkenburg</i></h1><small>Nunspeet</small></div></div>
           <nav class="paginas">
             <button class="pag-knop aan" data-actie="pagina" data-pagina="dashboard">🏠 Dashboard</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
@@ -552,6 +588,17 @@ class HuisPanel extends HTMLElement {
           <div class="klok"><div class="t" id="klok">--:--:--</div><div class="d" id="datum"></div></div>
         </header>
         <div class="storm" id="storm"></div>
+        <div class="lijf">
+          <nav class="rail">
+            <div class="avatar" id="avatar">S</div>
+            <div class="stok">
+              <button class="aan" data-actie="pagina" data-pagina="dashboard">🏠<span class="tip">Dashboard</span></button>
+              <button data-actie="pagina" data-pagina="meldkamer">🚒<span class="tip">Meldkamer</span></button>
+              <button data-actie="pagina" data-pagina="weer">⛈️<span class="tip">Weer & storm</span></button>
+              <button data-actie="pagina" data-pagina="test">🧪<span class="tip">Test</span></button>
+            </div>
+          </nav>
+          <div class="inhoud">
 
         <main class="raster pagina p-meldkamer" id="p-meldkamer">
           <section class="kolom k1">
@@ -651,6 +698,8 @@ class HuisPanel extends HTMLElement {
           </section>
         </main>
 
+          </div>
+        </div>
         <div class="deurbel" id="deurbel"></div>
         <div class="nacht" id="nacht"><div class="t" id="nachtklok"></div><div class="s" id="nachtinfo"></div><div class="s">Tik om het scherm te wekken</div></div>
         <div class="alarm" id="alarm"></div>
@@ -671,6 +720,9 @@ class HuisPanel extends HTMLElement {
     this._audio();
     this._laadExtra();
     this._toonWeerTab();
+    this._toonPagina("dashboard");
+    const naam = (this._hass.user?.name || "S").trim();
+    this.shadowRoot.getElementById("avatar").textContent = naam[0].toUpperCase();
     try {
       this._hass.connection.subscribeEvents(() => this._deurbel({ test: true }), "meldkamer_deurbel");
     } catch (e) {
@@ -777,6 +829,7 @@ class HuisPanel extends HTMLElement {
       } else if (this._pagina !== "dashboard" && stil > 5 * 60 * 1000) this._toonPagina("dashboard");
     }
     if (this._nachtVoorbeeldTot && Date.now() > this._nachtVoorbeeldTot) this._nachtVoorbeeldTot = null;
+    if (this.hasAttribute("modus") && !this._meldkamerTot && !r.getElementById("alarm").classList.contains("open")) this.removeAttribute("modus");
   }
 
   _tekenChips() {
@@ -958,7 +1011,7 @@ class HuisPanel extends HTMLElement {
     const dl = this._daglicht(d0);
     const daglicht = dl ? `${Math.floor(dl / 3600)}u ${pad(Math.round((dl % 3600) / 60))}m` : "–";
     this.shadowRoot.getElementById("groet").innerHTML = `
-      <div><h3>${groet}${naam ? ", " + esc(naam) : ""} 👋</h3>
+      <div><h3>${groet}${naam ? `, <i>${esc(naam)}</i>` : ""}</h3>
         <p>Het is ${nu.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · week ${this._weekNr(nu)}</p></div>
       <div class="blokjes">
         ${n.temperature_2m != null ? `<div class="blokje">${weerIcoon(n.weather_code, n.is_day)} ${weerTekst(n.weather_code)}<b>${Math.round(n.temperature_2m)}° <span style="font-size:11px;color:var(--zacht)">↑${Math.round(d0.max ?? 0)}° ↓${Math.round(d0.min ?? 0)}°</span></b></div>` : ""}
@@ -1527,6 +1580,7 @@ class HuisPanel extends HTMLElement {
 
   _toonAlarm(m) {
     this._alarmId = m.id;
+    this.setAttribute("modus", m.soort === "politie" ? "politie" : "brand");
     this._meldkamerTot = Date.now() + 10 * 60 * 1000;
     this._toonPagina("meldkamer");
     const politie = m.soort === "politie";
@@ -1740,7 +1794,14 @@ class HuisPanel extends HTMLElement {
     const r = this.shadowRoot;
     ["meldkamer", "dashboard", "weer", "test"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
     if (p === "test") this._vulSpeakers();
-    r.querySelectorAll(".pag-knop").forEach((b) => b.classList.toggle("aan", b.dataset.pagina === p));
+    r.querySelectorAll(".pag-knop, .rail button[data-pagina]").forEach((b) => b.classList.toggle("aan", b.dataset.pagina === p));
+    const pag = r.getElementById("p-" + p);
+    if (pag) {
+      pag.querySelectorAll(".kaart").forEach((k, i) => k.style.setProperty("--i", i));
+      pag.classList.remove("animeer");
+      void pag.offsetWidth;
+      pag.classList.add("animeer");
+    }
     if (p === "dashboard" && this._hass) this._tekenCams();
     if (p === "weer") this._toonWeerTab();
   }
