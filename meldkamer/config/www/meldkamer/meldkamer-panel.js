@@ -119,7 +119,13 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 .camgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-content:start;overflow:auto;flex:1;min-height:0}
 .camgrid .cam{aspect-ratio:16/10}
 .camgrid .cam span{font-size:14px;left:10px;bottom:8px}
-.camgrid .cam .live{position:absolute;right:8px;top:8px;font-size:11px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:6px;inset:8px 8px auto auto}
+.camgrid .cam .live{position:absolute;right:8px;top:8px;font-size:11px;font-weight:800;background:var(--accent);color:#fff;padding:2px 7px;border-radius:6px;inset:8px 8px auto auto;z-index:2}
+.camgrid .cam .live-houder{position:absolute;inset:0;overflow:hidden}
+.camgrid .cam .live-houder > *{display:block;width:100%;height:100%;--ha-card-border-radius:0;--ha-card-border-width:0}
+.camgrid .cam span{z-index:2;pointer-events:none}
+.camgrid .cam .live-knop{position:absolute;left:8px;top:8px;z-index:3;font-size:11px;font-weight:700;padding:4px 8px;border-radius:8px;
+  background:rgba(0,0,0,.65);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.camgrid .cam .live-knop.aan{background:var(--goed);color:#000;border-color:var(--goed)}
 .knmi{padding:10px 12px;border-radius:12px;margin-bottom:8px;border:1px solid;background:rgba(0,0,0,.2)}
 .knmi b{display:block;font-size:15px}
 .knmi small{color:var(--zacht)}
@@ -364,6 +370,7 @@ class MeldkamerPanel extends HTMLElement {
     const eerste = !this._hass;
     this._hass = h;
     if (eerste) this._bouw();
+    Object.values(this._liveKaarten || {}).forEach((k) => (k.hass = h));
     if (!this._planned) {
       this._planned = true;
       setTimeout(() => {
@@ -761,19 +768,113 @@ class MeldkamerPanel extends HTMLElement {
   }
 
   _tekenCamInfo() {
-    const n = this._ent("camera").length;
+    const n = this._camLijst().length;
     const el = this.shadowRoot.getElementById("cam-info");
     if (el) el.textContent = n ? `${n} camera's · tik voor live beeld` : "";
-    if (this._veranderd("camlijst", this._ent("camera").map((c) => c.entity_id).join())) this._tekenCams();
+    if (this._veranderd("camlijst", this._camLijst().map((c) => c.entity_id).join())) this._tekenCams();
+  }
+
+  // Camera's die altijd live in beeld staan (per apparaat onthouden)
+  _liveLijst() {
+    try {
+      return JSON.parse(localStorage.getItem("meldkamer_live_cams") || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+  _zetLive(id) {
+    const lijst = this._liveLijst();
+    const nieuw = lijst.includes(id) ? lijst.filter((x) => x !== id) : [...lijst, id];
+    try {
+      localStorage.setItem("meldkamer_live_cams", JSON.stringify(nieuw));
+    } catch (e) {
+      /* geen opslag */
+    }
+    this._camStructuur = null;
+    this._tekenCams();
+  }
+
+  _camLijst() {
+    const cams = this._ent("camera");
+    const ids = new Set(cams.map((c) => c.entity_id));
+    // Ring maakt soms een "live view" en een "last recording" per camera: toon alleen de live view.
+    return cams.filter((c) => !(c.entity_id.endsWith("_last_recording") && ids.has(c.entity_id.replace(/_last_recording$/, "_live_view"))));
+  }
+
+  // De kaarten van Home Assistant zelf laden (die kunnen live video afspelen).
+  async _kaartHulp() {
+    if (!window.loadCardHelpers) {
+      try {
+        const r = document.createElement("partial-panel-resolver");
+        const panels = [{ component_name: "lovelace", url_path: "meldkamer-tmp" }];
+        let routes;
+        if (r.getRoutes) routes = r.getRoutes(panels);
+        else {
+          r.hass = { panels };
+          r._updateRoutes();
+          routes = r.routerOptions;
+        }
+        await routes?.routes?.["meldkamer-tmp"]?.load?.();
+      } catch (e) {
+        /* oudere of nieuwere versie van Home Assistant */
+      }
+      for (let i = 0; i < 50 && !window.loadCardHelpers; i++) await new Promise((r) => setTimeout(r, 100));
+    }
+    return window.loadCardHelpers ? window.loadCardHelpers() : null;
+  }
+
+  async _liveKaart(id) {
+    this._liveKaarten = this._liveKaarten || {};
+    if (this._liveKaarten[id]) return this._liveKaarten[id];
+    const helpers = await this._kaartHulp();
+    if (!helpers) return null;
+    const kaart = helpers.createCardElement({
+      type: "picture-entity",
+      entity: id,
+      camera_view: "live",
+      show_name: false,
+      show_state: false,
+      tap_action: { action: "more-info" },
+    });
+    kaart.hass = this._hass;
+    this._liveKaarten[id] = kaart;
+    return kaart;
   }
 
   _tekenCams() {
-    const cams = this._ent("camera");
-    this.shadowRoot.getElementById("camgrid").innerHTML = cams.length
-      ? cams
-          .map((c) => `<div class="cam" data-actie="meer" data-id="${esc(c.entity_id)}"><img src="${esc(c.attributes.entity_picture || "")}&t=${Date.now()}" alt=""><span>📷 ${esc(this._naam(c))}</span>${c.state === "streaming" || c.state === "recording" ? '<b class="live">LIVE</b>' : ""}</div>`)
-          .join("")
-      : `<div class="leeg" style="padding:12px">Nog geen camera's gekoppeld. Koppel je Ring-account via Instellingen → Apparaten & diensten → Ring.</div>`;
+    const grid = this.shadowRoot.getElementById("camgrid");
+    const cams = this._camLijst();
+    const live = this._liveLijst();
+    const structuur = cams.map((c) => c.entity_id + (live.includes(c.entity_id) ? ":live" : "")).join();
+    if (!cams.length) {
+      grid.innerHTML = `<div class="leeg" style="padding:12px">Nog geen camera's gekoppeld. Koppel je Ring-account via Instellingen → Apparaten & diensten → Ring.</div>`;
+      this._camStructuur = structuur;
+      return;
+    }
+    if (this._camStructuur !== structuur) {
+      // Vakjes opnieuw opbouwen (alleen als er iets veranderd is)
+      this._camStructuur = structuur;
+      grid.innerHTML = cams
+        .map((c) => {
+          const isLive = live.includes(c.entity_id);
+          return `<div class="cam" ${isLive ? "" : `data-actie="meer"`} data-id="${esc(c.entity_id)}">
+            ${isLive ? `<div class="live-houder"></div><b class="live">● LIVE</b>` : `<img alt="">`}
+            <button class="live-knop ${isLive ? "aan" : ""}" data-actie="live" data-id="${esc(c.entity_id)}">📡 ${isLive ? "Live aan" : "Altijd live"}</button>
+            <span>📷 ${esc(this._naam(c).replace(/ live view$/i, ""))}</span></div>`;
+        })
+        .join("");
+      grid.querySelectorAll(".cam").forEach(async (vak) => {
+        const houder = vak.querySelector(".live-houder");
+        if (!houder) return;
+        const kaart = await this._liveKaart(vak.dataset.id);
+        if (kaart) houder.appendChild(kaart);
+      });
+    }
+    // Stilstaande plaatjes verversen
+    grid.querySelectorAll(".cam img").forEach((img) => {
+      const c = this._s(img.closest(".cam").dataset.id);
+      if (c?.attributes?.entity_picture) img.src = `${c.attributes.entity_picture}&t=${Date.now()}`;
+    });
   }
   _ververstCams() {
     if (this._pagina === "huis") this._tekenCams();
@@ -1323,6 +1424,9 @@ class MeldkamerPanel extends HTMLElement {
       case "tab":
         this._tab = el.dataset.tab;
         this._toonTab();
+        break;
+      case "live":
+        this._zetLive(id);
         break;
       case "wtab":
         this._weerTab = el.dataset.tab;
