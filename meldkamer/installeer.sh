@@ -229,11 +229,23 @@ ${groen}=====================================================================
   Op deze laptop:   ${vet}http://localhost:8123${uit}
   Op je iPhone-app: ${vet}http://$IP:8123${uit}   (schrijf dit op!)
 
+EOF
+if [ "$NIEUW" = "1" ]; then
+  cat <<EOF
   ${vet}Wat nu?${uit}
   1. Er gaat zo een browser open. Maak daar je Home Assistant-account aan.
   2. Klaar? Herstart de laptop. Het dashboard opent dan vanzelf.
   3. Volg daarna de handleiding verder voor lampen, rolluiken en je telefoon.
 
+EOF
+else
+  cat <<EOF
+  ${vet}Bijgewerkt!${uit} Ga naar het dashboard en druk op ${vet}Ctrl + F5${uit}.
+  (Home Assistant herstart even, dat kan een halve minuut duren.)
+
+EOF
+fi
+cat <<EOF
   Later bijwerken? Open een terminal en typ:  ${vet}meldkamer-bijwerken${uit}
 
 EOF
