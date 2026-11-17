@@ -133,8 +133,28 @@ const CSS = `
   --tekst:#f1f5fc; --zacht:#93a3c0; --zwak:#56658a;
   --accent:#ff7a18; --accent2:#ffb347; --goed:#34d399; --geel:#ffd60a; --blauw:#0a84ff; --cyaan:#7cc4ff;
   --r:22px; --serif:"Instrument Serif",Georgia,serif;
+  --vlak:rgba(255,255,255,.05); --vlak2:rgba(0,0,0,.25);
+  --kaartbg:linear-gradient(160deg,rgba(60,80,130,.32),rgba(25,35,62,.45));
+  --kaartschaduw:0 14px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
+  --lijfbg:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+  --achtergrond:radial-gradient(900px 600px at 85% -10%, color-mix(in srgb,var(--accent) 22%,transparent), transparent 60%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(40,90,200,.28), transparent 60%),
+    linear-gradient(160deg,#0b1426 0%,#111e3a 55%,#0a1222 100%);
+  --stormtekst:#ffe680; --lege-balk:#262b33;
   display:block; height:100vh; min-height:100%; background:var(--bg); color:var(--tekst);
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; -webkit-font-smoothing:antialiased;
+}
+:host([thema="licht"]){
+  --bg:#f4ede6; --tekst:#2a2420; --zacht:#7d7066; --zwak:#ab9e94; --rand:rgba(120,85,55,.13);
+  --accent:#ef5b39; --accent2:#ff8a62; --goed:#16a34a; --cyaan:#0e7fc2;
+  --vlak:rgba(120,85,55,.06); --vlak2:rgba(255,255,255,.6);
+  --kaartbg:linear-gradient(160deg,rgba(255,255,255,.78),rgba(255,247,240,.52));
+  --kaartschaduw:0 14px 34px rgba(120,80,40,.12), inset 0 1px 0 rgba(255,255,255,.9);
+  --lijfbg:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,.28));
+  --achtergrond:radial-gradient(900px 600px at 90% -10%, rgba(255,160,120,.55), transparent 60%),
+    radial-gradient(900px 700px at -10% 110%, rgba(255,214,190,.7), transparent 60%),
+    linear-gradient(160deg,#efe4da 0%,#e9d7c9 55%,#f3e9e1 100%);
+  --stormtekst:#7a4a00; --lege-balk:#e6dbd2;
 }
 :host([storm]){ --accent:#d97706; --accent2:#f5a524; }
 :host([modus="brand"]){ --accent:#ff3b30; --accent2:#ff7a5c; }
@@ -144,43 +164,43 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 a{color:inherit}
 .wrap{height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;animation:intro .9s cubic-bezier(.2,.8,.2,1) both;
   background:
-    radial-gradient(900px 600px at 85% -10%, color-mix(in srgb,var(--accent) 22%,transparent), transparent 60%),
-    radial-gradient(1000px 700px at -10% 110%, rgba(40,90,200,.28), transparent 60%),
-    linear-gradient(160deg,#0b1426 0%,#111e3a 55%,#0a1222 100%);
-  transition:background .6s;}
+    var(--achtergrond);
+  transition:filter .8s;}
+:host([thema="donker"]:not([modus]):not([fel])) .wrap{filter:brightness(.78) saturate(.95)}
+:host([avond]:not([modus]):not([fel])) .wrap{filter:brightness(.9) sepia(.06)}
 @keyframes intro{from{opacity:0;transform:scale(1.015);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @keyframes binnen{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
 .animeer .kaart{animation:binnen .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 55ms)}
 /* ---- lijf met zijbalk ---- */
 .lijf{flex:1;min-height:0;display:flex;gap:0;margin:0 14px 14px;border-radius:30px;
-  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.09);
-  box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(20px);overflow:hidden}
+  background:var(--lijfbg);border:1px solid var(--rand);
+  box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 var(--vlak);backdrop-filter:blur(20px);overflow:hidden}
 .inhoud{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
 .rail{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 0 18px 14px}
-.rail .stok{display:flex;flex-direction:column;gap:8px;padding:8px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid var(--rand)}
+.rail .stok{display:flex;flex-direction:column;gap:8px;padding:8px;border-radius:999px;background:var(--vlak2);border:1px solid var(--rand)}
 .rail button{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:18px;color:var(--zacht);transition:.2s;position:relative}
-.rail button:hover{background:rgba(255,255,255,.08)}
+.rail button:hover{background:var(--vlak)}
 .rail button.aan{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 22px color-mix(in srgb,var(--accent) 55%,transparent)}
-.rail button .tip{position:absolute;left:52px;white-space:nowrap;font-size:12px;font-weight:600;background:#0b1426;border:1px solid var(--rand);padding:4px 9px;border-radius:8px;opacity:0;pointer-events:none;transition:.15s;z-index:10}
+.rail button .tip{position:absolute;left:52px;white-space:nowrap;font-size:12px;font-weight:600;background:var(--bg);border:1px solid var(--rand);padding:4px 9px;border-radius:8px;opacity:0;pointer-events:none;transition:.15s;z-index:10}
 .rail button:hover .tip{opacity:1}
 .rail .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 4px rgba(255,255,255,.08)}
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 4px var(--vlak)}
 /* ---- kop ---- */
 .kop{display:flex;align-items:center;gap:14px;padding:10px 20px}
-.menu{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.05);font-size:18px;flex:none}
+.menu{width:38px;height:38px;border-radius:11px;background:var(--vlak);font-size:18px;flex:none}
 .logo{display:flex;align-items:center;gap:12px;min-width:0}
 .logo .bol{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none;
   background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 22px color-mix(in srgb,var(--accent) 40%,transparent)}
 .logo h1{margin:0;font-size:24px;letter-spacing:.01em;font-weight:400;white-space:nowrap;font-family:var(--serif)}
 .logo h1 i{color:var(--accent2)}
 .logo small{display:block;color:var(--zacht);font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
-.paginas{display:none;gap:6px;flex:none;padding:4px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--rand)}
+.paginas{display:none;gap:6px;flex:none;padding:4px;border-radius:14px;background:var(--vlak);border:1px solid var(--rand)}
 .pag-knop{padding:8px 14px;border-radius:10px;font-weight:700;font-size:13.5px;color:var(--zacht);white-space:nowrap;transition:.15s}
 .pag-knop.aan{background:var(--accent);color:#fff;box-shadow:0 4px 18px color-mix(in srgb,var(--accent) 35%,transparent)}
 :host([storm]) .pag-knop.aan{color:#000}
 :host([storm]) .pag-knop[data-pagina="weer"]:not(.aan){color:var(--geel);animation:flits 2.4s infinite}
 .chips{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:flex-end}
-.chip{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.04);
+.chip{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--vlak);
   border:1px solid var(--rand);font-size:12.5px;color:var(--zacht);white-space:nowrap}
 .chip b{color:var(--tekst);font-weight:600}
 .chip .stip{width:7px;height:7px;border-radius:50%;background:var(--goed);box-shadow:0 0 8px var(--goed)}
@@ -191,7 +211,7 @@ a{color:inherit}
 /* ---- storm ---- */
 .storm{display:none;align-items:center;gap:12px;padding:7px 18px;font-weight:600;font-size:13.5px;
   background:repeating-linear-gradient(-45deg,rgba(255,214,10,.15) 0 14px,rgba(255,214,10,.05) 14px 28px);
-  border-bottom:1px solid rgba(255,214,10,.35);color:#ffe680}
+  border-bottom:1px solid rgba(255,214,10,.35);color:var(--stormtekst)}
 :host([storm]) .storm{display:flex}
 .storm .bliksem{font-size:18px;animation:flits 2.4s infinite}
 @keyframes flits{0%,86%,100%{opacity:1}88%{opacity:.2}90%{opacity:1}92%{opacity:.3}}
@@ -202,8 +222,9 @@ a{color:inherit}
 .p-dashboard .groet{grid-column:1/-1}
 .kolom{display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;overflow:auto;scrollbar-width:none}
 .kolom::-webkit-scrollbar{display:none}
-.kaart{background:linear-gradient(160deg,rgba(60,80,130,.32),rgba(25,35,62,.45));border:1px solid var(--rand);border-radius:var(--r);padding:14px 16px;flex:none;
-  backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);min-height:0;position:relative}
+.kaart{background:var(--kaartbg);border:1px solid var(--rand);border-radius:var(--r);padding:14px 16px;flex:none;
+  backdrop-filter:blur(14px);box-shadow:var(--kaartschaduw);min-height:0;position:relative;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s}
+@media (hover:hover){.p-dashboard .kaart:hover,.p-woonkamer .kaart:hover{transform:translateY(-4px)}}
 .kaart.groei{flex:1 1 auto;display:flex;flex-direction:column;min-height:200px}
 .kaart h2{margin:0 0 11px;font-size:10.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--zacht);display:flex;align-items:center;gap:8px}
 .kaart h2::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);flex:none}
@@ -211,7 +232,7 @@ a{color:inherit}
 .kaart h2 .r{margin-left:auto;letter-spacing:.04em;text-transform:none;font-weight:500;display:flex;gap:6px;align-items:center}
 .scroll{overflow:auto;min-height:0;flex:1;scrollbar-width:thin;scrollbar-color:#2c323b transparent}
 .leeg{color:var(--zwak);font-size:13.5px;padding:4px 0}
-.klein-knop{font-size:11.5px;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.07);color:var(--zacht);font-weight:600}
+.klein-knop{font-size:11.5px;padding:5px 10px;border-radius:8px;background:var(--vlak);color:var(--zacht);font-weight:600}
 .klein-knop:hover{color:var(--tekst)}
 .klein-knop.politie{color:#9ecbff}
 /* ---- laatste melding ---- */
@@ -229,28 +250,28 @@ a{color:inherit}
 .badge{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:12.5px;padding:3px 9px;border-radius:7px;background:#3a4250;color:#fff}
 .badge.p1{background:#ff3b30;box-shadow:0 0 14px rgba(255,59,48,.55)}
 .badge.p2{background:#ff9f0a;color:#111}
-.badge.cat{font-family:Inter,sans-serif;font-weight:600;background:rgba(255,255,255,.08)}
+.badge.cat{font-family:Inter,sans-serif;font-weight:600;background:var(--vlak)}
 .geleden{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--zacht)}
 .hero-titel{font-size:23px;font-weight:800;line-height:1.2;margin:9px 0 4px;overflow-wrap:anywhere}
 .hero-adres{color:var(--zacht);font-size:13.5px}
 .eenheden{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}
-.eenheid{font-size:11.5px;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--rand)}
+.eenheid{font-size:11.5px;padding:3px 8px;border-radius:6px;background:var(--vlak);border:1px solid var(--rand)}
 .route{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.route a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--rand);text-decoration:none}
+.route a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:var(--vlak);border:1px solid var(--rand);text-decoration:none}
 .route a.best{border-color:var(--goed);background:rgba(48,209,88,.10)}
 .route a span{font-size:21px}
 .route a b{font-size:19px;font-family:"JetBrains Mono",monospace}
 .route a small{display:block;color:var(--zacht);font-size:11px}
 .advies{margin-top:8px;padding:8px 12px;border-radius:10px;background:rgba(10,132,255,.12);border:1px solid rgba(10,132,255,.35);font-size:13.5px}
 .teller{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:11px}
-.teller div{background:rgba(0,0,0,.28);border-radius:11px;padding:8px 10px}
+.teller div{background:var(--vlak2);border-radius:11px;padding:8px 10px}
 .teller b{display:block;font-size:21px;font-family:"JetBrains Mono",monospace}
 .teller small{color:var(--zacht);font-size:10px;text-transform:uppercase;letter-spacing:.1em}
 /* ---- grafiek ---- */
 .grafiek svg{width:100%;height:92px;display:block}
 .grafiek .as{display:flex;justify-content:space-between;font-size:10px;color:var(--zwak);font-family:"JetBrains Mono",monospace;margin-top:3px}
 .cats{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 8px}
-.cats span{font-size:11.5px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.05);display:flex;gap:6px;align-items:center}
+.cats span{font-size:11.5px;padding:3px 9px;border-radius:999px;background:var(--vlak);display:flex;gap:6px;align-items:center}
 .cats i{width:8px;height:8px;border-radius:50%;display:inline-block}
 /* ---- lijsten ---- */
 .rij{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--rand)}
@@ -277,33 +298,33 @@ a{color:inherit}
 .groet p{margin:3px 0 0;color:rgba(255,255,255,.85);font-size:13.5px}
 .groet .blokje{background:rgba(0,0,0,.18);border-color:rgba(255,255,255,.22);color:rgba(255,255,255,.85)}
 .groet .blokjes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-.blokje{background:rgba(0,0,0,.25);border:1px solid var(--rand);border-radius:12px;padding:7px 12px;font-size:11.5px;color:var(--zacht);min-width:92px}
+.blokje{background:var(--vlak2);border:1px solid var(--rand);border-radius:12px;padding:7px 12px;font-size:11.5px;color:var(--zacht);min-width:92px}
 .blokje b{display:block;color:var(--tekst);font-size:16px;margin-top:1px}
 /* ---- lampen ---- */
-.uitgelicht{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:15px;background:rgba(255,255,255,.04);border:1px solid var(--rand);margin-bottom:10px}
+.uitgelicht{display:flex;align-items:center;gap:14px;padding:13px 14px;border-radius:15px;background:var(--vlak);border:1px solid var(--rand);margin-bottom:10px}
 .uitgelicht .bol{width:44px;height:44px;border-radius:50%;flex:none;background:#2a2f37;display:grid;place-items:center;font-size:20px}
 .uitgelicht.aan{background:rgba(255,214,10,.1);border-color:rgba(255,214,10,.4)}
 .uitgelicht .n{font-size:16px;font-weight:700}
 .uitgelicht .s{font-size:12px;color:var(--zacht)}
 .uitgelicht input{margin-left:auto;width:42%;accent-color:var(--geel)}
 .alle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.alle button{padding:10px;border-radius:12px;font-weight:700;font-size:13px;background:rgba(255,255,255,.06);border:1px solid var(--rand)}
-.alle .aan-knop{background:rgba(255,214,10,.12);border-color:rgba(255,214,10,.35);color:#ffe680}
+.alle button{padding:10px;border-radius:12px;font-weight:700;font-size:13px;background:var(--vlak);border:1px solid var(--rand)}
+.alle .aan-knop{background:rgba(255,214,10,.16);border-color:rgba(255,214,10,.45);color:var(--tekst)}
 .schakels{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:8px}
 .lamp{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;border-radius:13px;text-align:left;
-  background:rgba(255,255,255,.04);border:1px solid var(--rand);min-height:72px;transition:.2s}
+  background:var(--vlak);border:1px solid var(--rand);min-height:72px;transition:.2s}
 .lamp .n{font-size:13px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
 .lamp .s{font-size:11px;color:var(--zacht)}
 .lamp .bol{width:16px;height:16px;border-radius:50%;background:#333;transition:.2s}
 .lamp.aan{background:rgba(255,214,10,.09);border-color:rgba(255,214,10,.32)}
 .lamp.aan .bol{box-shadow:0 0 12px currentColor}
 .luiken{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.luik{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--rand)}
+.luik{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:12px;background:var(--vlak);border:1px solid var(--rand)}
 .luik .n{flex:1;font-size:13px;font-weight:600}
 .luik .s{font-size:11px;color:var(--zacht);font-weight:500}
-.luik button{width:34px;height:30px;border-radius:8px;background:rgba(255,255,255,.07)}
+.luik button{width:34px;height:30px;border-radius:8px;background:var(--vlak)}
 .toggles{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
-.toggle{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);font-size:12px;text-align:left}
+.toggle{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--vlak);font-size:12px;text-align:left}
 .toggle .sw{margin-left:auto;width:30px;height:18px;border-radius:9px;background:#3a3f47;position:relative;flex:none}
 .toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s}
 .toggle.aan .sw{background:var(--goed)}
@@ -325,14 +346,14 @@ a{color:inherit}
 .klein .cam span{font-size:11px}
 /* ---- energie ---- */
 .energie-nu{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.energie-nu > div{background:rgba(0,0,0,.25);border-radius:12px;padding:9px 11px}
+.energie-nu > div{background:var(--vlak2);border-radius:12px;padding:9px 11px}
 .energie-nu b{font-size:21px;font-family:"JetBrains Mono",monospace;display:block}
 .energie-nu small{font-size:10px;color:var(--zacht);text-transform:uppercase;letter-spacing:.08em}
 .terug{color:var(--goed)} .zon{color:var(--geel)}
 .energie-dag{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:10.5px;color:var(--zacht)}
 .energie-dag b{display:block;font-size:13.5px;color:var(--tekst)}
 .zelf{margin-top:9px;font-size:12px;color:var(--zacht)}
-.zelf .balk{height:7px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:4px}
+.zelf .balk{height:7px;border-radius:4px;background:var(--vlak);overflow:hidden;margin-top:4px}
 .zelf .balk div{height:100%;background:linear-gradient(90deg,#ffd60a,#30d158)}
 .uurgrafiek svg{width:100%;height:58px;display:block;margin-top:8px}
 .legenda{display:flex;gap:12px;font-size:10.5px;color:var(--zacht);margin-top:3px}
@@ -356,46 +377,46 @@ a{color:inherit}
 .weer-nu .temp{font-size:44px;font-weight:800;font-family:"JetBrains Mono",monospace;line-height:1}
 .weer-nu .omschr{font-size:13.5px;color:var(--zacht)}
 .raster4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
-.raster4 div,.raster3 div{background:rgba(0,0,0,.25);border-radius:10px;padding:6px 8px;font-size:10.5px;color:var(--zacht)}
+.raster4 div,.raster3 div{background:var(--vlak2);border-radius:10px;padding:6px 8px;font-size:10.5px;color:var(--zacht)}
 .raster4 b,.raster3 b{display:block;color:var(--tekst);font-size:14.5px}
 .raster3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .uren{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(44px,1fr);gap:4px;overflow:auto;scrollbar-width:none;margin-bottom:10px}
-.uur{text-align:center;font-size:10.5px;color:var(--zacht);padding:6px 0;border-radius:8px;background:rgba(255,255,255,.03)}
+.uur{text-align:center;font-size:10.5px;color:var(--zacht);padding:6px 0;border-radius:8px;background:var(--vlak)}
 .uur b{display:block;color:var(--tekst);font-size:13.5px}
 .uur .i{font-size:17px;display:block;margin:2px 0}
 .uur .kans{color:var(--cyaan)}
 .regen svg{width:100%;height:50px;display:block}
 .regen .as{display:flex;justify-content:space-between;font-size:10px;color:var(--zwak);font-family:"JetBrains Mono",monospace}
 .dagen{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
-.dag{text-align:center;background:rgba(0,0,0,.25);border-radius:10px;padding:6px;font-size:11.5px;color:var(--zacht)}
+.dag{text-align:center;background:var(--vlak2);border-radius:10px;padding:6px;font-size:11.5px;color:var(--zacht)}
 .dag .i{font-size:19px;display:block}
 .dag b{color:var(--tekst)}
 .tabs{display:flex;gap:4px;margin:-3px 0 10px;overflow-x:auto;scrollbar-width:none;flex:none}
-.tab{white-space:nowrap;padding:6px 12px;border-radius:999px;font-size:12.5px;color:var(--zacht);background:rgba(255,255,255,.04)}
+.tab{white-space:nowrap;padding:6px 12px;border-radius:999px;font-size:12.5px;color:var(--zacht);background:var(--vlak)}
 .tab.aan{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700}
 .venster{flex:1;min-height:260px;border-radius:13px;overflow:hidden;position:relative;background:#0b0f14}
 .venster > *{position:absolute;inset:0;width:100%;height:100%;border:0}
 .verberg{display:none!important}
 .radar{object-fit:contain;background:#0b0f14}
-.knmi{padding:9px 12px;border-radius:12px;margin-bottom:8px;border:1px solid;background:rgba(0,0,0,.2)}
+.knmi{padding:9px 12px;border-radius:12px;margin-bottom:8px;border:1px solid;background:var(--vlak2)}
 .knmi b{display:block;font-size:14.5px}
 .knmi small{color:var(--zacht)}
 .ok-blok{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:rgba(48,209,88,.08);border:1px solid rgba(48,209,88,.3)}
 .aqi{display:flex;align-items:center;gap:12px}
 .aqi .ring{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:18px;font-family:"JetBrains Mono",monospace;border:4px solid;flex:none}
 .aqi small{color:var(--zacht);font-size:11px;display:block}
-.uitleg{font-size:12.5px;color:#c9d1dc;line-height:1.45;margin:10px 0 8px}
+.uitleg{font-size:12.5px;color:var(--tekst);line-height:1.45;margin:10px 0 8px}
 .stof{display:grid;grid-template-columns:76px 1fr 46px;gap:8px;align-items:center;font-size:11.5px;color:var(--zacht);margin:4px 0}
-.stof .balk{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.stof .balk{height:6px;border-radius:3px;background:var(--vlak);overflow:hidden}
 .stof .balk div{height:100%;border-radius:3px}
 .stof b{color:var(--tekst);text-align:right;font-family:"JetBrains Mono",monospace;font-size:11.5px}
 .zonmaan{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.zonmaan > div{background:rgba(0,0,0,.25);border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--zacht)}
+.zonmaan > div{background:var(--vlak2);border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--zacht)}
 .zonmaan .groot{font-size:28px;line-height:1;display:block;margin-bottom:4px}
 .zonmaan b{color:var(--tekst);font-size:14px;display:block}
 .boog svg{width:100%;height:46px;display:block;margin-top:6px}
 /* ---- compacte lampen ---- */
-.hoofdlamp{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--rand);margin-bottom:10px}
+.hoofdlamp{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:13px;background:var(--vlak);border:1px solid var(--rand);margin-bottom:10px}
 .hoofdlamp.aan{background:rgba(255,214,10,.1);border-color:rgba(255,214,10,.4)}
 .hoofdlamp .bol{width:30px;height:30px;border-radius:50%;flex:none;background:#2a2f37;display:grid;place-items:center;font-size:14px}
 .hoofdlamp .n{font-size:14px;font-weight:700}
@@ -405,7 +426,7 @@ a{color:inherit}
 .sub{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--zwak);margin:12px 0 6px;font-weight:700}
 /* ---- compacte energie ---- */
 .e-rij{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.e-rij div{background:rgba(0,0,0,.25);border-radius:10px;padding:6px 9px;font-size:10px;color:var(--zacht);text-transform:uppercase;letter-spacing:.06em}
+.e-rij div{background:var(--vlak2);border-radius:10px;padding:6px 9px;font-size:10px;color:var(--zacht);text-transform:uppercase;letter-spacing:.06em}
 .e-rij b{display:block;font-size:15px;font-family:"JetBrains Mono",monospace;text-transform:none;letter-spacing:0;color:var(--tekst)}
 /* ---- regio ---- */
 .regio .rij{padding:6px 0}
@@ -416,15 +437,15 @@ a{color:inherit}
 .label.f1{background:rgba(255,214,10,.16);color:#ffe680}
 /* ---- testtabblad ---- */
 .test-knop{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;margin-bottom:8px;
-  background:rgba(255,255,255,.05);border:1px solid var(--rand);transition:.15s}
-.test-knop:hover{background:rgba(255,255,255,.09)}
+  background:var(--vlak);border:1px solid var(--rand);transition:.15s}
+.test-knop:hover{background:var(--vlak)}
 .test-knop .i{font-size:24px;width:34px;text-align:center;flex:none}
 .test-knop b{display:block;font-size:14px}
 .test-knop small{display:block;font-size:11.5px;color:var(--zacht);margin-top:2px;line-height:1.35}
 .test-knop.rood{border-color:rgba(255,59,48,.45);background:rgba(255,59,48,.10)}
 .test-knop.blauw{border-color:rgba(10,132,255,.45);background:rgba(10,132,255,.10)}
 .veld{display:flex;gap:8px;margin-bottom:8px}
-.veld input,.veld select{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1px solid var(--rand);color:var(--tekst);border-radius:10px;padding:9px 11px;font:inherit;font-size:13px}
+.veld input,.veld select{flex:1;min-width:0;background:var(--vlak2);border:1px solid var(--rand);color:var(--tekst);border-radius:10px;padding:9px 11px;font:inherit;font-size:13px}
 .veld button{padding:9px 14px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;font-size:13px}
 .uitleg-klein{font-size:12px;color:var(--zacht);line-height:1.45;margin:0 0 10px}
 /* ---- deurbel ---- */
@@ -440,6 +461,111 @@ a{color:inherit}
 .deurbel .camvak .cam.groot{grid-row:1 / span 3}
 .deurbel .camvak .cam .live-knop{display:none}
 @media (max-width:760px){.deurbel .camvak{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.deurbel .camvak .cam{aspect-ratio:16/9;height:auto}.deurbel .camvak .cam.groot{grid-row:auto}}
+/* ==== Dashboard (glassy) ==== */
+.p-dashboard{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:none!important;grid-auto-rows:max-content;align-content:start;overflow-y:auto;scrollbar-width:none}
+.p-dashboard::-webkit-scrollbar{display:none}
+.d-kop{grid-column:1/-1;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:2px 4px 0}
+.d-kop h3{margin:0;font-family:var(--serif);font-weight:400;font-size:38px;line-height:1}
+.d-kop h3 i{color:var(--accent)}
+.d-kop p{margin:4px 0 0;color:var(--zacht);font-size:13px}
+.pillen{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pil{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid var(--rand);background:var(--vlak2);color:var(--tekst)}
+.pil.donker{background:var(--tekst);color:var(--bg);border-color:transparent}
+.d-hero{grid-column:span 8;min-height:200px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.d-datum{grid-column:span 4}
+.tegel{grid-column:span 3;min-height:126px;display:flex;flex-direction:column;cursor:default}
+.d-licht{grid-column:span 4;height:390px;display:flex;flex-direction:column}
+.d-cam{grid-column:span 5;height:390px;display:flex;flex-direction:column}
+.d-nieuws{grid-column:span 3;height:390px;display:flex;flex-direction:column}
+.hero-kleur{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;border-color:rgba(255,255,255,.25)!important;color:#fff;
+  box-shadow:0 18px 50px color-mix(in srgb,var(--accent) 40%,transparent), inset 0 1px 0 rgba(255,255,255,.35)!important}
+.hero-kleur .zacht{color:rgba(255,255,255,.88)}
+.label-pil{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.2);letter-spacing:.02em}
+.label-pil::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
+.hero-groot{font-family:var(--serif);font-size:38px;line-height:1.08;margin:10px 0 6px;font-weight:400}
+.hero-groot i{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}
+.hero-stats{display:flex;gap:0;margin:12px 0 14px;flex-wrap:wrap}
+.hero-stats div{padding:0 16px;border-left:1px solid rgba(255,255,255,.3);font-size:11px;color:rgba(255,255,255,.85)}
+.hero-stats div:first-child{padding-left:0;border-left:0}
+.hero-stats b{display:block;font-size:20px;color:#fff;font-family:"JetBrains Mono",monospace}
+.hero-knoppen{display:flex;gap:8px;flex-wrap:wrap}
+.hero-knoppen button{padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid rgba(255,255,255,.6)}
+.hero-knoppen button:first-child{background:#fff;color:var(--accent);border-color:#fff}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .midden{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .midden b{display:block;font-size:28px;font-family:"JetBrains Mono",monospace}
+.ring .midden small{font-size:10.5px;color:rgba(255,255,255,.85)}
+.ring .zonnetje{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:12px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.dag-kop{display:flex;align-items:center;gap:12px}
+.dag-kop .nr{font-family:var(--serif);font-size:54px;line-height:.9;color:var(--accent)}
+.dag-kop b{display:block;font-size:15px}
+.dag-kop small{color:var(--zacht);font-size:11.5px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0 10px;text-align:center}
+.week div{padding:6px 0;border-radius:10px;font-size:10.5px;color:var(--zacht)}
+.week div b{display:block;font-size:13px;color:var(--tekst);margin-top:2px}
+.week .vandaag{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.week .vandaag b{color:#fff}
+.afspraak-kaart{display:flex;gap:10px;align-items:center;padding:7px 10px;border-radius:12px;background:var(--vlak2);border:1px solid var(--rand);margin-bottom:6px;font-size:12.5px}
+.afspraak-kaart .w{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--zacht);min-width:42px}
+.afspraak-kaart .streep{width:3px;align-self:stretch;border-radius:2px;background:var(--accent);flex:none}
+.afspraak-kaart .tag{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);white-space:nowrap}
+.tegel .boven{display:flex;align-items:center;justify-content:space-between}
+.tegel .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--vlak2);border:1px solid var(--rand);font-size:14px}
+.tegel .chg{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(52,211,153,.16);color:var(--goed)}
+.tegel .waarde{font-size:30px;font-weight:800;font-family:"JetBrains Mono",monospace;margin-top:10px;line-height:1}
+.tegel .lbl{font-size:12.5px;font-weight:700;margin-top:6px}
+.tegel .sub{font-size:11px;color:var(--zacht);margin:2px 0 0;letter-spacing:0;text-transform:none;font-weight:400}
+.tegel .onder{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto}
+.tegel svg.spark{width:84px;height:30px;flex:none}
+.t-accent{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;color:#fff;border-color:rgba(255,255,255,.25)!important;cursor:pointer;
+  box-shadow:0 14px 40px color-mix(in srgb,var(--accent) 40%,transparent)!important}
+.t-accent .ic{background:rgba(255,255,255,.22);border-color:transparent}
+.t-accent .sub{color:rgba(255,255,255,.88)}
+.t-accent .chg{background:#fff;color:var(--accent)}
+.t-accent .waarde{font-size:19px;font-family:Inter,sans-serif;line-height:1.2;font-weight:800}
+/* ==== Woonkamer ==== */
+.p-woonkamer{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:auto minmax(0,1fr);overflow:hidden}
+.w-klok{grid-column:span 5;display:flex;flex-direction:column;justify-content:space-between;min-height:250px}
+.w-weer{grid-column:span 7;min-height:250px}
+.w-licht{grid-column:span 4;display:flex;flex-direction:column;min-height:0}
+.w-cam{grid-column:span 5;display:flex;flex-direction:column;min-height:0}
+.w-vandaag{grid-column:span 3;display:flex;flex-direction:column;min-height:0}
+.w-groet{font-family:var(--serif);font-size:30px;line-height:1}
+.w-groet i{color:var(--accent)}
+.w-tijd{font-size:104px;font-weight:300;letter-spacing:-.04em;line-height:.9;margin:10px 0 4px;font-variant-numeric:tabular-nums}
+.w-datum{font-size:17px;color:var(--zacht);text-transform:capitalize}
+.w-zon{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.w-weer-boven{display:flex;align-items:center;gap:18px}
+.w-weer-boven .ic{font-size:64px;line-height:1}
+.w-weer-boven .t{font-size:64px;font-weight:300;letter-spacing:-.03em;line-height:1}
+.w-weer-boven .om{font-size:15px;color:var(--zacht)}
+.w-weer-boven .stats{margin-left:auto;display:grid;grid-template-columns:repeat(3,auto);gap:6px 18px;font-size:11px;color:var(--zacht)}
+.w-weer-boven .stats b{display:block;font-size:17px;color:var(--tekst)}
+.w-uren{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:14px 0 12px}
+.w-uren div{text-align:center;padding:8px 0;border-radius:14px;background:var(--vlak2);border:1px solid var(--rand);font-size:11px;color:var(--zacht)}
+.w-uren .i{display:block;font-size:20px;margin:3px 0}
+.w-uren b{display:block;color:var(--tekst);font-size:15px}
+.w-uren .kans{color:var(--cyaan);font-size:10.5px}
+.w-meldingen{display:flex;gap:8px;flex-wrap:wrap}
+.w-tip{display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:14px;background:var(--vlak2);border:1px solid var(--rand);font-size:13px;font-weight:600}
+.w-tip.let{background:rgba(14,127,194,.12);border-color:rgba(14,127,194,.35)}
+.w-tip.vorst{background:rgba(120,190,255,.2);border-color:rgba(80,160,230,.5)}
+.w-lampen{display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow:auto;min-height:0;flex:1;align-content:start;scrollbar-width:none}
+.w-camgrid{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:8px;flex:1;min-height:0}
+.w-camgrid .cam{aspect-ratio:auto;height:100%;min-height:0}
+.w-camgrid.een{grid-template-columns:1fr}
+.w-lijst{display:flex;flex-direction:column;gap:7px;overflow:auto;min-height:0;flex:1;scrollbar-width:none}
+.w-item{display:flex;gap:10px;align-items:center;padding:9px 11px;border-radius:14px;background:var(--vlak2);border:1px solid var(--rand);font-size:13px}
+.w-item .i{font-size:20px}
+.w-item small{display:block;color:var(--zacht);font-size:11px}
+.alarm.rustig{animation:none!important;background:linear-gradient(160deg,#c62828,#8e0000)!important}
+.alarm.rustig.politie{background:linear-gradient(160deg,#1f5fd6,#0a2c78)!important}
+@media (max-width:1100px){.d-hero,.d-datum,.d-licht,.d-cam,.d-nieuws,.w-klok,.w-weer,.w-licht,.w-cam,.w-vandaag{grid-column:span 12}.tegel{grid-column:span 6}.p-woonkamer{overflow:auto;grid-template-rows:none}.w-licht,.w-cam,.w-vandaag{min-height:320px}}
+@media (max-width:760px){.d-hero{grid-template-columns:1fr}.ring{margin:auto}.w-tijd{font-size:76px}.w-weer-boven{flex-wrap:wrap}.w-weer-boven .stats{margin-left:0}.w-uren{grid-template-columns:repeat(4,1fr)}.hero-groot{font-size:30px}}
+.alarm,.deurbel{color:#fff}
+.cam span{color:#fff}
+.w-camgrid.drie .cam:first-child{grid-column:span 2}
 /* ---- alarm ---- */
 .alarm{position:absolute;inset:0;z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
   background:#7a0000;animation:alarmbg 1s steps(2) infinite}
@@ -515,7 +641,14 @@ class HuisPanel extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this._pagina = "dashboard";
+    try {
+      this._thuis = localStorage.getItem("meldkamer_thuis") || "dashboard";
+    } catch (e) {
+      this._thuis = "dashboard";
+    }
+    this._pagina = this._thuis;
+    this._verjaardagen = [];
+    this._wkKaarten = {};
     this._weerTab = "windy";
     this._dingGezien = {};
     this._deurbelKaarten = {};
@@ -580,6 +713,7 @@ class HuisPanel extends HTMLElement {
           <div class="logo"><div class="bol">🏠</div><div><h1>Huis <i>Sterkenburg</i></h1><small>Nunspeet</small></div></div>
           <nav class="paginas">
             <button class="pag-knop aan" data-actie="pagina" data-pagina="dashboard">🏠 Dashboard</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="woonkamer">🛋️ Woonkamer</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="weer">⛈️ Weer & storm</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="test">🧪 Test</button>
@@ -593,6 +727,7 @@ class HuisPanel extends HTMLElement {
             <div class="avatar" id="avatar">S</div>
             <div class="stok">
               <button class="aan" data-actie="pagina" data-pagina="dashboard">🏠<span class="tip">Dashboard</span></button>
+              <button data-actie="pagina" data-pagina="woonkamer">🛋️<span class="tip">Woonkamer</span></button>
               <button data-actie="pagina" data-pagina="meldkamer">🚒<span class="tip">Meldkamer</span></button>
               <button data-actie="pagina" data-pagina="weer">⛈️<span class="tip">Weer & storm</span></button>
               <button data-actie="pagina" data-pagina="test">🧪<span class="tip">Test</span></button>
@@ -619,20 +754,25 @@ class HuisPanel extends HTMLElement {
           </section>
         </main>
 
-        <main class="raster pagina p-dashboard aan" id="p-dashboard">
-          <div class="kaart groet" id="groet"></div>
-          <section class="kolom k1">
-            <div class="kaart groei" id="bediening"></div>
-          </section>
-          <section class="kolom k2">
-            <div class="kaart groei"><h2>📷 Camera's <span class="r" id="cam-info"></span></h2><div class="camgrid" id="camgrid"></div></div>
-          </section>
-          <section class="kolom k3">
-            <div class="kaart" id="energie"></div>
-            <div class="kaart regio" id="regio"></div>
-            <div class="kaart" id="agenda"></div>
-            <div class="kaart groei"><h2>📰 Nieuws <span class="r">NU.nl · belangrijk & F1</span></h2><div class="scroll" id="nieuws"></div></div>
-          </section>
+        <main class="raster pagina p-dashboard" id="p-dashboard">
+          <div class="d-kop" id="d-kop"></div>
+          <div class="kaart d-hero hero-kleur" id="d-hero"></div>
+          <div class="kaart d-datum" id="d-datum"></div>
+          <div class="kaart tegel" id="t-temp"></div>
+          <div class="kaart tegel" id="t-zon"></div>
+          <div class="kaart tegel" id="t-stroom"></div>
+          <div class="kaart tegel t-accent" id="t-melding" data-actie="pagina" data-pagina="meldkamer"></div>
+          <div class="kaart d-licht" id="bediening"></div>
+          <div class="kaart d-cam"><h2>📷 Camera's <span class="r" id="cam-info"></span></h2><div class="camgrid" id="camgrid"></div></div>
+          <div class="kaart d-nieuws"><h2>📰 Nieuws <span class="r">NU.nl</span></h2><div class="scroll" id="nieuws"></div></div>
+        </main>
+
+        <main class="raster pagina p-woonkamer" id="p-woonkamer">
+          <div class="kaart w-klok" id="w-klok"></div>
+          <div class="kaart w-weer" id="w-weer"></div>
+          <div class="kaart w-licht" id="w-licht"></div>
+          <div class="kaart w-cam"><h2>📷 Camera's</h2><div class="w-camgrid" id="w-cams"></div></div>
+          <div class="kaart w-vandaag" id="w-vandaag"></div>
         </main>
 
         <main class="raster pagina p-weer" id="p-weer">
@@ -694,6 +834,8 @@ class HuisPanel extends HTMLElement {
               <button class="test-knop" data-actie="voorbeeld" data-wat="politie"><span class="i">🔵</span><div><b>Alarmscherm politie</b></div></button>
               <button class="test-knop" data-actie="voorbeeld" data-wat="deurbel"><span class="i">📷</span><div><b>Deurbelscherm</b></div></button>
               <button class="test-knop" data-actie="voorbeeld" data-wat="nacht"><span class="i">🌙</span><div><b>Nachtscherm (10 seconden)</b></div></button>
+              <div class="sub">Licht of donker</div>
+              <div class="veld"><select id="thema-keuze"><option value="auto">🌗 Automatisch (licht overdag, donker 's avonds)</option><option value="licht">☀️ Altijd licht</option><option value="donker">🌙 Altijd donker</option></select><button data-actie="thema">Opslaan</button></div>
             </div>
           </section>
         </main>
@@ -720,7 +862,7 @@ class HuisPanel extends HTMLElement {
     this._audio();
     this._laadExtra();
     this._toonWeerTab();
-    this._toonPagina("dashboard");
+    this._toonPagina(this._thuis);
     const naam = (this._hass.user?.name || "S").trim();
     this.shadowRoot.getElementById("avatar").textContent = naam[0].toUpperCase();
     try {
@@ -783,6 +925,20 @@ class HuisPanel extends HTMLElement {
       this._weerTab = storm ? "bliksem" : "windy";
       this._toonWeerTab();
     }
+    const zon = this._s("sun.sun");
+    const uur = new Date().getHours();
+    let dag = zon ? zon.state === "above_horizon" : uur >= 8 && uur < 17;
+    let keuze = "auto";
+    try {
+      keuze = localStorage.getItem("meldkamer_thema") || "auto";
+    } catch (e) {
+      /* geen opslag */
+    }
+    if (keuze === "licht") dag = true;
+    if (keuze === "donker") dag = false;
+    const wk = this._pagina === "woonkamer";
+    this.setAttribute("thema", dag || wk ? "licht" : "donker");
+    this.toggleAttribute("avond", wk && !dag);
     this._tekenChips();
     this._tekenStorm();
     this._tekenHero();
@@ -794,7 +950,6 @@ class HuisPanel extends HTMLElement {
     this._tekenBediening();
     this._tekenCamInfo();
     this._tekenEnergie();
-    this._tekenRegio();
     this._tekenAgenda();
     this._tekenNieuws();
     this._tekenWeer();
@@ -802,6 +957,7 @@ class HuisPanel extends HTMLElement {
     this._tekenKnmi();
     this._tekenLucht();
     this._tekenZonMaan();
+    this._tekenWoonkamer();
     this._controleerDeurbel();
     this._controleerAlarm();
   }
@@ -818,6 +974,8 @@ class HuisPanel extends HTMLElement {
     const af = r.getElementById("aftel");
     if (af && this._alarmEind) af.textContent = `Sluit vanzelf over ${Math.max(0, Math.ceil((this._alarmEind - Date.now()) / 1000))} s`;
     this._tekenNacht(nu);
+    const wt = r.getElementById("w-tijd");
+    if (wt) wt.textContent = `${pad(nu.getHours())}:${pad(nu.getMinutes())}`;
     const stil = Date.now() - (this._actief || 0);
     if (this._meldkamerTot && Date.now() < this._meldkamerTot) {
       // Na een melding 10 minuten op het Meldkamer-tabblad blijven
@@ -825,8 +983,8 @@ class HuisPanel extends HTMLElement {
     } else {
       if (this._meldkamerTot) {
         this._meldkamerTot = null;
-        this._toonPagina("dashboard");
-      } else if (this._pagina !== "dashboard" && stil > 5 * 60 * 1000) this._toonPagina("dashboard");
+        this._toonPagina(this._thuis);
+      } else if (this._pagina !== this._thuis && stil > 5 * 60 * 1000) this._toonPagina(this._thuis);
     }
     if (this._nachtVoorbeeldTot && Date.now() > this._nachtVoorbeeldTot) this._nachtVoorbeeldTot = null;
     if (this.hasAttribute("modus") && !this._meldkamerTot && !r.getElementById("alarm").classList.contains("open")) this.removeAttribute("modus");
@@ -923,7 +1081,7 @@ class HuisPanel extends HTMLElement {
     const balken = dagen
       .map((n, i) => {
         const h = n ? Math.max(4, (n / max) * 84) : 1.2;
-        return `<rect x="${i * bw + 0.5}" y="${88 - h}" width="${bw - 1}" height="${h}" rx="1" fill="${n ? (i === dagen.length - 1 ? "var(--accent)" : "#ff6b5e") : "#262b33"}"><title>${n} melding(en)</title></rect>`;
+        return `<rect x="${i * bw + 0.5}" y="${88 - h}" width="${bw - 1}" height="${h}" rx="1" fill="${n ? (i === dagen.length - 1 ? "var(--accent)" : "#ff6b5e") : "var(--lege-balk)"}"><title>${n} melding(en)</title></rect>`;
       })
       .join("");
     const lijnen = [0.5, 1].map((f) => `<line x1="0" x2="100" y1="${88 - f * 84}" y2="${88 - f * 84}" stroke="#1f242b" stroke-width=".3"/>`).join("");
@@ -997,28 +1155,125 @@ class HuisPanel extends HTMLElement {
 
   // ---- Dashboard-tabblad ----
 
+  // ---------- hulpjes voor het dashboard ----------
+
+  _spark(waarden, kleur = "var(--accent)", vul = true) {
+    const w = waarden.filter((x) => x != null && !isNaN(x));
+    if (w.length < 2) return "";
+    const min = Math.min(...w), max = Math.max(...w), sp = max - min || 1;
+    const pts = w.map((v, i) => [(i / (w.length - 1)) * 100, 28 - ((v - min) / sp) * 24]);
+    const lijn = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" ");
+    return `<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none">
+      ${vul ? `<path d="${lijn} L100 30 L0 30Z" fill="${kleur}" opacity=".14"/>` : ""}
+      <path d="${lijn}" fill="none" stroke="${kleur}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  _weerData() {
+    return this._a("sensor.meldkamer_weer");
+  }
+
+  // Wanneer regent het vandaag, of wanneer is het weer droog?
+  _regenZin() {
+    const r = this._a("sensor.meldkamer_buienradar");
+    const w = this._weerData();
+    const nu = Date.now();
+    const vandaag = new Date().toDateString();
+    const uren = (w.uren || []).filter((u) => new Date(u.tijd).toDateString() === vandaag && new Date(u.tijd).getTime() >= nu - 3600000);
+    const nat = (u) => (u.regen ?? 0) >= 0.2 || (u.regenkans ?? 0) >= 60;
+    if ((r.nu ?? 0) >= 0.1) {
+      if (r.samenvatting && /droog/.test(r.samenvatting)) return { icoon: "🌧️", tekst: r.samenvatting.replace("Regen, droog rond", "Het regent nu, droog rond") };
+      const droog = uren.find((u) => !nat(u) && new Date(u.tijd).getTime() > nu);
+      return { icoon: "🌧️", tekst: droog ? `Het regent nu, droog rond ${klokTijd(droog.tijd)}` : "Het regent nu, vandaag blijft het nat" };
+    }
+    if (r.samenvatting && /verwacht rond/.test(r.samenvatting)) return { icoon: "🌦️", tekst: r.samenvatting };
+    const eerste = uren.find(nat);
+    if (eerste) {
+      const daarna = uren.find((u) => new Date(u.tijd) > new Date(eerste.tijd) && !nat(u));
+      return { icoon: "🌦️", tekst: `Regen vanaf ${klokTijd(eerste.tijd)} (${eerste.regenkans ?? "?"}%)${daarna ? `, droog rond ${klokTijd(daarna.tijd)}` : ""}` };
+    }
+    return { icoon: "☀️", tekst: "Vandaag blijft het droog" };
+  }
+
+  // Moet je morgenvroeg de autoruiten krabben?
+  _krabben() {
+    const uren = this._weerData().uren || [];
+    const ochtend = uren.filter((u) => {
+      const d = new Date(u.tijd);
+      return d.getTime() > Date.now() && d.getHours() >= 4 && d.getHours() <= 8;
+    });
+    if (!ochtend.length) return null;
+    const koudste = ochtend.reduce((a, b) => (b.temp < a.temp ? b : a));
+    const morgen = new Date(koudste.tijd).toDateString() !== new Date().toDateString();
+    const wanneer = morgen ? "Morgenvroeg" : "Vanochtend";
+    const t = Math.round(koudste.temp * 10) / 10;
+    const vocht = koudste.vocht ?? 85;
+    const dauwDicht = koudste.dauw != null ? koudste.temp - koudste.dauw <= 2 : vocht >= 85;
+    if (koudste.temp <= 0 && (dauwDicht || vocht >= 75)) return { niveau: "ja", tekst: `${wanneer} ${t}°: ruiten krabben 🧊` };
+    if (koudste.temp <= 0) return { niveau: "misschien", tekst: `${wanneer} ${t}°: kans op ijs op de ruit` };
+    if (koudste.temp <= 2.5 && dauwDicht && (koudste.wolken ?? 100) < 60) return { niveau: "misschien", tekst: `${wanneer} ${t}°: mogelijk een bevroren ruit` };
+    return null;
+  }
+
+  _zonVoortgang() {
+    const d0 = (this._weerData().dagen || [])[0] || {};
+    const op = new Date(d0.zonop), onder = new Date(d0.zononder);
+    if (isNaN(op) || isNaN(onder)) return null;
+    const nu = Date.now();
+    return { op, onder, f: Math.max(0, Math.min(1, (nu - op) / (onder - op))), dag: nu > op && nu < onder };
+  }
+
+  _groetWoord() {
+    const u = new Date().getHours();
+    return u < 6 ? "Goedenacht" : u < 12 ? "Goedemorgen" : u < 18 ? "Goedemiddag" : "Goedenavond";
+  }
+
+  // ---------- Dashboard ----------
+
   _tekenGroet() {
-    const sig = this._sig("sensor.meldkamer_weer") + new Date().getMinutes();
+    const sig = this._sig("sensor.meldkamer_weer", "sensor.meldkamer_buienradar", "sun.sun") + new Date().getMinutes();
     if (!this._veranderd("groet", sig)) return;
+    const r = this.shadowRoot;
     const nu = new Date();
-    const u = nu.getHours();
-    const groet = u < 6 ? "Goedenacht" : u < 12 ? "Goedemorgen" : u < 18 ? "Goedemiddag" : "Goedenavond";
     const naam = (this._hass.user?.name || "").split(" ")[0];
-    const w = this._a("sensor.meldkamer_weer");
+    r.getElementById("d-kop").innerHTML = `
+      <div><h3>${this._groetWoord()}${naam ? `, <i>${esc(naam)}</i>` : ""}</h3>
+        <p>${nu.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })} · week ${this._weekNr(nu)} · Nunspeet</p></div>
+      <div class="pillen">
+        <button class="pil" data-actie="pagina" data-pagina="weer">⛈️ Weer & storm</button>
+        <button class="pil donker" data-actie="alle" data-dienst="turn_off">🌑 Alle lampen uit</button>
+      </div>`;
+    const w = this._weerData();
     const n = w.nu || {};
     const d0 = (w.dagen || [])[0] || {};
-    const mn = maan(nu);
+    const regen = this._regenZin();
+    const krab = this._krabben();
+    const zon = this._zonVoortgang();
     const dl = this._daglicht(d0);
-    const daglicht = dl ? `${Math.floor(dl / 3600)}u ${pad(Math.round((dl % 3600) / 60))}m` : "–";
-    this.shadowRoot.getElementById("groet").innerHTML = `
-      <div><h3>${groet}${naam ? `, <i>${esc(naam)}</i>` : ""}</h3>
-        <p>Het is ${nu.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} · week ${this._weekNr(nu)}</p></div>
-      <div class="blokjes">
-        ${n.temperature_2m != null ? `<div class="blokje">${weerIcoon(n.weather_code, n.is_day)} ${weerTekst(n.weather_code)}<b>${Math.round(n.temperature_2m)}° <span style="font-size:11px;color:var(--zacht)">↑${Math.round(d0.max ?? 0)}° ↓${Math.round(d0.min ?? 0)}°</span></b></div>` : ""}
-        <div class="blokje">🌅 Zon op / onder<b>${klokTijd(d0.zonop) || "–"} · ${klokTijd(d0.zononder) || "–"}</b></div>
-        <div class="blokje">☀️ Daglicht<b>${daglicht}</b></div>
-        <div class="blokje">${mn.icoon} Maan<b>${mn.naam}</b></div>
-      </div>`;
+    let ring = "";
+    if (zon) {
+      const omtrek = 2 * Math.PI * 62;
+      const hoek = zon.f * 2 * Math.PI - Math.PI / 2;
+      const zx = 75 + Math.cos(hoek) * 62 - 11, zy = 75 + Math.sin(hoek) * 62 - 11;
+      const rest = zon.dag ? zon.onder - Date.now() : 0;
+      ring = `<div class="ring"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="9"/>
+          <circle cx="75" cy="75" r="62" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="${omtrek}" stroke-dashoffset="${omtrek * (1 - zon.f)}"/></svg>
+        ${zon.dag ? `<div class="zonnetje" style="left:${zx}px;top:${zy}px">☀️</div>` : ""}
+        <div class="midden"><div><b>${zon.dag ? Math.round(zon.f * 100) + "%" : "🌙"}</b><small>${zon.dag ? `zon onder over<br>${Math.floor(rest / 3600000)}u ${pad(Math.floor((rest % 3600000) / 60000))}m` : `zon op ${klokTijd(d0.zonop)}`}</small></div></div></div>`;
+    }
+    r.getElementById("d-hero").innerHTML = n.temperature_2m == null
+      ? `<div><span class="label-pil">Vandaag in Nunspeet</span><div class="hero-groot">Het weer wordt <i>geladen</i>…</div></div>`
+      : `<div>
+        <span class="label-pil">Vandaag in Nunspeet</span>
+        <div class="hero-groot">${weerIcoon(n.weather_code, n.is_day)} <i>${weerTekst(n.weather_code).toLowerCase()}</i> en ${Math.round(n.temperature_2m)}°</div>
+        <div class="zacht" style="font-size:13.5px">${regen.icoon} ${esc(regen.tekst)}${krab ? ` · ${esc(krab.tekst)}` : ""}</div>
+        <div class="hero-stats">
+          <div>Max / min<b>${Math.round(d0.max ?? 0)}° / ${Math.round(d0.min ?? 0)}°</b></div>
+          <div>Vochtigheid<b>${Math.round(n.relative_humidity_2m ?? 0)}%</b></div>
+          <div>Wind<b>${windRichting(n.wind_direction_10m)} ${beaufort(n.wind_speed_10m)}</b></div>
+          <div>Daglicht<b>${dl ? Math.floor(dl / 3600) + "u" + pad(Math.round((dl % 3600) / 60)) : "–"}</b></div>
+        </div>
+        <div class="hero-knoppen"><button data-actie="pagina" data-pagina="weer">Weerbericht ↗</button><button data-actie="pagina" data-pagina="woonkamer">🛋️ Woonkamer</button></div>
+      </div>${ring}`;
   }
 
   _daglicht(d0) {
@@ -1204,6 +1459,7 @@ class HuisPanel extends HTMLElement {
   }
   _ververstCams() {
     if (this._pagina === "dashboard") this._tekenCams();
+    if (this._pagina === "woonkamer") this._tekenWkCams();
   }
   _tekenCamInfo() {
     const n = this._camLijst().length;
@@ -1227,38 +1483,36 @@ class HuisPanel extends HTMLElement {
 
   _tekenEnergie() {
     const { net, zonTotaal, panelen, naarW } = this._vermogenSensoren();
-    const sig = [net, zonTotaal, ...panelen].map((s) => s && s.state).join() + JSON.stringify(this._energie);
+    const w = this._weerData();
+    const sig = [net, zonTotaal, ...panelen].map((s) => s && s.state).join() + JSON.stringify(this._energie) + this._sig("sensor.meldkamer_weer", "sensor.meldkamer_laatste_melding");
     if (!this._veranderd("energie", sig)) return;
-    const el = this.shadowRoot.getElementById("energie");
-    if (!net && !zonTotaal && !panelen.length && !this._energie) {
-      el.innerHTML = `<h2>⚡ Energie</h2><div class="leeg">Nog geen energiegegevens.</div>`;
-      return;
-    }
-    const fmt = (w) => (Math.abs(w) >= 1000 ? (w / 1000).toFixed(1) + " kW" : Math.round(w) + " W");
-    const netW = net ? naarW(net) : null;
-    const zonW = zonTotaal ? naarW(zonTotaal) : panelen.reduce((t, s) => t + naarW(s), 0);
+    const r = this.shadowRoot;
+    const fmt = (x) => (Math.abs(x) >= 1000 ? (x / 1000).toFixed(1) + " kW" : Math.round(x) + " W");
     const e = this._energie || {};
+    const n = w.nu || {};
+    const temps = (w.uren || []).filter((u) => new Date(u.tijd).getTime() >= Date.now() - 3600000).slice(0, 12).map((u) => u.temp);
+    const verschil = temps.length > 6 ? Math.round(temps[6] - temps[0]) : null;
+    r.getElementById("t-temp").innerHTML = `
+      <div class="boven"><span class="ic">🌡️</span>${verschil != null ? `<span class="chg" style="${verschil < 0 ? "background:rgba(14,127,194,.15);color:var(--cyaan)" : ""}">${verschil >= 0 ? "↑" : "↓"} ${Math.abs(verschil)}° in 6u</span>` : ""}</div>
+      <div class="waarde">${n.temperature_2m != null ? Math.round(n.temperature_2m) + "°" : "–"}</div>
+      <div class="onder"><div><div class="lbl">Buiten</div><div class="sub">voelt als ${n.apparent_temperature != null ? Math.round(n.apparent_temperature) + "°" : "–"} · ${Math.round(n.relative_humidity_2m ?? 0)}% vocht</div></div>${this._spark(temps)}</div>`;
+    const zonW = zonTotaal ? naarW(zonTotaal) : panelen.reduce((t, s) => t + naarW(s), 0);
+    r.getElementById("t-zon").innerHTML = `
+      <div class="boven"><span class="ic">☀️</span>${e.zon != null ? `<span class="chg">${e.zon.toFixed(1)} kWh vandaag</span>` : ""}</div>
+      <div class="waarde">${zonTotaal || panelen.length ? fmt(zonW) : "–"}</div>
+      <div class="onder"><div><div class="lbl">Zonnepanelen</div><div class="sub">${panelen.length ? panelen.length + " panelen · " : ""}opbrengst nu</div></div>${this._spark((e.uren || []).map((u) => u.zon), "#f59e0b")}</div>`;
     const verbruik = e.stroom != null ? e.stroom + (e.zon || 0) - (e.terug || 0) : null;
-    const zelf = verbruik && e.zon != null ? Math.max(0, Math.min(100, Math.round(((e.zon - (e.terug || 0)) / verbruik) * 100))) : null;
-    el.innerHTML = `
-      <h2>⚡ Energie <span class="r">${zelf != null ? `☀️ ${zelf}% eigen stroom vandaag` : ""}</span></h2>
-      <div class="e-rij">
-        ${netW != null ? `<div>${netW < 0 ? "Terug" : "Net"} nu<b class="${netW < 0 ? "terug" : ""}">${fmt(Math.abs(netW))}</b></div>` : ""}
-        ${zonTotaal || panelen.length ? `<div>Zon nu<b class="zon">${fmt(zonW)}</b></div>` : ""}
-        ${verbruik != null ? `<div>Verbruik vandaag<b>${verbruik.toFixed(1)} kWh</b></div>` : e.gas != null ? `<div>Gas vandaag<b>${e.gas.toFixed(1)} m³</b></div>` : ""}
-      </div>`;
-  }
-
-  _tekenRegio() {
-    if (!this._veranderd("regio", this._sig("sensor.meldkamer_laatste_melding", "sensor.meldkamer_instellingen"))) return;
-    const woorden = (this._instelling("regio_woorden", ["NOG", "Noord- en Oost-Gelderland"]) || []).map((w) => w.toLowerCase());
-    const lijst = (this._p2000().nl || [])
-      .filter((m) => woorden.some((w) => (m.titel + " " + (m.eenheden || []).join(" ")).toLowerCase().includes(w)))
-      .slice(0, 3);
-    this.shadowRoot.getElementById("regio").innerHTML = `<h2>🚒 Brandweer regio NOG <span class="r"><button class="klein-knop" data-actie="pagina" data-pagina="meldkamer">Meer →</button></span></h2>
-      ${lijst.length
-        ? lijst.map((m) => `<div class="rij">${this._badge(m)}<div><div class="t">${esc(m.kort || m.titel)}</div></div><div class="k" data-sinds="${esc(m.tijd)}">${tijdGeleden(m.tijd)}</div></div>`).join("")
-        : `<div class="leeg">Nog geen meldingen in de regio.</div>`}`;
+    const netW = net ? naarW(net) : null;
+    r.getElementById("t-stroom").innerHTML = `
+      <div class="boven"><span class="ic">⚡</span>${netW != null ? `<span class="chg" style="${netW > 0 ? "background:rgba(239,91,57,.14);color:var(--accent)" : ""}">${netW < 0 ? "terug " : "net "}${fmt(Math.abs(netW))}</span>` : ""}</div>
+      <div class="waarde">${verbruik != null ? verbruik.toFixed(1) : "–"}<span style="font-size:14px"> kWh</span></div>
+      <div class="onder"><div><div class="lbl">Stroom vandaag</div><div class="sub">${e.gas != null ? "gas " + e.gas.toFixed(2) + " m³" : "verbruik in huis"}</div></div>${this._spark((e.uren || []).map((u) => u.verbruik), "#0e7fc2")}</div>`;
+    const d = this._p2000();
+    const m = (d.meldingen || []).find((x) => !x.proef && /nunspeet|elspeet|hulshorst|vierhouten/i.test((x.titel || "") + " " + (x.adres || "")));
+    r.getElementById("t-melding").innerHTML = `
+      <div class="boven"><span class="ic">🚒</span><span class="chg">${m ? (m.prio ? "P" + m.prio : "melding") : "rustig"}</span></div>
+      <div class="waarde">${m ? esc(m.kort || m.titel) : "Geen uitrukken"}</div>
+      <div class="onder"><div><div class="sub">${m ? `<span data-sinds="${esc(m.tijd)}">${tijdGeleden(m.tijd)}</span> · ${d.week ?? 0} deze week` : "Laatste melding Nunspeet"}</div></div>${this._spark((d.per_dag || []).slice(-14), "#fff", false)}</div>`;
   }
 
   async _laadEnergie() {
@@ -1313,45 +1567,191 @@ class HuisPanel extends HTMLElement {
     const agendas = this._ent("calendar");
     const start = new Date();
     start.setHours(0, 0, 0, 0);
-    const eind = new Date(start.getTime() + 4 * 86400000);
+    const eind = new Date(start.getTime() + 15 * 86400000);
     const items = [];
     for (const a of agendas) {
       try {
         const r = await this._hass.callApi("GET", `calendars/${a.entity_id}?start=${start.toISOString()}&end=${eind.toISOString()}`);
-        r.forEach((ev) => items.push(ev));
+        const isVerjaardag = /verjaar|birthday|jarig/i.test(a.entity_id + " " + this._naam(a));
+        r.forEach((ev) => items.push({ ...ev, verjaardag: isVerjaardag || /jarig|verjaardag|birthday/i.test(ev.summary || "") }));
       } catch (e) {
         /* agenda niet bereikbaar */
       }
     }
-    const tijd = (x) => x.dateTime || x.date;
-    items.sort((a, b) => new Date(tijd(a.start)) - new Date(tijd(b.start)));
-    this._agenda = items.filter((ev) => new Date(tijd(ev.end)) > new Date()).slice(0, 5);
+    const tijd = (x) => new Date(x.dateTime || x.date + "T00:00");
+    items.sort((a, b) => tijd(a.start) - tijd(b.start));
+    const nu = new Date();
+    const over4 = new Date(start.getTime() + 4 * 86400000);
+    this._agenda = items.filter((ev) => !ev.verjaardag && tijd(ev.end) > nu && tijd(ev.start) < over4).slice(0, 6);
+    this._verjaardagen = items.filter((ev) => ev.verjaardag).slice(0, 5);
     this._handtekening.agenda = null;
+    this._handtekening.woonkamer = null;
     this._tekenAgenda();
+    this._tekenWoonkamer();
+  }
+
+  _afvalInfo() {
+    const v = this._a("sensor.meldkamer_afval").volgende;
+    if (!v) return null;
+    const iconen = { gft: "🟢", groen: "🟢", rest: "⚫", papier: "🔵", plastic: "🟠", pmd: "🟠", glas: "🟣" };
+    const icoon = Object.entries(iconen).find(([k]) => v.soort.toLowerCase().includes(k))?.[1] || "🗑️";
+    const wanneer = v.dagen === 0 ? "Vandaag" : v.dagen === 1 ? "Morgen" : `Over ${v.dagen} dagen`;
+    return { ...v, icoon, wanneer };
+  }
+
+  _evTijd(ev) {
+    if (!ev.start.dateTime) return "Hele dag";
+    const d = new Date(ev.start.dateTime);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  _evDag(ev) {
+    const d = new Date(ev.start.dateTime || ev.start.date + "T00:00");
+    const v = new Date();
+    v.setHours(0, 0, 0, 0);
+    const x = Math.round((new Date(d).setHours(0, 0, 0, 0) - v) / 86400000);
+    return x === 0 ? "Vandaag" : x === 1 ? "Morgen" : d.toLocaleDateString("nl-NL", { weekday: "long" });
   }
 
   _tekenAgenda() {
-    const afval = this._a("sensor.meldkamer_afval");
-    const sig = this._sig("sensor.meldkamer_afval") + JSON.stringify(this._agenda) + new Date().getDate();
+    const sig = this._sig("sensor.meldkamer_afval") + JSON.stringify(this._agenda) + JSON.stringify(this._verjaardagen) + new Date().getDate();
     if (!this._veranderd("agenda", sig)) return;
-    const v = afval.volgende;
-    const iconen = { gft: "🟢", groen: "🟢", rest: "⚫", papier: "🔵", plastic: "🟠", pmd: "🟠", glas: "🟣" };
-    const afvalIcoon = (s) => Object.entries(iconen).find(([k]) => s.toLowerCase().includes(k))?.[1] || "🗑️";
-    const wanneer = (d) => (d === 0 ? "Vandaag" : d === 1 ? "Morgen" : `Over ${d} dagen`);
-    const dagNaam = (iso, heleDag) => {
-      const d = new Date(iso);
-      const vandaag = new Date();
-      vandaag.setHours(0, 0, 0, 0);
-      const verschil = Math.round((new Date(d).setHours(0, 0, 0, 0) - vandaag) / 86400000);
-      const dag = verschil === 0 ? "Vandaag" : verschil === 1 ? "Morgen" : d.toLocaleDateString("nl-NL", { weekday: "short" });
-      return heleDag ? dag : `${dag} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const nu = new Date();
+    const maandag = new Date(nu);
+    maandag.setDate(nu.getDate() - ((nu.getDay() + 6) % 7));
+    const dagen = Array.from({ length: 7 }, (_, i) => new Date(maandag.getTime() + i * 86400000));
+    const afval = this._afvalInfo();
+    const items = [];
+    if (afval && afval.dagen <= 2) items.push(`<div class="afspraak-kaart"><span class="streep" style="background:var(--goed)"></span><span>${afval.icoon}</span><span><b>${afval.wanneer}</b> ${esc(afval.soort)}</span><span class="tag">afval</span></div>`);
+    this._verjaardagen.slice(0, 1).forEach((ev) => items.push(`<div class="afspraak-kaart"><span class="streep" style="background:#ec4899"></span><span>🎂</span><span><b>${this._evDag(ev)}</b> ${esc(ev.summary)}</span></div>`));
+    this._agenda.slice(0, Math.max(0, 3 - items.length)).forEach((ev) =>
+      items.push(`<div class="afspraak-kaart"><span class="w">${this._evTijd(ev)}</span><span class="streep"></span><span>${esc(ev.summary)}</span>${this._evDag(ev) !== "Vandaag" ? `<span class="tag">${this._evDag(ev)}</span>` : ""}</div>`)
+    );
+    if (afval && afval.dagen > 2 && items.length < 3) items.push(`<div class="afspraak-kaart"><span class="streep" style="background:var(--goed)"></span><span>${afval.icoon}</span><span>${esc(afval.soort)} · ${afval.wanneer.toLowerCase()}</span></div>`);
+    const vandaag = this._agenda.filter((e) => this._evDag(e) === "Vandaag").length;
+    this.shadowRoot.getElementById("d-datum").innerHTML = `
+      <div class="dag-kop"><span class="nr">${pad(nu.getDate())}</span><div><b style="text-transform:capitalize">${nu.toLocaleDateString("nl-NL", { weekday: "long" })}</b>
+        <small>${nu.toLocaleDateString("nl-NL", { month: "long", year: "numeric" })} · ${vandaag} ${vandaag === 1 ? "afspraak" : "afspraken"} vandaag</small></div></div>
+      <div class="week">${dagen.map((d) => `<div class="${d.toDateString() === nu.toDateString() ? "vandaag" : ""}">${d.toLocaleDateString("nl-NL", { weekday: "short" }).slice(0, 2)}<b>${d.getDate()}</b></div>`).join("")}</div>
+      ${items.length ? items.join("") : `<div class="afspraak-kaart"><span>☕</span><span>Geen afspraken de komende dagen</span></div>`}`;
+  }
+
+  // ---------- Woonkamer ----------
+
+  _tekenWoonkamer() {
+    if (!this._hass || this._pagina !== "woonkamer") return;
+    const lampen = this._ent("light");
+    const luiken = this._ent("cover");
+    const sig =
+      this._sig("sensor.meldkamer_weer", "sensor.meldkamer_buienradar", "sensor.meldkamer_afval", "sun.sun") +
+      [...lampen, ...luiken].map((x) => x.entity_id + x.state + x.attributes.brightness + (x.attributes.current_position ?? "")).join() +
+      JSON.stringify(this._agenda) + JSON.stringify(this._verjaardagen) + new Date().getMinutes();
+    if (!this._veranderd("woonkamer", sig)) return;
+    const r = this.shadowRoot;
+    const w = this._weerData();
+    const n = w.nu || {};
+    const d0 = (w.dagen || [])[0] || {};
+    const nu = new Date();
+    const mn = maan(nu);
+    r.getElementById("w-klok").innerHTML = `
+      <div class="w-groet">${this._groetWoord()} <i>✦</i></div>
+      <div><div class="w-tijd" id="w-tijd">${pad(nu.getHours())}:${pad(nu.getMinutes())}</div>
+      <div class="w-datum">${nu.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div></div>
+      <div class="w-zon"><span class="pil">🌅 ${klokTijd(d0.zonop) || "–"}</span><span class="pil">🌇 ${klokTijd(d0.zononder) || "–"}</span><span class="pil">${mn.icoon} ${mn.naam}</span></div>`;
+    const regen = this._regenZin();
+    const krab = this._krabben();
+    const uren = (w.uren || []).filter((u) => new Date(u.tijd).getTime() >= Date.now() - 3600000).slice(0, 8);
+    r.getElementById("w-weer").innerHTML = n.temperature_2m == null
+      ? `<h2>🌤️ Weer</h2><div class="leeg">Het weer wordt geladen…</div>`
+      : `<div class="w-weer-boven">
+          <span class="ic">${weerIcoon(n.weather_code, n.is_day)}</span>
+          <div><div class="t">${Math.round(n.temperature_2m)}°</div><div class="om">${weerTekst(n.weather_code)} · voelt als ${Math.round(n.apparent_temperature)}°</div></div>
+          <div class="stats"><div>Vochtigheid<b>${Math.round(n.relative_humidity_2m ?? 0)}%</b></div><div>Wind<b>${windRichting(n.wind_direction_10m)} ${beaufort(n.wind_speed_10m)}</b></div><div>Max / min<b>${Math.round(d0.max ?? 0)}° / ${Math.round(d0.min ?? 0)}°</b></div></div>
+        </div>
+        <div class="w-uren">${uren
+          .map((u, i) => {
+            const d = new Date(u.tijd);
+            return `<div>${i === 0 ? "Nu" : pad(d.getHours()) + ":00"}<span class="i">${weerIcoon(u.code, d.getHours() >= 8 && d.getHours() < 17 ? 1 : 0)}</span><b>${Math.round(u.temp)}°</b><span class="kans">${u.regenkans ?? 0}%</span></div>`;
+          })
+          .join("")}</div>
+        <div class="w-meldingen">
+          <span class="w-tip let">${regen.icoon} ${esc(regen.tekst)}</span>
+          ${krab ? `<span class="w-tip vorst">${krab.niveau === "ja" ? "🧊" : "❄️"} ${esc(krab.tekst)}</span>` : `<span class="w-tip">🚗 Geen ijs op de ruit verwacht</span>`}
+        </div>`;
+    const kleurVan = (l) => {
+      const rgb = l.attributes.rgb_color;
+      return l.state === "on" ? (rgb ? `rgb(${rgb.join(",")})` : "#f5b301") : "#cfc5bc";
     };
-    this.shadowRoot.getElementById("agenda").innerHTML = `
-      <h2>📅 Agenda & afval</h2>
-      ${v ? `<div class="afval ${v.dagen <= 1 ? "snel" : ""}"><span style="font-size:20px">${afvalIcoon(v.soort)}</span><div><b>${wanneer(v.dagen)}: ${esc(v.soort)}</b><div style="font-size:11.5px;color:var(--zacht)">${new Date(v.datum).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })}${v.dagen <= 1 ? " · container aan de weg!" : ""}</div></div></div>` : ""}
-      ${this._agenda.length
-        ? this._agenda.map((ev) => `<div class="afspraak"><span class="w">${dagNaam(ev.start.dateTime || ev.start.date + "T00:00", !ev.start.dateTime)}</span><span>${esc(ev.summary)}</span></div>`).join("")
-        : `<div class="leeg">${this._ent("calendar").length ? "Geen afspraken de komende dagen." : "Google Agenda nog niet gekoppeld."}</div>`}`;
+    const pct = (l) => (l.state === "on" && l.attributes.brightness ? Math.round((l.attributes.brightness / 255) * 100) : 0);
+    const inst = this._a("sensor.meldkamer_instellingen");
+    let kamer = lampen.filter((l) => /woonkamer|living/i.test(this._naam(l)));
+    // Aanvullen met de vaste lampen van het dashboard, zodat er geen lege plek is
+    [inst.hoofdlamp || "lamp sem", ...(inst.dashboard_lampen || [])].forEach((x) => {
+      const l = this._zoekNaam(lampen, x);
+      if (l && !kamer.includes(l)) kamer.push(l);
+    });
+    kamer = kamer.slice(0, 6);
+    const ids = luiken.map((c) => c.entity_id).join(",");
+    r.getElementById("w-licht").innerHTML = `
+      <h2>💡 Woonkamer <span class="r">${lampen.filter((l) => l.state === "on").length} lampen aan</span></h2>
+      <div class="w-lampen">${
+        kamer
+          .map(
+            (l) => `<button class="lamp ${l.state === "on" ? "aan" : ""}" data-actie="toggle" data-id="${esc(l.entity_id)}" data-meer="${esc(l.entity_id)}">
+          <span class="bol" style="background:${kleurVan(l)};color:${kleurVan(l)}"></span><span class="n">${esc(this._naam(l))}</span><span class="s">${l.state === "on" ? pct(l) + "%" : "Uit"}</span></button>`
+          )
+          .join("") || `<div class="leeg">Geen woonkamerlampen gevonden.</div>`
+      }</div>
+      <div class="alle" style="margin:10px 0 8px"><button class="aan-knop" data-actie="alle" data-dienst="turn_on">💡 Alles aan</button><button data-actie="alle" data-dienst="turn_off">🌑 Alles uit</button></div>
+      ${luiken.length ? `<div class="luik"><div class="n">🪟 Rolluiken<div class="s">${luiken.filter((c) => c.state === "closed").length} van ${luiken.length} dicht</div></div>
+        <button data-actie="luik" data-dienst="open_cover" data-id="${ids}" title="Open">▲</button>
+        <button data-actie="luik" data-dienst="stop_cover" data-id="${ids}" title="Stop">■</button>
+        <button data-actie="luik" data-dienst="close_cover" data-id="${ids}" title="Dicht">▼</button></div>` : ""}`;
+    const afval = this._afvalInfo();
+    const lijst = [];
+    if (afval) lijst.push(`<div class="w-item"><span class="i">${afval.icoon}</span><div><b>${afval.wanneer}: ${esc(afval.soort)}</b><small>${afval.dagen <= 1 ? "Container aan de weg zetten" : new Date(afval.datum).toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })}</small></div></div>`);
+    this._verjaardagen.forEach((ev) => lijst.push(`<div class="w-item"><span class="i">🎂</span><div><b>${esc(ev.summary)}</b><small style="text-transform:capitalize">${this._evDag(ev)}</small></div></div>`));
+    this._agenda.slice(0, 4).forEach((ev) => lijst.push(`<div class="w-item"><span class="i">📅</span><div><b>${esc(ev.summary)}</b><small style="text-transform:capitalize">${this._evDag(ev)} · ${this._evTijd(ev)}</small></div></div>`));
+    if (!lijst.length) lijst.push(`<div class="w-item"><span class="i">☕</span><div><b>Niets op de planning</b><small>Geniet van je dag</small></div></div>`);
+    lijst.push(`<div class="w-item"><span class="i">${mn.icoon}</span><div><b>${mn.naam}</b><small>${mn.verlicht}% verlicht · volle maan ${mn.volle.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</small></div></div>`);
+    r.getElementById("w-vandaag").innerHTML = `<h2>📌 Vandaag & binnenkort</h2><div class="w-lijst">${lijst.join("")}</div>`;
+    this._tekenWkCams();
+  }
+
+  async _tekenWkCams() {
+    const grid = this.shadowRoot.getElementById("w-cams");
+    if (!grid) return;
+    const cams = this._camLijst();
+    const live = this._liveLijst();
+    const keuze = [...cams.filter((c) => live.includes(c.entity_id)), ...cams.filter((c) => !live.includes(c.entity_id))].slice(0, 4);
+    const structuur = keuze.map((c) => c.entity_id + (live.includes(c.entity_id) ? ":l" : "")).join();
+    if (grid.dataset.structuur !== structuur) {
+      grid.dataset.structuur = structuur;
+      grid.classList.toggle("een", keuze.length === 1);
+      grid.classList.toggle("drie", keuze.length === 3);
+      grid.innerHTML = keuze.length
+        ? keuze
+            .map((c) => `<div class="cam" data-actie="meer" data-id="${esc(c.entity_id)}">${live.includes(c.entity_id) ? `<div class="live-houder"></div><b class="live">● LIVE</b>` : `<img alt="">`}<span>${esc(this._naam(c).replace(/ live view$/i, ""))}</span></div>`)
+            .join("")
+        : `<div class="leeg">Nog geen camera's gekoppeld.</div>`;
+      for (const vak of grid.querySelectorAll(".cam")) {
+        const houder = vak.querySelector(".live-houder");
+        if (!houder) continue;
+        const id = vak.dataset.id;
+        if (!this._wkKaarten[id]) {
+          const helpers = await this._kaartHulp();
+          if (!helpers) continue;
+          this._wkKaarten[id] = helpers.createCardElement({ type: "picture-entity", entity: id, camera_view: "live", show_name: false, show_state: false, tap_action: { action: "none" } });
+        }
+        this._wkKaarten[id].hass = this._hass;
+        this._liveKaarten["wk:" + id] = this._wkKaarten[id];
+        houder.appendChild(this._wkKaarten[id]);
+      }
+    }
+    grid.querySelectorAll(".cam img").forEach((img) => {
+      const c = this._s(img.closest(".cam").dataset.id);
+      if (c?.attributes?.entity_picture) img.src = `${c.attributes.entity_picture}&t=${Date.now()}`;
+    });
   }
 
   _tekenNieuws() {
@@ -1581,8 +1981,12 @@ class HuisPanel extends HTMLElement {
   _toonAlarm(m) {
     this._alarmId = m.id;
     this.setAttribute("modus", m.soort === "politie" ? "politie" : "brand");
-    this._meldkamerTot = Date.now() + 10 * 60 * 1000;
-    this._toonPagina("meldkamer");
+    const woonkamer = this._thuis === "woonkamer";
+    if (woonkamer) this._meldkamerTot = null;
+    else {
+      this._meldkamerTot = Date.now() + 10 * 60 * 1000;
+      this._toonPagina("meldkamer");
+    }
     const politie = m.soort === "politie";
     const r = m.route;
     const el = this.shadowRoot.getElementById("alarm");
@@ -1606,11 +2010,14 @@ class HuisPanel extends HTMLElement {
       </div>
       <div class="aftel" id="aftel"></div>`;
     el.classList.add("open");
-    if (politie) this._piep();
+    el.classList.toggle("rustig", woonkamer);
+    if (woonkamer) this._piepHard();
+    else if (politie) this._piep();
     else this._startSirene();
-    this._alarmEind = Date.now() + ALARM_DUUR;
+    const duur = woonkamer ? 60 * 1000 : ALARM_DUUR;
+    this._alarmEind = Date.now() + duur;
     clearTimeout(this._alarmTimer);
-    this._alarmTimer = setTimeout(() => this._sluitAlarm(), ALARM_DUUR);
+    this._alarmTimer = setTimeout(() => this._sluitAlarm(), duur);
   }
 
   _bevestig(id) {
@@ -1667,6 +2074,12 @@ class HuisPanel extends HTMLElement {
     [0, 450, 900].forEach((ms) => setTimeout(() => this._toon([[1400, 0]], 0.25, "square", 0.18), ms));
   }
 
+  _piepHard() {
+    this._audio();
+    this._stopGeluid();
+    [0, 700, 1400, 2100].forEach((ms) => setTimeout(() => this._toon([[1050, 0]], 0.42, "square", 0.55), ms));
+  }
+
   _stopGeluid() {
     clearInterval(this._geluid);
     this._geluid = null;
@@ -1699,6 +2112,7 @@ class HuisPanel extends HTMLElement {
 
   async _deurbel(info = {}, metGeluid = true) {
     const el = this.shadowRoot.getElementById("deurbel");
+    this.setAttribute("fel", "");
     const cams = this._camLijst();
     const bel = this._deurbelCamera(info);
     const rest = cams.filter((c) => c !== bel).slice(0, 3);
@@ -1737,6 +2151,7 @@ class HuisPanel extends HTMLElement {
   _sluitDeurbel() {
     clearTimeout(this._deurbelTimer);
     const el = this.shadowRoot.getElementById("deurbel");
+    this.removeAttribute("fel");
     el.classList.remove("open");
     el.innerHTML = "";
     Object.keys(this._liveKaarten).filter((k) => k.startsWith("db:")).forEach((k) => delete this._liveKaarten[k]);
@@ -1792,8 +2207,15 @@ class HuisPanel extends HTMLElement {
   _toonPagina(p) {
     this._pagina = p;
     const r = this.shadowRoot;
-    ["meldkamer", "dashboard", "weer", "test"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
-    if (p === "test") this._vulSpeakers();
+    ["meldkamer", "dashboard", "woonkamer", "weer", "test"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
+    if (p === "test") {
+      this._vulSpeakers();
+      try {
+        this.shadowRoot.getElementById("thema-keuze").value = localStorage.getItem("meldkamer_thema") || "auto";
+      } catch (e) {
+        /* geen opslag */
+      }
+    }
     r.querySelectorAll(".pag-knop, .rail button[data-pagina]").forEach((b) => b.classList.toggle("aan", b.dataset.pagina === p));
     const pag = r.getElementById("p-" + p);
     if (pag) {
@@ -1803,7 +2225,9 @@ class HuisPanel extends HTMLElement {
       pag.classList.add("animeer");
     }
     if (p === "dashboard" && this._hass) this._tekenCams();
+    if (p === "woonkamer" && this._hass) this._handtekening.woonkamer = null;
     if (p === "weer") this._toonWeerTab();
+    if (this._hass) setTimeout(() => this._teken(), 30);
   }
 
   _meerInfo(entityId) {
@@ -1839,6 +2263,14 @@ class HuisPanel extends HTMLElement {
         h.callService("cover", el.dataset.dienst, { entity_id: id.split(",") });
         break;
       case "pagina":
+        if (["dashboard", "woonkamer"].includes(el.dataset.pagina)) {
+          this._thuis = el.dataset.pagina;
+          try {
+            localStorage.setItem("meldkamer_thuis", this._thuis);
+          } catch (e2) {
+            /* geen opslag */
+          }
+        }
         this._toonPagina(el.dataset.pagina);
         break;
       case "wtab":
@@ -1884,6 +2316,14 @@ class HuisPanel extends HTMLElement {
         else this._dingDong();
         break;
       }
+      case "thema":
+        try {
+          localStorage.setItem("meldkamer_thema", this.shadowRoot.getElementById("thema-keuze").value);
+        } catch (e3) {
+          /* geen opslag */
+        }
+        this._teken();
+        break;
       case "zeg":
         this._zeg();
         break;

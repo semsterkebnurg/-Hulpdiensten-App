@@ -265,12 +265,13 @@ class MeldkamerHub:
             "longitude": self.lon,
             "current": "temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,"
             "wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,pressure_msl,is_day,visibility,dew_point_2m,uv_index",
-            "hourly": "temperature_2m,precipitation_probability,precipitation,weather_code,wind_gusts_10m",
+            "hourly": "temperature_2m,precipitation_probability,precipitation,weather_code,wind_gusts_10m,"
+            "relative_humidity_2m,dew_point_2m,cloud_cover",
             "daily": "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,"
             "precipitation_probability_max,sunrise,sunset,wind_gusts_10m_max,uv_index_max,precipitation_hours,daylight_duration",
             "timezone": "Europe/Amsterdam",
             "forecast_days": 5,
-            "forecast_hours": 24,
+            "forecast_hours": 36,
             "wind_speed_unit": "kmh",
         }
         try:
@@ -287,6 +288,9 @@ class MeldkamerHub:
                 "regen": h["precipitation"][i],
                 "code": h["weather_code"][i],
                 "windstoten": h["wind_gusts_10m"][i],
+                "vocht": (h.get("relative_humidity_2m") or [None] * 99)[i],
+                "dauw": (h.get("dew_point_2m") or [None] * 99)[i],
+                "wolken": (h.get("cloud_cover") or [None] * 99)[i],
             }
             for i, t in enumerate(h.get("time", []))
         ]
