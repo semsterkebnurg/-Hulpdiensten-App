@@ -16,8 +16,8 @@ STANDAARD_BRONNEN = {
         "https://www.alarmeringen.nl/feeds/discipline/politie.rss",
     ],
     "nieuws": [
-        ["NOS", "https://feeds.nos.nl/nosnieuwsalgemeen"],
-        ["Omroep Gelderland", "https://www.gld.nl/rss/index.xml"],
+        ["NU.nl", "https://www.nu.nl/rss/Algemeen"],
+        ["NU.nl", "https://www.nu.nl/rss/Formule-1"],
     ],
     "geocoder": "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free",
     "route_auto": "https://routing.openstreetmap.de/routed-car",

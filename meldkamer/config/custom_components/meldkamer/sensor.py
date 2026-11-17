@@ -233,4 +233,8 @@ class InstellingenSensor(SensorEntity):
             "webcam": self.hub.conf["webcam"],
             "routepunten": self.hub.routepunten,
             "vliegtuig_straal_km": self.hub.conf["vliegtuig_straal_km"],
+            "hoofdlamp": self.hub.conf["hoofdlamp"],
+            "dashboard_lampen": self.hub.conf["dashboard_lampen"],
+            "hoofdrolluik": self.hub.conf["hoofdrolluik"],
+            "regio_woorden": self.hub.conf["regio_woorden"],
         }

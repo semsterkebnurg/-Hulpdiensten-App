@@ -286,7 +286,7 @@ a{color:inherit}
 .cam span{position:absolute;left:10px;bottom:8px;font-size:13px;font-weight:700;text-shadow:0 1px 4px #000;z-index:2;pointer-events:none}
 .cam .live{position:absolute;right:8px;top:8px;font-size:10.5px;font-weight:800;background:#ff3b30;color:#fff;padding:2px 7px;border-radius:6px;z-index:2}
 .cam .live-houder{position:absolute;inset:0;overflow:hidden}
-.cam .live-houder > *{display:block;width:100%;height:100%;--ha-card-border-radius:0;--ha-card-border-width:0}
+.cam .live-houder > *{display:block;width:100%;height:100%;--ha-card-border-radius:0;--ha-card-border-width:0;--ha-card-background:#000;--card-background-color:#000}
 .cam .live-knop{position:absolute;left:8px;top:8px;z-index:3;font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.6);color:#fff;border:1px solid rgba(255,255,255,.22)}
 .cam .live-knop.aan{background:var(--goed);color:#000;border-color:var(--goed)}
 .klein .cam{aspect-ratio:16/10}
@@ -362,6 +362,52 @@ a{color:inherit}
 .zonmaan .groot{font-size:28px;line-height:1;display:block;margin-bottom:4px}
 .zonmaan b{color:var(--tekst);font-size:14px;display:block}
 .boog svg{width:100%;height:46px;display:block;margin-top:6px}
+/* ---- compacte lampen ---- */
+.hoofdlamp{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:13px;background:rgba(255,255,255,.04);border:1px solid var(--rand);margin-bottom:10px}
+.hoofdlamp.aan{background:rgba(255,214,10,.1);border-color:rgba(255,214,10,.4)}
+.hoofdlamp .bol{width:30px;height:30px;border-radius:50%;flex:none;background:#2a2f37;display:grid;place-items:center;font-size:14px}
+.hoofdlamp .n{font-size:14px;font-weight:700}
+.hoofdlamp .s{font-size:11px;color:var(--zacht)}
+.hoofdlamp input{margin-left:auto;width:38%;accent-color:var(--geel)}
+.drie{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sub{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--zwak);margin:12px 0 6px;font-weight:700}
+/* ---- compacte energie ---- */
+.e-rij{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.e-rij div{background:rgba(0,0,0,.25);border-radius:10px;padding:6px 9px;font-size:10px;color:var(--zacht);text-transform:uppercase;letter-spacing:.06em}
+.e-rij b{display:block;font-size:15px;font-family:"JetBrains Mono",monospace;text-transform:none;letter-spacing:0;color:var(--tekst)}
+/* ---- regio ---- */
+.regio .rij{padding:6px 0}
+.regio .rij .t{font-size:12.5px}
+/* ---- nieuws-labels ---- */
+.label{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:5px;margin-right:6px;letter-spacing:.04em}
+.label.belangrijk{background:rgba(255,69,58,.18);color:#ff8a80}
+.label.f1{background:rgba(255,214,10,.16);color:#ffe680}
+/* ---- testtabblad ---- */
+.test-knop{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;margin-bottom:8px;
+  background:rgba(255,255,255,.05);border:1px solid var(--rand);transition:.15s}
+.test-knop:hover{background:rgba(255,255,255,.09)}
+.test-knop .i{font-size:24px;width:34px;text-align:center;flex:none}
+.test-knop b{display:block;font-size:14px}
+.test-knop small{display:block;font-size:11.5px;color:var(--zacht);margin-top:2px;line-height:1.35}
+.test-knop.rood{border-color:rgba(255,59,48,.45);background:rgba(255,59,48,.10)}
+.test-knop.blauw{border-color:rgba(10,132,255,.45);background:rgba(10,132,255,.10)}
+.veld{display:flex;gap:8px;margin-bottom:8px}
+.veld input,.veld select{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1px solid var(--rand);color:var(--tekst);border-radius:10px;padding:9px 11px;font:inherit;font-size:13px}
+.veld button{padding:9px 14px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;font-size:13px}
+.uitleg-klein{font-size:12px;color:var(--zacht);line-height:1.45;margin:0 0 10px}
+/* ---- deurbel ---- */
+.deurbel{position:absolute;inset:0;z-index:1900;display:none;flex-direction:column;background:#04060a;padding:14px}
+.deurbel.open{display:flex}
+.deurbel .bovenbalk{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.deurbel .bovenbalk h2{margin:0;font-size:24px;font-weight:800}
+.deurbel .bovenbalk .bel{font-size:30px;animation:schud .6s ease-in-out 4}
+@keyframes schud{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg)}75%{transform:rotate(18deg)}}
+.deurbel .bovenbalk button{margin-left:auto;padding:10px 18px;border-radius:12px;background:#fff;color:#000;font-weight:800}
+.deurbel .camvak{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:10px;flex:1;min-height:0}
+.deurbel .camvak .cam{aspect-ratio:auto;height:100%}
+.deurbel .camvak .cam.groot{grid-row:1 / span 3}
+.deurbel .camvak .cam .live-knop{display:none}
+@media (max-width:760px){.deurbel .camvak{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.deurbel .camvak .cam{aspect-ratio:16/9;height:auto}.deurbel .camvak .cam.groot{grid-row:auto}}
 /* ---- alarm ---- */
 .alarm{position:absolute;inset:0;z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
   background:#7a0000;animation:alarmbg 1s steps(2) infinite}
@@ -399,9 +445,10 @@ a{color:inherit}
   .groet{padding:10px 16px}
   .groet h3{font-size:19px}
 }
-@media (max-width:1250px) and (min-width:761px){
+@media (max-width:1450px) and (min-width:761px){
   .chips .chip.extra{display:none}
   .logo small{display:none}
+  .pag-knop{padding:8px 11px}
 }
 @media (max-width:1100px){
   .raster{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -432,8 +479,10 @@ class HuisPanel extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this._pagina = "meldkamer";
+    this._pagina = "dashboard";
     this._weerTab = "windy";
+    this._dingGezien = {};
+    this._deurbelKaarten = {};
     this._handtekening = {};
     this._agenda = [];
     this._energie = null;
@@ -494,16 +543,17 @@ class HuisPanel extends HTMLElement {
           <button class="menu" data-actie="menu" title="Menu">☰</button>
           <div class="logo"><div class="bol">🏠</div><div><h1>HUIS STERKENBURG</h1><small>Nunspeet</small></div></div>
           <nav class="paginas">
-            <button class="pag-knop aan" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
-            <button class="pag-knop" data-actie="pagina" data-pagina="dashboard">🏠 Dashboard</button>
+            <button class="pag-knop aan" data-actie="pagina" data-pagina="dashboard">🏠 Dashboard</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="weer">⛈️ Weer & storm</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="test">🧪 Test</button>
           </nav>
           <div class="chips" id="chips"></div>
           <div class="klok"><div class="t" id="klok">--:--:--</div><div class="d" id="datum"></div></div>
         </header>
         <div class="storm" id="storm"></div>
 
-        <main class="raster pagina p-meldkamer aan" id="p-meldkamer">
+        <main class="raster pagina p-meldkamer" id="p-meldkamer">
           <section class="kolom k1">
             <div class="kaart hero" id="hero"></div>
             <div class="kaart groei"><h2>👮 Politie in de buurt <span class="r" id="politie-info"></span></h2><div class="scroll" id="politie"></div></div>
@@ -522,7 +572,7 @@ class HuisPanel extends HTMLElement {
           </section>
         </main>
 
-        <main class="raster pagina p-dashboard" id="p-dashboard">
+        <main class="raster pagina p-dashboard aan" id="p-dashboard">
           <div class="kaart groet" id="groet"></div>
           <section class="kolom k1">
             <div class="kaart groei" id="bediening"></div>
@@ -532,8 +582,9 @@ class HuisPanel extends HTMLElement {
           </section>
           <section class="kolom k3">
             <div class="kaart" id="energie"></div>
+            <div class="kaart regio" id="regio"></div>
             <div class="kaart" id="agenda"></div>
-            <div class="kaart groei"><h2>📰 Nieuws <span class="r">NOS · Omroep Gelderland</span></h2><div class="scroll" id="nieuws"></div></div>
+            <div class="kaart groei"><h2>📰 Nieuws <span class="r">NU.nl · belangrijk & F1</span></h2><div class="scroll" id="nieuws"></div></div>
           </section>
         </main>
 
@@ -559,6 +610,48 @@ class HuisPanel extends HTMLElement {
           </section>
         </main>
 
+        <main class="raster pagina p-test" id="p-test">
+          <section class="kolom k1">
+            <div class="kaart">
+              <h2>🚒 Brandweer & politie</h2>
+              <p class="uitleg-klein">Deze knoppen doen precies wat een echte melding doet: lampen, Google Home, pop-up op je telefoon en het grote scherm. Er staat steeds TEST bij.</p>
+              <button class="test-knop rood" data-actie="test" data-soort="brand"><span class="i">🚒</span><div><b>Test melding post Nunspeet</b><small>Rood-wit knipperen, overloop, carport, buitendeur, Google Home en pop-up</small></div></button>
+              <button class="test-knop blauw" data-actie="test" data-soort="politie"><span class="i">👮</span><div><b>Test politiemelding</b><small>Slaapkamerlamp blauw-wit, Google Home en blauw scherm</small></div></button>
+              <div class="sub">Eigen testmelding</div>
+              <div class="veld"><input id="eigen-tekst" placeholder="bijv. P 1 Woningbrand Molenstraat Nunspeet"></div>
+              <div class="veld"><select id="eigen-soort"><option value="brand">🚒 Brandweer</option><option value="politie">👮 Politie</option></select><button data-actie="eigen-test">Verstuur</button></div>
+            </div>
+          </section>
+          <section class="kolom k2">
+            <div class="kaart">
+              <h2>🔔 Deurbel</h2>
+              <button class="test-knop" data-actie="test-deurbel"><span class="i">🔔</span><div><b>Test deurbel</b><small>Alle camera's live in beeld, ding-dong op de laptop en de Google Home</small></div></button>
+            </div>
+            <div class="kaart">
+              <h2>🔊 Geluid van deze laptop</h2>
+              <button class="test-knop" data-actie="geluid" data-geluid="sirene"><span class="i">🚨</span><div><b>Sirene</b><small>Het geluid bij een brandweermelding (5 seconden)</small></div></button>
+              <button class="test-knop" data-actie="geluid" data-geluid="piep"><span class="i">📟</span><div><b>Piep</b><small>Het geluid bij een politiemelding</small></div></button>
+              <button class="test-knop" data-actie="geluid" data-geluid="deurbel"><span class="i">🛎️</span><div><b>Ding-dong</b><small>Het deurbelgeluid</small></div></button>
+            </div>
+          </section>
+          <section class="kolom k3">
+            <div class="kaart">
+              <h2>🗣️ Google Home laten praten</h2>
+              <div class="veld"><select id="speaker"></select></div>
+              <div class="veld"><input id="zeg-tekst" value="Dit is een test van Huis Sterkenburg."><button data-actie="zeg">Zeg het</button></div>
+            </div>
+            <div class="kaart">
+              <h2>📺 Schermen bekijken</h2>
+              <p class="uitleg-klein">Alleen op dit scherm, zonder lampen of Google Home.</p>
+              <button class="test-knop" data-actie="voorbeeld" data-wat="brand"><span class="i">🔴</span><div><b>Alarmscherm brandweer</b></div></button>
+              <button class="test-knop" data-actie="voorbeeld" data-wat="politie"><span class="i">🔵</span><div><b>Alarmscherm politie</b></div></button>
+              <button class="test-knop" data-actie="voorbeeld" data-wat="deurbel"><span class="i">📷</span><div><b>Deurbelscherm</b></div></button>
+              <button class="test-knop" data-actie="voorbeeld" data-wat="nacht"><span class="i">🌙</span><div><b>Nachtscherm (10 seconden)</b></div></button>
+            </div>
+          </section>
+        </main>
+
+        <div class="deurbel" id="deurbel"></div>
         <div class="nacht" id="nacht"><div class="t" id="nachtklok"></div><div class="s" id="nachtinfo"></div><div class="s">Tik om het scherm te wekken</div></div>
         <div class="alarm" id="alarm"></div>
       </div>`;
@@ -578,6 +671,11 @@ class HuisPanel extends HTMLElement {
     this._audio();
     this._laadExtra();
     this._toonWeerTab();
+    try {
+      this._hass.connection.subscribeEvents(() => this._deurbel({ test: true }), "meldkamer_deurbel");
+    } catch (e) {
+      /* geen abonnement mogelijk */
+    }
   }
 
   _audio() {
@@ -644,6 +742,7 @@ class HuisPanel extends HTMLElement {
     this._tekenBediening();
     this._tekenCamInfo();
     this._tekenEnergie();
+    this._tekenRegio();
     this._tekenAgenda();
     this._tekenNieuws();
     this._tekenWeer();
@@ -651,6 +750,7 @@ class HuisPanel extends HTMLElement {
     this._tekenKnmi();
     this._tekenLucht();
     this._tekenZonMaan();
+    this._controleerDeurbel();
     this._controleerAlarm();
   }
 
@@ -666,7 +766,17 @@ class HuisPanel extends HTMLElement {
     const af = r.getElementById("aftel");
     if (af && this._alarmEind) af.textContent = `Sluit vanzelf over ${Math.max(0, Math.ceil((this._alarmEind - Date.now()) / 1000))} s`;
     this._tekenNacht(nu);
-    if (this._pagina !== "meldkamer" && Date.now() - (this._actief || 0) > 5 * 60 * 1000) this._toonPagina("meldkamer");
+    const stil = Date.now() - (this._actief || 0);
+    if (this._meldkamerTot && Date.now() < this._meldkamerTot) {
+      // Na een melding 10 minuten op het Meldkamer-tabblad blijven
+      if (this._pagina !== "meldkamer" && stil > 30 * 1000) this._toonPagina("meldkamer");
+    } else {
+      if (this._meldkamerTot) {
+        this._meldkamerTot = null;
+        this._toonPagina("dashboard");
+      } else if (this._pagina !== "dashboard" && stil > 5 * 60 * 1000) this._toonPagina("dashboard");
+    }
+    if (this._nachtVoorbeeldTot && Date.now() > this._nachtVoorbeeldTot) this._nachtVoorbeeldTot = null;
   }
 
   _tekenChips() {
@@ -871,8 +981,14 @@ class HuisPanel extends HTMLElement {
     return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
   }
 
-  _uitgelichteLamp(lampen) {
-    return lampen.find((l) => /lamp\s*s[ae]m/i.test(this._naam(l))) || lampen.find((l) => /\bs[ae]m\b/i.test(this._naam(l))) || null;
+  _instelling(sleutel, standaard) {
+    const v = this._a("sensor.meldkamer_instellingen")[sleutel];
+    return v == null ? standaard : v;
+  }
+
+  _zoekNaam(lijst, woord) {
+    const w = String(woord).toLowerCase();
+    return lijst.find((l) => this._naam(l).toLowerCase() === w) || lijst.find((l) => this._naam(l).toLowerCase().includes(w)) || null;
   }
 
   _tekenBediening() {
@@ -884,40 +1000,42 @@ class HuisPanel extends HTMLElement {
       ["input_boolean.meldkamer_nachtmodus_uit", "🌙 Nachtscherm", true],
       ["input_boolean.meldkamer_stormmodus", "⚡ Stormmodus", false],
     ];
-    const sig = [...lampen, ...luiken].map((s) => s.entity_id + s.last_updated).join() + this._sig(...toggles.map((t) => t[0]));
+    const inst = this._a("sensor.meldkamer_instellingen");
+    const sig = [...lampen, ...luiken].map((s) => s.entity_id + s.last_updated).join() + this._sig(...toggles.map((t) => t[0]), "sensor.meldkamer_instellingen");
     if (!this._veranderd("bediening", sig)) return;
-    const top = this._uitgelichteLamp(lampen);
-    const rest = lampen.filter((l) => l !== top);
-    const aantalAan = lampen.filter((l) => l.state === "on").length;
+    const hoofd = this._zoekNaam(lampen, inst.hoofdlamp || "lamp sem");
+    const gekozen = [];
+    (inst.dashboard_lampen || ["overloop", "woonkamer", "carport", "wc"]).forEach((w) => {
+      const l = this._zoekNaam(lampen.filter((x) => x !== hoofd && !gekozen.includes(x)), w);
+      if (l) gekozen.push(l);
+    });
     const kleurVan = (l) => {
       const rgb = l.attributes.rgb_color;
       return l.state === "on" ? (rgb ? `rgb(${rgb.join(",")})` : "#ffd60a") : "#333";
     };
     const pct = (l) => (l.state === "on" && l.attributes.brightness ? Math.round((l.attributes.brightness / 255) * 100) : 0);
-    const topHtml = top
-      ? `<div class="uitgelicht ${top.state === "on" ? "aan" : ""}">
-          <button class="bol" data-actie="toggle" data-id="${esc(top.entity_id)}" style="background:${top.state === "on" ? kleurVan(top) : "#2a2f37"};box-shadow:${top.state === "on" ? "0 0 22px " + kleurVan(top) : "none"}">💡</button>
-          <button style="text-align:left" data-actie="toggle" data-id="${esc(top.entity_id)}" data-meer="${esc(top.entity_id)}"><div class="n">${esc(this._naam(top))}</div><div class="s">${top.state === "on" ? pct(top) + "% aan" : "Uit"}</div></button>
-          <input type="range" min="1" max="100" value="${pct(top) || 1}" data-dimmer="${esc(top.entity_id)}" aria-label="Helderheid">
+    const hoofdHtml = hoofd
+      ? `<div class="hoofdlamp ${hoofd.state === "on" ? "aan" : ""}">
+          <button class="bol" data-actie="toggle" data-id="${esc(hoofd.entity_id)}" style="background:${hoofd.state === "on" ? kleurVan(hoofd) : "#2a2f37"};box-shadow:${hoofd.state === "on" ? "0 0 16px " + kleurVan(hoofd) : "none"}">💡</button>
+          <button style="text-align:left" data-actie="toggle" data-id="${esc(hoofd.entity_id)}" data-meer="${esc(hoofd.entity_id)}"><div class="n">${esc(this._naam(hoofd))}</div><div class="s">${hoofd.state === "on" ? pct(hoofd) + "% aan" : "Uit"}</div></button>
+          <input type="range" min="1" max="100" value="${pct(hoofd) || 1}" data-dimmer="${esc(hoofd.entity_id)}" aria-label="Helderheid">
         </div>`
       : "";
-    const lampHtml = rest
+    const lampHtml = gekozen
       .map(
         (l) => `<button class="lamp ${l.state === "on" ? "aan" : ""}" data-actie="toggle" data-id="${esc(l.entity_id)}" data-meer="${esc(l.entity_id)}" title="Rechtsklik voor helderheid en kleur">
           <span class="bol" style="background:${kleurVan(l)};color:${kleurVan(l)}"></span><span class="n">${esc(this._naam(l))}</span><span class="s">${l.state === "on" ? pct(l) + "%" : "Uit"}</span></button>`
       )
       .join("");
-    const alleIds = luiken.map((c) => c.entity_id).join(",");
-    const luikHtml = luiken
-      .map((c) => {
-        const pos = c.attributes.current_position;
-        const st = { open: "Open", closed: "Dicht", opening: "Gaat open…", closing: "Gaat dicht…" }[c.state] || c.state;
-        return `<div class="luik"><div class="n">${esc(this._naam(c))}<div class="s">${st}${pos != null ? " · " + pos + "%" : ""}</div></div>
-          <button data-actie="luik" data-dienst="open_cover" data-id="${esc(c.entity_id)}" title="Open">▲</button>
-          <button data-actie="luik" data-dienst="stop_cover" data-id="${esc(c.entity_id)}" title="Stop">■</button>
-          <button data-actie="luik" data-dienst="close_cover" data-id="${esc(c.entity_id)}" title="Dicht">▼</button></div>`;
-      })
-      .join("");
+    const luik = this._zoekNaam(luiken, inst.hoofdrolluik || "sem");
+    const luikRij = (naam, ids, status) => `<div class="luik"><div class="n">${naam}${status ? `<div class="s">${status}</div>` : ""}</div>
+          <button data-actie="luik" data-dienst="open_cover" data-id="${ids}" title="Open">▲</button>
+          <button data-actie="luik" data-dienst="stop_cover" data-id="${ids}" title="Stop">■</button>
+          <button data-actie="luik" data-dienst="close_cover" data-id="${ids}" title="Dicht">▼</button></div>`;
+    const status = (c) => {
+      const pos = c.attributes.current_position;
+      return ({ open: "Open", closed: "Dicht", opening: "Gaat open…", closing: "Gaat dicht…" }[c.state] || c.state) + (pos != null ? " · " + pos + "%" : "");
+    };
     const toggleHtml = toggles
       .map(([id, label, omgekeerd]) => {
         if (!this._s(id)) return "";
@@ -926,15 +1044,14 @@ class HuisPanel extends HTMLElement {
       })
       .join("");
     this.shadowRoot.getElementById("bediening").innerHTML = `
-      <h2>💡 Lampen & rolluiken <span class="r">${aantalAan} van ${lampen.length} aan</span></h2>
+      <h2>💡 Verlichting <span class="r">${lampen.filter((l) => l.state === "on").length} van ${lampen.length} aan</span></h2>
       <div class="scroll">
-        ${topHtml}
-        ${lampen.length ? `<div class="alle"><button class="aan-knop" data-actie="alle" data-dienst="turn_on">💡 Alle lampen aan</button><button data-actie="alle" data-dienst="turn_off">🌑 Alle lampen uit</button></div>` : `<div class="leeg">Nog geen lampen gekoppeld.</div>`}
-        ${rest.length ? `<div class="schakels">${lampHtml}</div>` : ""}
-        ${luiken.length ? `<div class="luiken">${luiken.length > 1 ? `<div class="luik"><div class="n">🪟 Alle rolluiken</div>
-          <button data-actie="luik" data-dienst="open_cover" data-id="${alleIds}">▲</button>
-          <button data-actie="luik" data-dienst="stop_cover" data-id="${alleIds}">■</button>
-          <button data-actie="luik" data-dienst="close_cover" data-id="${alleIds}">▼</button></div>` : ""}${luikHtml}</div>` : ""}
+        ${hoofdHtml}
+        ${gekozen.length ? `<div class="drie">${lampHtml}</div>` : `<div class="leeg">Geen lampen gevonden met de namen overloop, woonkamer, carport of wc.</div>`}
+        ${lampen.length ? `<div class="alle" style="margin-top:8px"><button class="aan-knop" data-actie="alle" data-dienst="turn_on">💡 Alle lampen aan</button><button data-actie="alle" data-dienst="turn_off">🌑 Alle lampen uit</button></div>` : ""}
+        ${luiken.length ? `<div class="sub">🪟 Rolluiken</div><div class="luiken" style="margin-top:0">
+          ${luik ? luikRij(esc(this._naam(luik)), esc(luik.entity_id), status(luik)) : ""}
+          ${luiken.length > 1 ? luikRij("Alle rolluiken", luiken.map((c) => c.entity_id).join(","), "") : ""}</div>` : ""}
       </div>
       <div class="toggles">${toggleHtml}</div>`;
   }
@@ -1064,37 +1181,31 @@ class HuisPanel extends HTMLElement {
       el.innerHTML = `<h2>⚡ Energie</h2><div class="leeg">Nog geen energiegegevens.</div>`;
       return;
     }
-    const fmt = (w) => (Math.abs(w) >= 1000 ? (w / 1000).toFixed(2) + " kW" : Math.round(w) + " W");
+    const fmt = (w) => (Math.abs(w) >= 1000 ? (w / 1000).toFixed(1) + " kW" : Math.round(w) + " W");
     const netW = net ? naarW(net) : null;
     const zonW = zonTotaal ? naarW(zonTotaal) : panelen.reduce((t, s) => t + naarW(s), 0);
     const e = this._energie || {};
-    const maxPaneel = Math.max(1, ...panelen.map(naarW));
     const verbruik = e.stroom != null ? e.stroom + (e.zon || 0) - (e.terug || 0) : null;
     const zelf = verbruik && e.zon != null ? Math.max(0, Math.min(100, Math.round(((e.zon - (e.terug || 0)) / verbruik) * 100))) : null;
-    let uren = "";
-    if (e.uren?.length) {
-      const max = Math.max(0.1, ...e.uren.map((u) => Math.max(u.zon, u.verbruik)));
-      const bw = 100 / 24;
-      uren = `<div class="uurgrafiek"><svg viewBox="0 0 100 50" preserveAspectRatio="none">
-        ${e.uren.map((u, i) => `<rect x="${i * bw + 0.4}" y="${50 - (u.verbruik / max) * 48}" width="${bw / 2 - 0.4}" height="${(u.verbruik / max) * 48}" fill="#0a84ff" rx=".5"/>
-          <rect x="${i * bw + bw / 2}" y="${50 - (u.zon / max) * 48}" width="${bw / 2 - 0.4}" height="${(u.zon / max) * 48}" fill="#ffd60a" rx=".5"/>`).join("")}
-        </svg><div class="legenda"><span><i style="background:#0a84ff"></i>Verbruik</span><span><i style="background:#ffd60a"></i>Zon</span><span style="margin-left:auto">per uur · 00–24u</span></div></div>`;
-    }
     el.innerHTML = `
-      <h2>⚡ Energie <span class="r">nu & vandaag</span></h2>
-      <div class="energie-nu">
-        ${netW != null ? `<div><small>${netW < 0 ? "Teruglevering" : "Van het net"}</small><b class="${netW < 0 ? "terug" : ""}">${fmt(Math.abs(netW))}</b></div>` : ""}
-        ${zonTotaal || panelen.length ? `<div><small>Zonnepanelen</small><b class="zon">${fmt(zonW)}</b></div>` : ""}
-      </div>
-      ${panelen.length ? `<div class="panelen" title="Opbrengst per paneel">${panelen.map((p) => `<div style="height:${(naarW(p) / maxPaneel) * 100}%" title="${esc(this._naam(p))}: ${fmt(naarW(p))}"></div>`).join("")}</div>` : ""}
-      ${Object.keys(e).length ? `<div class="energie-dag">
-        ${verbruik != null ? `<div>Verbruikt<b>${verbruik.toFixed(1)} kWh</b></div>` : ""}
-        ${e.zon != null ? `<div>Opgewekt<b class="zon">${e.zon.toFixed(1)} kWh</b></div>` : ""}
-        ${e.terug != null ? `<div>Terug<b class="terug">${e.terug.toFixed(1)} kWh</b></div>` : ""}
-        ${e.gas != null ? `<div>Gas<b>${e.gas.toFixed(2)} m³</b></div>` : ""}
-      </div>` : ""}
-      ${zelf != null ? `<div class="zelf">🏠 ${zelf}% van je verbruik kwam vandaag van je eigen panelen<div class="balk"><div style="width:${zelf}%"></div></div></div>` : ""}
-      ${uren}`;
+      <h2>⚡ Energie <span class="r">${zelf != null ? `☀️ ${zelf}% eigen stroom vandaag` : ""}</span></h2>
+      <div class="e-rij">
+        ${netW != null ? `<div>${netW < 0 ? "Terug" : "Net"} nu<b class="${netW < 0 ? "terug" : ""}">${fmt(Math.abs(netW))}</b></div>` : ""}
+        ${zonTotaal || panelen.length ? `<div>Zon nu<b class="zon">${fmt(zonW)}</b></div>` : ""}
+        ${verbruik != null ? `<div>Verbruik vandaag<b>${verbruik.toFixed(1)} kWh</b></div>` : e.gas != null ? `<div>Gas vandaag<b>${e.gas.toFixed(1)} m³</b></div>` : ""}
+      </div>`;
+  }
+
+  _tekenRegio() {
+    if (!this._veranderd("regio", this._sig("sensor.meldkamer_laatste_melding", "sensor.meldkamer_instellingen"))) return;
+    const woorden = (this._instelling("regio_woorden", ["NOG", "Noord- en Oost-Gelderland"]) || []).map((w) => w.toLowerCase());
+    const lijst = (this._p2000().nl || [])
+      .filter((m) => woorden.some((w) => (m.titel + " " + (m.eenheden || []).join(" ")).toLowerCase().includes(w)))
+      .slice(0, 3);
+    this.shadowRoot.getElementById("regio").innerHTML = `<h2>🚒 Brandweer regio NOG <span class="r"><button class="klein-knop" data-actie="pagina" data-pagina="meldkamer">Meer →</button></span></h2>
+      ${lijst.length
+        ? lijst.map((m) => `<div class="rij">${this._badge(m)}<div><div class="t">${esc(m.kort || m.titel)}</div></div><div class="k" data-sinds="${esc(m.tijd)}">${tijdGeleden(m.tijd)}</div></div>`).join("")
+        : `<div class="leeg">Nog geen meldingen in de regio.</div>`}`;
   }
 
   async _laadEnergie() {
@@ -1195,7 +1306,7 @@ class HuisPanel extends HTMLElement {
     const items = (this._a("sensor.meldkamer_nieuws").items || []).slice(0, 10);
     this.shadowRoot.getElementById("nieuws").innerHTML = items.length
       ? items
-          .map((n) => `<a class="nieuws" href="${esc(n.link)}" target="_blank" rel="noopener"><div class="t">${esc(n.titel)}</div><div class="s"><span class="bron">${esc(n.bron)}</span> · <span data-sinds="${esc(n.tijd)}">${tijdGeleden(n.tijd)}</span></div></a>`)
+          .map((n) => `<a class="nieuws" href="${esc(n.link)}" target="_blank" rel="noopener"><div class="t">${n.soort === "belangrijk" ? '<span class="label belangrijk">BELANGRIJK</span>' : n.soort === "f1" ? '<span class="label f1">🏎️ F1</span>' : ""}${esc(n.titel)}</div><div class="s"><span class="bron">${esc(n.bron)}</span> · <span data-sinds="${esc(n.tijd)}">${tijdGeleden(n.tijd)}</span></div></a>`)
           .join("")
       : `<div class="leeg">Nieuws wordt geladen…</div>`;
   }
@@ -1383,7 +1494,8 @@ class HuisPanel extends HTMLElement {
     const isNacht = u >= NACHT_VAN || u < NACHT_TOT;
     const uit = this._aan("input_boolean.meldkamer_nachtmodus_uit");
     const alarm = this.shadowRoot.getElementById("alarm").classList.contains("open");
-    const toon = isNacht && !uit && !alarm && Date.now() > this._wakkerTot;
+    const deurbel = this.shadowRoot.getElementById("deurbel").classList.contains("open");
+    const toon = (this._nachtVoorbeeldTot && Date.now() < this._nachtVoorbeeldTot) || (isNacht && !uit && !alarm && !deurbel && Date.now() > this._wakkerTot);
     el.classList.toggle("open", toon);
     if (toon) {
       const m = this._p2000().melding;
@@ -1415,6 +1527,7 @@ class HuisPanel extends HTMLElement {
 
   _toonAlarm(m) {
     this._alarmId = m.id;
+    this._meldkamerTot = Date.now() + 10 * 60 * 1000;
     this._toonPagina("meldkamer");
     const politie = m.soort === "politie";
     const r = m.route;
@@ -1460,7 +1573,8 @@ class HuisPanel extends HTMLElement {
     clearTimeout(this._alarmTimer);
     this._alarmEind = null;
     this.shadowRoot.getElementById("alarm").classList.remove("open");
-    if (this._alarmId) this._bevestig(this._alarmId);
+    if (this._alarmId && !this._isVoorbeeld) this._bevestig(this._alarmId);
+    this._isVoorbeeld = false;
     this._wakkerTot = Date.now() + 5 * 60 * 1000;
   }
 
@@ -1504,12 +1618,128 @@ class HuisPanel extends HTMLElement {
     this._geluid = null;
   }
 
+  // ---- deurbel ----
+
+  _controleerDeurbel() {
+    const bellen = Object.values(this._hass.states).filter(
+      (s) => s.entity_id.startsWith("event.") && (s.entity_id.endsWith("_ding") || s.attributes.event_type === "ding")
+    );
+    for (const b of bellen) {
+      const vorige = this._dingGezien[b.entity_id];
+      this._dingGezien[b.entity_id] = b.state;
+      if (vorige === undefined || vorige === b.state || b.state === "unavailable" || b.state === "unknown") continue;
+      if (b.attributes.event_type && !["ding", "doorbell", "pressed"].includes(b.attributes.event_type)) continue;
+      if (Date.now() - new Date(b.state).getTime() < 60 * 1000) this._deurbel({ event: b.entity_id });
+    }
+  }
+
+  _deurbelCamera(info) {
+    const cams = this._camLijst();
+    if (info.event) {
+      const prefix = info.event.replace(/^event\./, "").replace(/_ding$/, "");
+      const cam = cams.find((c) => c.entity_id.startsWith("camera." + prefix));
+      if (cam) return cam;
+    }
+    return cams.find((c) => /deur|bel|voor|ding/i.test(this._naam(c))) || cams[0];
+  }
+
+  async _deurbel(info = {}, metGeluid = true) {
+    const el = this.shadowRoot.getElementById("deurbel");
+    const cams = this._camLijst();
+    const bel = this._deurbelCamera(info);
+    const rest = cams.filter((c) => c !== bel).slice(0, 3);
+    const nu = new Date();
+    el.innerHTML = `<div class="bovenbalk"><span class="bel">🔔</span><div><h2>Er wordt aangebeld${info.test ? " · TEST" : ""}</h2>
+        <div style="color:var(--zacht);font-size:13px">${bel ? esc(this._naam(bel).replace(/ live view$/i, "")) + " · " : ""}${pad(nu.getHours())}:${pad(nu.getMinutes())}:${pad(nu.getSeconds())}</div></div>
+        <button data-actie="deurbel-sluit">✓ Sluiten</button></div>
+      <div class="camvak">
+        ${bel ? `<div class="cam groot" data-id="${esc(bel.entity_id)}"><div class="live-houder"></div><b class="live">● LIVE</b><span>🔔 ${esc(this._naam(bel).replace(/ live view$/i, ""))}</span></div>` : `<div class="leeg">Geen camera's gekoppeld.</div>`}
+        ${rest.map((c) => `<div class="cam" data-id="${esc(c.entity_id)}"><div class="live-houder"></div><b class="live">● LIVE</b><span>📷 ${esc(this._naam(c).replace(/ live view$/i, ""))}</span></div>`).join("")}
+      </div>`;
+    el.classList.add("open");
+    if (metGeluid) this._dingDong();
+    clearTimeout(this._deurbelTimer);
+    this._deurbelTimer = setTimeout(() => this._sluitDeurbel(), 2 * 60 * 1000);
+    for (const vak of el.querySelectorAll(".cam[data-id]")) {
+      const kaart = await this._deurbelKaart(vak.dataset.id);
+      if (kaart) vak.querySelector(".live-houder").appendChild(kaart);
+    }
+  }
+
+  async _deurbelKaart(id) {
+    if (!this._deurbelKaarten[id]) {
+      const helpers = await this._kaartHulp();
+      if (!helpers) return null;
+      this._deurbelKaarten[id] = helpers.createCardElement({
+        type: "picture-entity", entity: id, camera_view: "live", show_name: false, show_state: false, tap_action: { action: "none" },
+      });
+    }
+    const k = this._deurbelKaarten[id];
+    k.hass = this._hass;
+    this._liveKaarten["db:" + id] = k;
+    return k;
+  }
+
+  _sluitDeurbel() {
+    clearTimeout(this._deurbelTimer);
+    const el = this.shadowRoot.getElementById("deurbel");
+    el.classList.remove("open");
+    el.innerHTML = "";
+    Object.keys(this._liveKaarten).filter((k) => k.startsWith("db:")).forEach((k) => delete this._liveKaarten[k]);
+  }
+
+  _dingDong() {
+    try {
+      const a = new Audio("/local/meldkamer/deurbel.wav");
+      a.volume = 1;
+      a.play().catch(() => this._toon([[659, 0]], 0.6, "sine", 0.3));
+    } catch (e) {
+      /* geen geluid */
+    }
+  }
+
+  _vulSpeakers() {
+    const sel = this.shadowRoot.getElementById("speaker");
+    if (!sel || sel.dataset.gevuld) return;
+    const spelers = this._ent("media_player").filter((m) => !/diw7022|tv|apple|vsx|dlna/i.test(m.entity_id + this._naam(m)));
+    const voorkeur = spelers.find((m) => /sem|google|home|mini/i.test(this._naam(m))) || spelers[0];
+    sel.innerHTML = spelers.map((m) => `<option value="${esc(m.entity_id)}" ${m === voorkeur ? "selected" : ""}>${esc(this._naam(m))}</option>`).join("") || "<option>Geen speakers gevonden</option>";
+    sel.dataset.gevuld = "1";
+  }
+
+  _zeg() {
+    const r = this.shadowRoot;
+    const speler = r.getElementById("speaker").value;
+    const tekst = r.getElementById("zeg-tekst").value.trim();
+    const tts = this._ent("tts").find((t) => /google/i.test(t.entity_id)) || this._ent("tts")[0];
+    if (!tts || !speler.startsWith("media_player.") || !tekst) return alert("Geen spraakdienst of speaker gevonden.");
+    this._hass.callService("tts", "speak", { entity_id: tts.entity_id, media_player_entity_id: speler, message: tekst, language: "nl", cache: false });
+  }
+
+  _voorbeeld(wat) {
+    if (wat === "nacht") {
+      this._nachtVoorbeeldTot = Date.now() + 10 * 1000;
+      return;
+    }
+    if (wat === "deurbel") return this._deurbel({ test: true }, true);
+    const politie = wat === "politie";
+    this._toonAlarm({
+      id: "voorbeeld-" + Date.now(), soort: politie ? "politie" : "brand", prio: 1, test: true,
+      kort: politie ? "Voorbeeld: Verdachte situatie Stationsplein Nunspeet" : "Voorbeeld: Woningbrand Stationsplein Nunspeet",
+      adres: "Stationsplein, Nunspeet", eenheden: [politie ? "Politie (voorbeeld)" : "Brandweer NOG (Bevelvoerder Nunspeet)"],
+      route: { auto: { minuten: 4, km: 1.8 }, fiets: { minuten: 6, km: 1.8 }, advies: "Via Zeeweg-rotonde (2 min sneller)", sneller: "auto" },
+    });
+    this._meldkamerTot = null;
+    this._isVoorbeeld = true;
+  }
+
   // ---- bediening ----
 
   _toonPagina(p) {
     this._pagina = p;
     const r = this.shadowRoot;
-    ["meldkamer", "dashboard", "weer"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
+    ["meldkamer", "dashboard", "weer", "test"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
+    if (p === "test") this._vulSpeakers();
     r.querySelectorAll(".pag-knop").forEach((b) => b.classList.toggle("aan", b.dataset.pagina === p));
     if (p === "dashboard" && this._hass) this._tekenCams();
     if (p === "weer") this._toonWeerTab();
@@ -1568,6 +1798,36 @@ class HuisPanel extends HTMLElement {
       }
       case "stil":
         this._stopGeluid();
+        break;
+      case "eigen-test": {
+        const r = this.shadowRoot;
+        const tekst = r.getElementById("eigen-tekst").value.trim();
+        const soort = r.getElementById("eigen-soort").value;
+        if (!tekst) return alert("Typ eerst een meldingstekst.");
+        h.callService("meldkamer", "test_melding", { soort, tekst: "TEST " + tekst });
+        break;
+      }
+      case "test-deurbel":
+        h.callService("meldkamer", "test_deurbel", {});
+        break;
+      case "deurbel-sluit":
+        this._sluitDeurbel();
+        break;
+      case "geluid": {
+        const g = el.dataset.geluid;
+        this._audio();
+        if (g === "sirene") {
+          this._startSirene();
+          setTimeout(() => this._stopGeluid(), 5000);
+        } else if (g === "piep") this._piep();
+        else this._dingDong();
+        break;
+      }
+      case "zeg":
+        this._zeg();
+        break;
+      case "voorbeeld":
+        this._voorbeeld(el.dataset.wat);
         break;
       case "bevestig":
         this._sluitAlarm();

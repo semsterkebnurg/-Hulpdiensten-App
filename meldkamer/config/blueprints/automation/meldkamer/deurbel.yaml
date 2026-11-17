@@ -1,0 +1,86 @@
+blueprint:
+  name: "Huis Sterkenburg: deurbel"
+  description: >
+    Als er wordt aangebeld bij de Ring-deurbel speelt de Google Home (en/of
+    Sonos) een ding-dong af. Het dashboard laat zelf alle camera's live zien.
+  domain: automation
+  input:
+    deurbel:
+      name: Deurbel
+      description: Het "ding"-onderdeel van je Ring-deurbel (bijv. event.voordeur_ding).
+      selector:
+        entity:
+          filter:
+            - domain: event
+    speakers:
+      name: Speakers (Google Home / Sonos)
+      default: []
+      selector:
+        entity:
+          multiple: true
+          filter:
+            - domain: media_player
+    zeggen:
+      name: Ook zeggen "Er wordt aangebeld"
+      default: false
+      selector:
+        boolean:
+    tts:
+      name: Spraakdienst (alleen nodig als je hierboven 'zeggen' aanzet)
+      default: ""
+      selector:
+        entity:
+          filter:
+            - domain: tts
+
+mode: single
+max_exceeded: silent
+
+triggers:
+  - trigger: state
+    entity_id: !input deurbel
+    not_from: ["unavailable", "unknown"]
+    id: echt
+  - trigger: event
+    event_type: meldkamer_deurbel
+    id: test
+
+variables:
+  speakers: !input speakers
+  zeggen: !input zeggen
+  tts: !input tts
+
+conditions:
+  - condition: template
+    value_template: >-
+      {{ trigger.id == 'test' or trigger.to_state.attributes.event_type in ['ding', 'doorbell', 'pressed'] }}
+
+actions:
+  - if:
+      - condition: template
+        value_template: "{{ speakers | length > 0 }}"
+    then:
+      - action: media_player.play_media
+        continue_on_error: true
+        target:
+          entity_id: "{{ speakers }}"
+        data:
+          media_content_id: /local/meldkamer/deurbel.wav
+          media_content_type: music
+      - if:
+          - condition: template
+            value_template: "{{ zeggen and tts != '' }}"
+        then:
+          - delay:
+              seconds: 3
+          - action: tts.speak
+            continue_on_error: true
+            target:
+              entity_id: "{{ tts }}"
+            data:
+              media_player_entity_id: "{{ speakers }}"
+              language: nl
+              message: "Er wordt aangebeld bij de voordeur."
+  # Niet vaker dan eens per 20 seconden
+  - delay:
+      seconds: 20

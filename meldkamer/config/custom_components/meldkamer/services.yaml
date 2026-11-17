@@ -15,3 +15,7 @@ test_melding:
       example: "P 1 TEST Gebouwbrand Stationsplein Nunspeet"
       selector:
         text:
+
+test_deurbel:
+  name: Test-deurbel
+  description: Doet alsof er wordt aangebeld (camera's op het dashboard en deurbelgeluid).

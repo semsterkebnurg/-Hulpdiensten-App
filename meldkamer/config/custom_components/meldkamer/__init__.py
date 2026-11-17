@@ -6,6 +6,7 @@ import asyncio
 from datetime import date, datetime, timedelta, timezone
 import logging
 import math
+import re
 from typing import Any
 from urllib.parse import quote
 
@@ -49,6 +50,15 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional("proef_capcodes", default=["0803000"]): vol.All(cv.ensure_list, [cv.string]),
                 # Politie: alleen meldingen in deze plaatsen
                 vol.Optional("politie", default=True): cv.boolean,
+                # Dashboard: welke lampen en rolluiken (woorden uit de naam)
+                vol.Optional("hoofdlamp", default="lamp sem"): cv.string,
+                vol.Optional(
+                    "dashboard_lampen", default=["overloop", "woonkamer", "carport", "wc"]
+                ): vol.All(cv.ensure_list, [cv.string]),
+                vol.Optional("hoofdrolluik", default="sem"): cv.string,
+                vol.Optional(
+                    "regio_woorden", default=["NOG", "Noord- en Oost-Gelderland", "0806240"]
+                ): vol.All(cv.ensure_list, [cv.string]),
                 vol.Optional(
                     "politie_plaatsen", default=["Nunspeet", "Elspeet", "Vierhouten", "Hulshorst", "Doornspijk"]
                 ): vol.All(cv.ensure_list, [cv.string]),
@@ -81,6 +91,11 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
             {vol.Optional("tekst"): cv.string, vol.Optional("soort", default="brand"): vol.In(["brand", "politie"])}
         ),
     )
+
+    async def test_deurbel(call: ServiceCall) -> None:
+        hass.bus.async_fire("meldkamer_deurbel", {"test": True})
+
+    hass.services.async_register(DOMAIN, "test_deurbel", test_deurbel)
 
     hass.async_create_task(
         discovery.async_load_platform(hass, Platform.SENSOR, DOMAIN, {}, config)
@@ -435,18 +450,29 @@ class MeldkamerHub:
     # ---------- Nieuws ----------
 
     async def _nieuws(self) -> dict:
-        items = []
+        items: list[dict] = []
+        titels: set[str] = set()
         for naam, url in self.bronnen["nieuws"]:
             try:
                 tekst = await _get(self.session, url, soort="text")
-                for it in p2000.lees_feed(tekst)[:10]:
-                    items.append({"bron": naam, "titel": it["titel"], "tijd": it["tijd"], "link": it["link"]})
+                for it in p2000.lees_feed(tekst)[:40]:
+                    if it["titel"] in titels:
+                        continue
+                    titels.add(it["titel"])
+                    soort = nieuws_soort(it["titel"], it.get("categorie", ""), url)
+                    if soort == "sport":
+                        continue
+                    items.append({"bron": naam, "titel": it["titel"], "tijd": it["tijd"], "link": it["link"], "soort": soort})
             except Exception as err:  # noqa: BLE001
                 _LOGGER.debug("Nieuws van %s niet beschikbaar: %s", naam, err)
         if not items:
             raise UpdateFailed("Geen nieuws beschikbaar")
         items.sort(key=lambda i: i["tijd"], reverse=True)
-        return {"items": items[:14]}
+        belangrijk = [i for i in items if i["soort"] in ("belangrijk", "f1")]
+        # Te weinig belangrijk nieuws? Aanvullen met het laatste algemene nieuws.
+        aanvulling = [i for i in items if i not in belangrijk][: max(0, 8 - len(belangrijk))]
+        lijst = sorted(belangrijk[:14] + aanvulling, key=lambda i: i["tijd"], reverse=True)
+        return {"items": lijst}
 
     # ---------- Afval ----------
 
@@ -467,6 +493,33 @@ class MeldkamerHub:
 
 # Veelvoorkomende helikoptertypes (traumaheli, politie, defensie)
 HELI_TYPES = {"EC35", "EC45", "EC30", "EC55", "H135", "H145", "AS65", "A139", "AW139", "NH90", "CH47", "H47", "AH64", "B06", "R44", "R22", "EC20", "AS50", "A109", "A169", "B429"}
+
+
+RE_F1 = re.compile(r"\b(f1|formule 1|formule-1|grand prix|verstappen|max verstappen|red bull racing)\b", re.I)
+RE_SPORT = re.compile(
+    r"\b(voetbal|eredivisie|ajax|psv|feyenoord|az|fc |champions league|europa league|oranjeleeuwinnen|"
+    r"tennis|wielren|schaats|darts|hockey|handbal|volleybal|olympisch|wk |ek |doelpunt|trainer|transfer)\b",
+    re.I,
+)
+RE_BELANGRIJK = re.compile(
+    r"(ramp|ongeluk|ongeval|botsing|crash|neergestort|explosie|brand|aanslag|schiet|steekpartij|dode|doden|"
+    r"dodelijk|omgekomen|gewond|slachtoffer|evacu|aardbeving|tsunami|orkaan|storm|overstroming|code (oranje|rood)|"
+    r"knmi|kabinet|premier|minister|tweede kamer|verkiezing|valt|gevallen|oorlog|leger|raket|aanval|"
+    r"gijzel|vermist|stroomstoring|storing|nl-alert|gaslek|terreur|staatsgreep|noodtoestand|pandemie|virus)",
+    re.I,
+)
+
+
+def nieuws_soort(titel: str, categorie: str, url: str) -> str:
+    """Bepaal of nieuws belangrijk, F1, sport (weglaten) of gewoon is."""
+    tekst = f"{titel} {categorie}"
+    if RE_F1.search(tekst) or "formule" in url.lower():
+        return "f1"
+    if "sport" in categorie.lower() or "/sport" in url.lower() or RE_SPORT.search(titel):
+        return "sport"
+    if RE_BELANGRIJK.search(titel):
+        return "belangrijk"
+    return "algemeen"
 
 
 MAX_LIJST = 12

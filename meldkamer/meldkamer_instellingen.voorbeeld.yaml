@@ -40,3 +40,11 @@ afval:
   Restafval: []
   Papier: []
   PMD: []
+
+# ---- Dashboard ----
+# Bovenste lamp (deel van de naam is genoeg)
+hoofdlamp: "lamp sem"
+# De lampen in het groepje eronder (deel van de naam)
+dashboard_lampen: ["overloop", "woonkamer", "carport", "wc"]
+# Het rolluik dat bovenaan staat
+hoofdrolluik: "sem"

@@ -92,6 +92,9 @@ def lees_feed(xml_tekst: str) -> list[dict]:
                 "eenheden": regels,
                 "tijd": datum.isoformat(),
                 "link": link,
+                "categorie": " ".join(
+                    _tekst(k) for k in item if k.tag.split("}")[-1].lower() == "category"
+                ),
             }
         )
     return meldingen
