@@ -4,7 +4,7 @@
  * Dashboard (huis, lampen, camera's, energie, agenda, nieuws) en Weer & storm.
  */
 
-const FONTS = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Instrument+Serif:ital@0;1&display=swap";
+const FONTS = "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Instrument+Serif:ital@0;1&display=swap";
 const NACHT_VAN = 23;
 const NACHT_TOT = 7;
 const ALARM_DUUR = 2 * 60 * 1000;
@@ -129,32 +129,32 @@ function maan(d = new Date()) {
 
 const CSS = `
 :host{
-  --bg:#070d1a; --kaart:rgba(28,40,68,.55); --rand:rgba(160,190,255,.10);
-  --tekst:#f1f5fc; --zacht:#93a3c0; --zwak:#56658a;
-  --accent:#ff7a18; --accent2:#ffb347; --goed:#34d399; --geel:#ffd60a; --blauw:#0a84ff; --cyaan:#7cc4ff;
+  --bg:#07110d; --kaart:rgba(28,52,42,.55); --rand:rgba(170,230,200,.10);
+  --tekst:#eef7f2; --zacht:#9db5aa; --zwak:#5b7468;
+  --accent:#16a36b; --accent2:#4fd09a; --goed:#34d399; --geel:#ffd60a; --blauw:#0a84ff; --cyaan:#7cc4ff;
   --r:22px; --serif:"Instrument Serif",Georgia,serif;
   --vlak:rgba(255,255,255,.05); --vlak2:rgba(0,0,0,.25);
-  --kaartbg:linear-gradient(160deg,rgba(60,80,130,.32),rgba(25,35,62,.45));
+  --kaartbg:linear-gradient(160deg,rgba(70,120,100,.24),rgba(16,38,30,.55));
   --kaartschaduw:0 14px 34px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
   --lijfbg:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
   --achtergrond:radial-gradient(900px 600px at 85% -10%, color-mix(in srgb,var(--accent) 22%,transparent), transparent 60%),
-    radial-gradient(1000px 700px at -10% 110%, rgba(40,90,200,.28), transparent 60%),
-    linear-gradient(160deg,#0b1426 0%,#111e3a 55%,#0a1222 100%);
+    radial-gradient(1000px 700px at -10% 110%, rgba(20,140,100,.22), transparent 60%),
+    linear-gradient(160deg,#08130f 0%,#0e2219 55%,#07110d 100%);
   --stormtekst:#ffe680; --lege-balk:#262b33;
   display:block; height:100vh; min-height:100%; background:var(--bg); color:var(--tekst);
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; -webkit-font-smoothing:antialiased;
+  font-family:"Plus Jakarta Sans",Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; -webkit-font-smoothing:antialiased;
 }
 :host([thema="licht"]){
-  --bg:#f4ede6; --tekst:#2a2420; --zacht:#7d7066; --zwak:#ab9e94; --rand:rgba(120,85,55,.13);
-  --accent:#ef5b39; --accent2:#ff8a62; --goed:#16a34a; --cyaan:#0e7fc2;
-  --vlak:rgba(120,85,55,.06); --vlak2:rgba(255,255,255,.6);
-  --kaartbg:linear-gradient(160deg,rgba(255,255,255,.78),rgba(255,247,240,.52));
-  --kaartschaduw:0 14px 34px rgba(120,80,40,.12), inset 0 1px 0 rgba(255,255,255,.9);
+  --bg:#eef3ef; --tekst:#1c2923; --zacht:#62766c; --zwak:#9cb0a6; --rand:rgba(40,90,70,.12);
+  --accent:#129e66; --accent2:#3fcf8e; --goed:#15803d; --cyaan:#0e7fc2;
+  --vlak:rgba(40,90,70,.06); --vlak2:rgba(255,255,255,.66);
+  --kaartbg:linear-gradient(160deg,rgba(255,255,255,.82),rgba(244,251,247,.56));
+  --kaartschaduw:0 14px 34px rgba(30,80,60,.10), inset 0 1px 0 rgba(255,255,255,.95);
   --lijfbg:linear-gradient(160deg,rgba(255,255,255,.55),rgba(255,255,255,.28));
-  --achtergrond:radial-gradient(900px 600px at 90% -10%, rgba(255,160,120,.55), transparent 60%),
-    radial-gradient(900px 700px at -10% 110%, rgba(255,214,190,.7), transparent 60%),
-    linear-gradient(160deg,#efe4da 0%,#e9d7c9 55%,#f3e9e1 100%);
-  --stormtekst:#7a4a00; --lege-balk:#e6dbd2;
+  --achtergrond:radial-gradient(900px 600px at 90% -10%, rgba(110,215,165,.45), transparent 60%),
+    radial-gradient(900px 700px at -10% 110%, rgba(195,232,212,.75), transparent 60%),
+    linear-gradient(160deg,#e3ede7 0%,#d8e7de 55%,#ecf3ef 100%);
+  --stormtekst:#7a4a00; --lege-balk:#d6e5dc;
 }
 :host([storm]){ --accent:#d97706; --accent2:#f5a524; }
 :host([modus="brand"]){ --accent:#ff3b30; --accent2:#ff7a5c; }
@@ -166,7 +166,7 @@ a{color:inherit}
   background:
     var(--achtergrond);
   transition:filter .8s;}
-:host([thema="donker"]:not([modus]):not([fel])) .wrap{filter:brightness(.78) saturate(.95)}
+:host([thema="donker"]:not([modus]):not([fel])) .wrap{filter:brightness(.88)}
 :host([avond]:not([modus]):not([fel])) .wrap{filter:brightness(.9) sepia(.06)}
 @keyframes intro{from{opacity:0;transform:scale(1.015);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @keyframes binnen{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
@@ -462,47 +462,70 @@ a{color:inherit}
 .deurbel .camvak .cam .live-knop{display:none}
 @media (max-width:760px){.deurbel .camvak{grid-template-columns:1fr;grid-template-rows:none;overflow:auto}.deurbel .camvak .cam{aspect-ratio:16/9;height:auto}.deurbel .camvak .cam.groot{grid-row:auto}}
 /* ==== Dashboard (glassy) ==== */
-.p-dashboard{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:none!important;grid-auto-rows:max-content;align-content:start;overflow-y:auto;scrollbar-width:none}
+.p-dashboard{grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:auto auto auto minmax(0,1fr)!important;overflow:hidden;gap:12px!important;padding:14px 16px 16px 14px!important}
 .p-dashboard::-webkit-scrollbar{display:none}
 .d-kop{grid-column:1/-1;display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:2px 4px 0}
-.d-kop h3{margin:0;font-family:var(--serif);font-weight:400;font-size:38px;line-height:1}
-.d-kop h3 i{color:var(--accent)}
+.d-kop h3{margin:0;font-weight:700;font-size:30px;line-height:1.05;letter-spacing:-.02em}
+.d-kop h3 i{color:var(--accent);font-family:var(--serif);font-weight:400;font-size:34px}
 .d-kop p{margin:4px 0 0;color:var(--zacht);font-size:13px}
 .pillen{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .pil{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid var(--rand);background:var(--vlak2);color:var(--tekst)}
 .pil.donker{background:var(--tekst);color:var(--bg);border-color:transparent}
-.d-hero{grid-column:span 8;min-height:200px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.d-hero{grid-column:span 8;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:13px 18px!important}
 .d-datum{grid-column:span 4}
-.tegel{grid-column:span 3;min-height:126px;display:flex;flex-direction:column;cursor:default}
-.d-licht{grid-column:span 4;height:390px;display:flex;flex-direction:column}
-.d-cam{grid-column:span 5;height:390px;display:flex;flex-direction:column}
-.d-nieuws{grid-column:span 3;height:390px;display:flex;flex-direction:column}
+.tegel{grid-column:span 3;display:flex;flex-direction:column;cursor:default;padding:12px 14px!important}
+.d-licht{grid-column:span 4;display:flex;flex-direction:column;min-height:0}
+.d-cam{grid-column:span 5;display:flex;flex-direction:column;min-height:0}
+.d-nieuws{grid-column:span 3;display:flex;flex-direction:column;min-height:0}
+.d-cam .camgrid{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,1fr);gap:8px}
+.d-cam .camgrid.een{grid-template-columns:1fr}
+.d-cam .camgrid > .cam{aspect-ratio:auto;height:100%;min-height:0}
+.d-licht .hoofdlamp{margin-bottom:8px;padding:6px 10px}
+.d-licht .lamp{min-height:50px;padding:7px 10px;gap:2px}
+.d-licht .lamp .bol{width:12px;height:12px}
+.d-licht .drie{gap:6px}
+.d-licht .luiken{margin-top:8px}
+.hero-uitleg{font-size:12px;color:rgba(255,255,255,.9);margin-top:4px;line-height:1.4}
+.rij-w{display:flex;align-items:center;gap:12px;margin-top:6px}
+.rij-w .waarde{margin-top:0!important}
+.w-info{display:flex;flex-direction:column;font-size:11px;color:var(--zacht);line-height:1.4;min-width:0}
+.w-info b{color:var(--tekst);font-size:13px}
+.e-duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.e-duo > div{background:var(--vlak2);border:1px solid var(--rand);border-radius:12px;padding:6px 9px}
+.e-duo small{display:block;font-size:10.5px;color:var(--zacht)}
+.e-duo b{display:block;font-size:17px;font-family:"JetBrains Mono",monospace}
+.e-duo em{font-style:normal;font-size:10.5px;color:var(--zacht)}
 .hero-kleur{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;border-color:rgba(255,255,255,.25)!important;color:#fff;
   box-shadow:0 18px 50px color-mix(in srgb,var(--accent) 40%,transparent), inset 0 1px 0 rgba(255,255,255,.35)!important}
 .hero-kleur .zacht{color:rgba(255,255,255,.88)}
 .label-pil{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.2);letter-spacing:.02em}
 .label-pil::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
-.hero-groot{font-family:var(--serif);font-size:38px;line-height:1.08;margin:10px 0 6px;font-weight:400}
-.hero-groot i{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}
-.hero-stats{display:flex;gap:0;margin:12px 0 14px;flex-wrap:wrap}
+.hero-groot{font-size:26px;line-height:1.1;margin:6px 0 3px;font-weight:700;letter-spacing:-.02em}
+.hero-groot i{font-family:var(--serif);font-weight:400;font-size:33px;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:6px}
+.hero-stats{display:flex;gap:0;flex-wrap:wrap}
+.hero-onder{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px}
+.hero-onder .hero-knoppen{margin-left:auto}
 .hero-stats div{padding:0 16px;border-left:1px solid rgba(255,255,255,.3);font-size:11px;color:rgba(255,255,255,.85)}
 .hero-stats div:first-child{padding-left:0;border-left:0}
-.hero-stats b{display:block;font-size:20px;color:#fff;font-family:"JetBrains Mono",monospace}
+.hero-stats b{display:block;font-size:17px;color:#fff;font-family:"JetBrains Mono",monospace}
 .hero-knoppen{display:flex;gap:8px;flex-wrap:wrap}
 .hero-knoppen button{padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid rgba(255,255,255,.6)}
 .hero-knoppen button:first-child{background:#fff;color:var(--accent);border-color:#fff}
-.ring{position:relative;width:150px;height:150px}
+.ring{position:relative;width:112px;height:112px}
+.ring .midden b{font-size:22px!important}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring .midden{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
 .ring .midden b{display:block;font-size:28px;font-family:"JetBrains Mono",monospace}
 .ring .midden small{font-size:10.5px;color:rgba(255,255,255,.85)}
 .ring .zonnetje{position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:12px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 .dag-kop{display:flex;align-items:center;gap:12px}
-.dag-kop .nr{font-family:var(--serif);font-size:54px;line-height:.9;color:var(--accent)}
+.dag-kop .nr{font-family:var(--serif);font-size:48px;line-height:.9;color:var(--accent)}
 .dag-kop b{display:block;font-size:15px}
 .dag-kop small{color:var(--zacht);font-size:11.5px}
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0 10px;text-align:center}
-.week div{padding:6px 0;border-radius:10px;font-size:10.5px;color:var(--zacht)}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:8px 0 8px;text-align:center}
+.d-datum{padding:13px 16px!important}
+.d-datum .afspraak-kaart{padding:5px 10px;margin-bottom:5px}
+.week div{padding:4px 0;border-radius:10px;font-size:10.5px;color:var(--zacht)}
 .week div b{display:block;font-size:13px;color:var(--tekst);margin-top:2px}
 .week .vandaag{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 .week .vandaag b{color:#fff}
@@ -511,9 +534,11 @@ a{color:inherit}
 .afspraak-kaart .streep{width:3px;align-self:stretch;border-radius:2px;background:var(--accent);flex:none}
 .afspraak-kaart .tag{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);white-space:nowrap}
 .tegel .boven{display:flex;align-items:center;justify-content:space-between}
+.tegel .ic{width:26px!important;height:26px!important;font-size:13px!important}
+.tegel .e-duo{margin-top:6px}
 .tegel .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--vlak2);border:1px solid var(--rand);font-size:14px}
 .tegel .chg{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:rgba(52,211,153,.16);color:var(--goed)}
-.tegel .waarde{font-size:30px;font-weight:800;font-family:"JetBrains Mono",monospace;margin-top:10px;line-height:1}
+.tegel .waarde{font-size:28px;font-weight:800;margin-top:8px;line-height:1;letter-spacing:-.02em}
 .tegel .lbl{font-size:12.5px;font-weight:700;margin-top:6px}
 .tegel .sub{font-size:11px;color:var(--zacht);margin:2px 0 0;letter-spacing:0;text-transform:none;font-weight:400}
 .tegel .onder{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto}
@@ -566,6 +591,20 @@ a{color:inherit}
 .alarm,.deurbel{color:#fff}
 .cam span{color:#fff}
 .w-camgrid.drie .cam:first-child{grid-column:span 2}
+.vw-rij{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--rand);font-size:13px;line-height:1.4}
+.vw-rij:last-child{border-bottom:0}
+.vw-rij .i{font-size:22px;width:28px;text-align:center;flex:none}
+.vw-rij b{display:block;font-size:13.5px}
+.vw-rij span{color:var(--zacht);font-size:12px}
+.trend{margin-top:8px;padding:9px 12px;border-radius:12px;background:var(--vlak2);border:1px solid var(--rand);font-size:12.5px;line-height:1.45}
+.gevaar-top{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;color:#fff;margin-bottom:10px}
+.gevaar-top b{display:block;font-size:18px}
+.gevaar-top small{font-size:12px;opacity:.9}
+.gevaar-top .groot{font-size:30px}
+.gv-rij{display:grid;grid-template-columns:24px 96px 1fr;gap:8px;align-items:center;padding:6px 0;font-size:12.5px}
+.gv-rij .tekst{grid-column:2 / -1;font-size:11.5px;color:var(--zacht);margin-top:-4px}
+.segmenten{display:flex;gap:3px}
+.segmenten i{flex:1;height:7px;border-radius:4px;background:var(--vlak);border:1px solid var(--rand)}
 /* ---- alarm ---- */
 .alarm{position:absolute;inset:0;z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
   background:#7a0000;animation:alarmbg 1s steps(2) infinite}
@@ -641,15 +680,11 @@ class HuisPanel extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    try {
-      this._thuis = localStorage.getItem("meldkamer_thuis") || "dashboard";
-    } catch (e) {
-      this._thuis = "dashboard";
-    }
+    this._thuis = "dashboard";
     this._pagina = this._thuis;
     this._verjaardagen = [];
     this._wkKaarten = {};
-    this._weerTab = "windy";
+    this._weerTab = "radar";
     this._dingGezien = {};
     this._deurbelKaarten = {};
     this._handtekening = {};
@@ -713,7 +748,6 @@ class HuisPanel extends HTMLElement {
           <div class="logo"><div class="bol">🏠</div><div><h1>Huis <i>Sterkenburg</i></h1><small>Nunspeet</small></div></div>
           <nav class="paginas">
             <button class="pag-knop aan" data-actie="pagina" data-pagina="dashboard">🏠 Dashboard</button>
-            <button class="pag-knop" data-actie="pagina" data-pagina="woonkamer">🛋️ Woonkamer</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="weer">⛈️ Weer & storm</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="test">🧪 Test</button>
@@ -727,7 +761,6 @@ class HuisPanel extends HTMLElement {
             <div class="avatar" id="avatar">S</div>
             <div class="stok">
               <button class="aan" data-actie="pagina" data-pagina="dashboard">🏠<span class="tip">Dashboard</span></button>
-              <button data-actie="pagina" data-pagina="woonkamer">🛋️<span class="tip">Woonkamer</span></button>
               <button data-actie="pagina" data-pagina="meldkamer">🚒<span class="tip">Meldkamer</span></button>
               <button data-actie="pagina" data-pagina="weer">⛈️<span class="tip">Weer & storm</span></button>
               <button data-actie="pagina" data-pagina="test">🧪<span class="tip">Test</span></button>
@@ -758,22 +791,16 @@ class HuisPanel extends HTMLElement {
           <div class="d-kop" id="d-kop"></div>
           <div class="kaart d-hero hero-kleur" id="d-hero"></div>
           <div class="kaart d-datum" id="d-datum"></div>
-          <div class="kaart tegel" id="t-temp"></div>
-          <div class="kaart tegel" id="t-zon"></div>
-          <div class="kaart tegel" id="t-stroom"></div>
+          <div class="kaart tegel" id="t-weer"></div>
+          <div class="kaart tegel" id="t-energie"></div>
+          <div class="kaart tegel" id="t-lucht"></div>
           <div class="kaart tegel t-accent" id="t-melding" data-actie="pagina" data-pagina="meldkamer"></div>
           <div class="kaart d-licht" id="bediening"></div>
           <div class="kaart d-cam"><h2>📷 Camera's <span class="r" id="cam-info"></span></h2><div class="camgrid" id="camgrid"></div></div>
           <div class="kaart d-nieuws"><h2>📰 Nieuws <span class="r">NU.nl</span></h2><div class="scroll" id="nieuws"></div></div>
         </main>
 
-        <main class="raster pagina p-woonkamer" id="p-woonkamer">
-          <div class="kaart w-klok" id="w-klok"></div>
-          <div class="kaart w-weer" id="w-weer"></div>
-          <div class="kaart w-licht" id="w-licht"></div>
-          <div class="kaart w-cam"><h2>📷 Camera's</h2><div class="w-camgrid" id="w-cams"></div></div>
-          <div class="kaart w-vandaag" id="w-vandaag"></div>
-        </main>
+
 
         <main class="raster pagina p-weer" id="p-weer">
           <section class="kolom k1">
@@ -784,8 +811,8 @@ class HuisPanel extends HTMLElement {
             <div class="kaart groei">
               <div class="tabs" id="wtabs"></div>
               <div class="venster" id="wvenster">
-                <iframe id="windy" loading="lazy" allow="fullscreen"></iframe>
-                <img class="radar verberg" id="radar" alt="Buienradar">
+                <iframe class="verberg" id="windy" loading="lazy" allow="fullscreen"></iframe>
+                <img class="radar" id="radar" alt="Buienradar">
                 <iframe class="verberg" id="bliksem" loading="lazy" allow="fullscreen"></iframe>
               </div>
             </div>
@@ -804,6 +831,8 @@ class HuisPanel extends HTMLElement {
               <p class="uitleg-klein">Deze knoppen doen precies wat een echte melding doet: lampen, Google Home, pop-up op je telefoon en het grote scherm. Er staat steeds TEST bij.</p>
               <button class="test-knop rood" data-actie="test" data-soort="brand"><span class="i">🚒</span><div><b>Test melding post Nunspeet</b><small>Rood-wit knipperen, overloop, carport, buitendeur, Google Home en pop-up</small></div></button>
               <button class="test-knop blauw" data-actie="test" data-soort="politie"><span class="i">👮</span><div><b>Test politiemelding</b><small>Slaapkamerlamp blauw-wit, Google Home en blauw scherm</small></div></button>
+              <div class="sub">Schakelaars</div>
+              <div class="toggles" id="test-toggles" style="margin:0 0 6px"></div>
               <div class="sub">Eigen testmelding</div>
               <div class="veld"><input id="eigen-tekst" placeholder="bijv. P 1 Woningbrand Molenstraat Nunspeet"></div>
               <div class="veld"><select id="eigen-soort"><option value="brand">🚒 Brandweer</option><option value="politie">👮 Politie</option></select><button data-actie="eigen-test">Verstuur</button></div>
@@ -922,7 +951,7 @@ class HuisPanel extends HTMLElement {
     const storm = this._aan("input_boolean.meldkamer_stormmodus");
     if (storm !== this.hasAttribute("storm")) {
       this.toggleAttribute("storm", storm);
-      this._weerTab = storm ? "bliksem" : "windy";
+      this._weerTab = storm ? "bliksem" : "radar";
       this._toonWeerTab();
     }
     const zon = this._s("sun.sun");
@@ -957,7 +986,6 @@ class HuisPanel extends HTMLElement {
     this._tekenKnmi();
     this._tekenLucht();
     this._tekenZonMaan();
-    this._tekenWoonkamer();
     this._controleerDeurbel();
     this._controleerAlarm();
   }
@@ -1222,6 +1250,26 @@ class HuisPanel extends HTMLElement {
     return { op, onder, f: Math.max(0, Math.min(1, (nu - op) / (onder - op))), dag: nu > op && nu < onder };
   }
 
+  _weerUitleg(n) {
+    const delen = [];
+    const v = n.relative_humidity_2m;
+    if (v != null) {
+      const t = v < 40 ? "droge lucht" : v < 60 ? "aangenaam" : v < 80 ? "vrij vochtig" : v < 90 ? "vochtig en klam" : "erg vochtig, kans op mist of nevel";
+      delen.push(`💧 ${Math.round(v)}% vocht: ${t}`);
+    }
+    if (n.wind_speed_10m != null) {
+      const b = beaufort(n.wind_speed_10m);
+      const t = ["windstil", "bijna windstil", "zwakke wind", "zwakke wind", "matige wind", "vrij krachtige wind", "krachtige wind", "harde wind", "stormachtig", "storm", "zware storm", "zeer zware storm", "orkaan"][b];
+      delen.push(`💨 kracht ${b}: ${t}`);
+    }
+    if (n.apparent_temperature != null && n.temperature_2m != null) {
+      const d = Math.round(n.temperature_2m - n.apparent_temperature);
+      if (d >= 2) delen.push(`🥶 voelt ${d}° kouder door wind en vocht`);
+      else if (d <= -2) delen.push(`🥵 voelt ${-d}° warmer`);
+    }
+    return delen.join(" · ");
+  }
+
   _groetWoord() {
     const u = new Date().getHours();
     return u < 6 ? "Goedenacht" : u < 12 ? "Goedemorgen" : u < 18 ? "Goedemiddag" : "Goedenavond";
@@ -1257,7 +1305,7 @@ class HuisPanel extends HTMLElement {
       const rest = zon.dag ? zon.onder - Date.now() : 0;
       ring = `<div class="ring"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="9"/>
           <circle cx="75" cy="75" r="62" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="${omtrek}" stroke-dashoffset="${omtrek * (1 - zon.f)}"/></svg>
-        ${zon.dag ? `<div class="zonnetje" style="left:${zx}px;top:${zy}px">☀️</div>` : ""}
+        ${zon.dag ? `<div class="zonnetje" style="left:${((zx / 150) * 100).toFixed(1)}%;top:${((zy / 150) * 100).toFixed(1)}%">☀️</div>` : ""}
         <div class="midden"><div><b>${zon.dag ? Math.round(zon.f * 100) + "%" : "🌙"}</b><small>${zon.dag ? `zon onder over<br>${Math.floor(rest / 3600000)}u ${pad(Math.floor((rest % 3600000) / 60000))}m` : `zon op ${klokTijd(d0.zonop)}`}</small></div></div></div>`;
     }
     r.getElementById("d-hero").innerHTML = n.temperature_2m == null
@@ -1266,13 +1314,13 @@ class HuisPanel extends HTMLElement {
         <span class="label-pil">Vandaag in Nunspeet</span>
         <div class="hero-groot">${weerIcoon(n.weather_code, n.is_day)} <i>${weerTekst(n.weather_code).toLowerCase()}</i> en ${Math.round(n.temperature_2m)}°</div>
         <div class="zacht" style="font-size:13.5px">${regen.icoon} ${esc(regen.tekst)}${krab ? ` · ${esc(krab.tekst)}` : ""}</div>
-        <div class="hero-stats">
-          <div>Max / min<b>${Math.round(d0.max ?? 0)}° / ${Math.round(d0.min ?? 0)}°</b></div>
+        <div class="hero-uitleg">${this._weerUitleg(n)}</div>
+        <div class="hero-onder"><div class="hero-stats">
           <div>Vochtigheid<b>${Math.round(n.relative_humidity_2m ?? 0)}%</b></div>
           <div>Wind<b>${windRichting(n.wind_direction_10m)} ${beaufort(n.wind_speed_10m)}</b></div>
           <div>Daglicht<b>${dl ? Math.floor(dl / 3600) + "u" + pad(Math.round((dl % 3600) / 60)) : "–"}</b></div>
         </div>
-        <div class="hero-knoppen"><button data-actie="pagina" data-pagina="weer">Weerbericht ↗</button><button data-actie="pagina" data-pagina="woonkamer">🛋️ Woonkamer</button></div>
+        <div class="hero-knoppen"><button data-actie="pagina" data-pagina="weer">Weerbericht ↗</button><button data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button></div></div>
       </div>${ring}`;
   }
 
@@ -1305,7 +1353,6 @@ class HuisPanel extends HTMLElement {
     const toggles = [
       ["input_boolean.meldkamer_brandalarm_pauze", "🚨 Alarm", true],
       ["input_boolean.meldkamer_rolluiken_pauze", "🪟 Rolluiken auto", true],
-      ["input_boolean.meldkamer_nachtmodus_uit", "🌙 Nachtscherm", true],
       ["input_boolean.meldkamer_stormmodus", "⚡ Stormmodus", false],
     ];
     const inst = this._a("sensor.meldkamer_instellingen");
@@ -1352,16 +1399,17 @@ class HuisPanel extends HTMLElement {
       })
       .join("");
     this.shadowRoot.getElementById("bediening").innerHTML = `
-      <h2>💡 Verlichting <span class="r">${lampen.filter((l) => l.state === "on").length} van ${lampen.length} aan</span></h2>
+      <h2>💡 Verlichting <span class="r">${lampen.filter((l) => l.state === "on").length}/${lampen.length} aan <button class="klein-knop" data-actie="alle" data-dienst="turn_on">Alles aan</button></span></h2>
       <div class="scroll">
         ${hoofdHtml}
         ${gekozen.length ? `<div class="drie">${lampHtml}</div>` : `<div class="leeg">Geen lampen gevonden met de namen overloop, woonkamer, carport of wc.</div>`}
-        ${lampen.length ? `<div class="alle" style="margin-top:8px"><button class="aan-knop" data-actie="alle" data-dienst="turn_on">💡 Alle lampen aan</button><button data-actie="alle" data-dienst="turn_off">🌑 Alle lampen uit</button></div>` : ""}
         ${luiken.length ? `<div class="sub">🪟 Rolluiken</div><div class="luiken" style="margin-top:0">
           ${luik ? luikRij(esc(this._naam(luik)), esc(luik.entity_id), status(luik)) : ""}
           ${luiken.length > 1 ? luikRij("Alle rolluiken", luiken.map((c) => c.entity_id).join(","), "") : ""}</div>` : ""}
       </div>
-      <div class="toggles">${toggleHtml}</div>`;
+      `;
+    const tt = this.shadowRoot.getElementById("test-toggles");
+    if (tt) tt.innerHTML = toggleHtml;
   }
 
   // Camera's: per camera kiezen of hij altijd live staat (per apparaat onthouden)
@@ -1440,11 +1488,9 @@ class HuisPanel extends HTMLElement {
       const groot = cams.filter((c) => live.includes(c.entity_id));
       const klein = cams.filter((c) => !live.includes(c.entity_id));
       // Zonder live camera's: de eerste twee groot tonen
-      const grootLijst = groot.length ? groot : klein.slice(0, 2);
-      const kleinLijst = groot.length ? klein : klein.slice(2);
-      grid.innerHTML =
-        grootLijst.map((c) => this._camVak(c, live.includes(c.entity_id))).join("") +
-        (kleinLijst.length ? `<div class="klein">${kleinLijst.map((c) => this._camVak(c, false)).join("")}</div>` : "");
+      const grootLijst = [...groot, ...klein].slice(0, 2);
+      grid.classList.toggle("een", grootLijst.length === 1);
+      grid.innerHTML = grootLijst.map((c) => this._camVak(c, live.includes(c.entity_id))).join("");
       grid.querySelectorAll(".cam").forEach(async (vak) => {
         const houder = vak.querySelector(".live-houder");
         if (!houder) return;
@@ -1484,29 +1530,43 @@ class HuisPanel extends HTMLElement {
   _tekenEnergie() {
     const { net, zonTotaal, panelen, naarW } = this._vermogenSensoren();
     const w = this._weerData();
-    const sig = [net, zonTotaal, ...panelen].map((s) => s && s.state).join() + JSON.stringify(this._energie) + this._sig("sensor.meldkamer_weer", "sensor.meldkamer_laatste_melding");
+    const sig = [net, zonTotaal, ...panelen].map((s) => s && s.state).join() + JSON.stringify(this._energie) +
+      this._sig("sensor.meldkamer_weer", "sensor.meldkamer_laatste_melding", "sensor.meldkamer_luchtkwaliteit", "sensor.meldkamer_buienradar");
     if (!this._veranderd("energie", sig)) return;
     const r = this.shadowRoot;
     const fmt = (x) => (Math.abs(x) >= 1000 ? (x / 1000).toFixed(1) + " kW" : Math.round(x) + " W");
     const e = this._energie || {};
     const n = w.nu || {};
+    const d0 = (w.dagen || [])[0] || {};
+    // Weer buiten
     const temps = (w.uren || []).filter((u) => new Date(u.tijd).getTime() >= Date.now() - 3600000).slice(0, 12).map((u) => u.temp);
-    const verschil = temps.length > 6 ? Math.round(temps[6] - temps[0]) : null;
-    r.getElementById("t-temp").innerHTML = `
-      <div class="boven"><span class="ic">🌡️</span>${verschil != null ? `<span class="chg" style="${verschil < 0 ? "background:rgba(14,127,194,.15);color:var(--cyaan)" : ""}">${verschil >= 0 ? "↑" : "↓"} ${Math.abs(verschil)}° in 6u</span>` : ""}</div>
-      <div class="waarde">${n.temperature_2m != null ? Math.round(n.temperature_2m) + "°" : "–"}</div>
-      <div class="onder"><div><div class="lbl">Buiten</div><div class="sub">voelt als ${n.apparent_temperature != null ? Math.round(n.apparent_temperature) + "°" : "–"} · ${Math.round(n.relative_humidity_2m ?? 0)}% vocht</div></div>${this._spark(temps)}</div>`;
+    const regen = this._regenZin();
+    r.getElementById("t-weer").innerHTML = `
+      <div class="boven"><span class="ic">${weerIcoon(n.weather_code, n.is_day)}</span><span class="chg">↑ ${Math.round(d0.max ?? 0)}° ↓ ${Math.round(d0.min ?? 0)}°</span></div>
+      <div class="rij-w"><div class="waarde">${n.temperature_2m != null ? Math.round(n.temperature_2m) + "°" : "–"}</div>
+        <div class="w-info"><b>${weerTekst(n.weather_code)}</b><span>voelt als ${n.apparent_temperature != null ? Math.round(n.apparent_temperature) + "°" : "–"} · ${Math.round(n.relative_humidity_2m ?? 0)}% vocht</span>
+        <span>${windRichting(n.wind_direction_10m)} ${beaufort(n.wind_speed_10m)} Bft · stoten ${Math.round(n.wind_gusts_10m ?? 0)} km/u</span></div></div>
+      <div class="onder"><div class="sub">${regen.icoon} ${esc(regen.tekst)}</div>${this._spark(temps)}</div>`;
+    // Energie: zon + verbruik samen
     const zonW = zonTotaal ? naarW(zonTotaal) : panelen.reduce((t, s) => t + naarW(s), 0);
-    r.getElementById("t-zon").innerHTML = `
-      <div class="boven"><span class="ic">☀️</span>${e.zon != null ? `<span class="chg">${e.zon.toFixed(1)} kWh vandaag</span>` : ""}</div>
-      <div class="waarde">${zonTotaal || panelen.length ? fmt(zonW) : "–"}</div>
-      <div class="onder"><div><div class="lbl">Zonnepanelen</div><div class="sub">${panelen.length ? panelen.length + " panelen · " : ""}opbrengst nu</div></div>${this._spark((e.uren || []).map((u) => u.zon), "#f59e0b")}</div>`;
     const verbruik = e.stroom != null ? e.stroom + (e.zon || 0) - (e.terug || 0) : null;
     const netW = net ? naarW(net) : null;
-    r.getElementById("t-stroom").innerHTML = `
-      <div class="boven"><span class="ic">⚡</span>${netW != null ? `<span class="chg" style="${netW > 0 ? "background:rgba(239,91,57,.14);color:var(--accent)" : ""}">${netW < 0 ? "terug " : "net "}${fmt(Math.abs(netW))}</span>` : ""}</div>
-      <div class="waarde">${verbruik != null ? verbruik.toFixed(1) : "–"}<span style="font-size:14px"> kWh</span></div>
-      <div class="onder"><div><div class="lbl">Stroom vandaag</div><div class="sub">${e.gas != null ? "gas " + e.gas.toFixed(2) + " m³" : "verbruik in huis"}</div></div>${this._spark((e.uren || []).map((u) => u.verbruik), "#0e7fc2")}</div>`;
+    r.getElementById("t-energie").innerHTML = `
+      <div class="boven"><span class="ic">⚡</span>${netW != null ? `<span class="chg" style="${netW > 0 ? "background:rgba(239,91,57,.14);color:#e0532f" : ""}">${netW < 0 ? "terug " : "van net "}${fmt(Math.abs(netW))}</span>` : ""}</div>
+      <div class="e-duo">
+        <div><small>☀️ Zon nu</small><b>${zonTotaal || panelen.length ? fmt(zonW) : "–"}</b><em>${e.zon != null ? e.zon.toFixed(1) + " kWh vandaag" : panelen.length + " panelen"}</em></div>
+        <div><small>🏠 Verbruik</small><b>${verbruik != null ? verbruik.toFixed(1) + " kWh" : "–"}</b><em>${e.gas != null ? "gas " + e.gas.toFixed(2) + " m³" : "vandaag"}</em></div>
+      </div>`;
+    // Luchtkwaliteit
+    const l = this._s("sensor.meldkamer_luchtkwaliteit");
+    const aqi = l ? parseFloat(l.state) : NaN;
+    const [, label, kleur, advies] = isNaN(aqi) ? [0, "Laden…", "#888", ""] : AQI.find(([g]) => aqi < g);
+    r.getElementById("t-lucht").innerHTML = `
+      <div class="boven"><span class="ic">🌫️</span><span class="chg" style="background:${kleur}22;color:${kleur}">${label}</span></div>
+      <div class="rij-w"><div class="waarde" style="color:${kleur}">${isNaN(aqi) ? "–" : Math.round(aqi)}</div>
+        <div class="w-info"><b>Luchtkwaliteit</b><span>${esc(advies.split(".")[0])}</span></div></div>
+      <div class="onder"><div class="sub">Fijnstof ${rond(l?.attributes?.pm2_5, 0)} · NO₂ ${rond(l?.attributes?.nitrogen_dioxide, 0)} · ozon ${rond(l?.attributes?.ozone, 0)}</div></div>`;
+    // Laatste melding Nunspeet / Elspeet
     const d = this._p2000();
     const m = (d.meldingen || []).find((x) => !x.proef && /nunspeet|elspeet|hulshorst|vierhouten/i.test((x.titel || "") + " " + (x.adres || "")));
     r.getElementById("t-melding").innerHTML = `
@@ -1624,10 +1684,10 @@ class HuisPanel extends HTMLElement {
     const items = [];
     if (afval && afval.dagen <= 2) items.push(`<div class="afspraak-kaart"><span class="streep" style="background:var(--goed)"></span><span>${afval.icoon}</span><span><b>${afval.wanneer}</b> ${esc(afval.soort)}</span><span class="tag">afval</span></div>`);
     this._verjaardagen.slice(0, 1).forEach((ev) => items.push(`<div class="afspraak-kaart"><span class="streep" style="background:#ec4899"></span><span>🎂</span><span><b>${this._evDag(ev)}</b> ${esc(ev.summary)}</span></div>`));
-    this._agenda.slice(0, Math.max(0, 3 - items.length)).forEach((ev) =>
+    this._agenda.slice(0, Math.max(0, 2 - items.length)).forEach((ev) =>
       items.push(`<div class="afspraak-kaart"><span class="w">${this._evTijd(ev)}</span><span class="streep"></span><span>${esc(ev.summary)}</span>${this._evDag(ev) !== "Vandaag" ? `<span class="tag">${this._evDag(ev)}</span>` : ""}</div>`)
     );
-    if (afval && afval.dagen > 2 && items.length < 3) items.push(`<div class="afspraak-kaart"><span class="streep" style="background:var(--goed)"></span><span>${afval.icoon}</span><span>${esc(afval.soort)} · ${afval.wanneer.toLowerCase()}</span></div>`);
+    if (afval && afval.dagen > 2 && items.length < 2) items.push(`<div class="afspraak-kaart"><span class="streep" style="background:var(--goed)"></span><span>${afval.icoon}</span><span>${esc(afval.soort)} · ${afval.wanneer.toLowerCase()}</span></div>`);
     const vandaag = this._agenda.filter((e) => this._evDag(e) === "Vandaag").length;
     this.shadowRoot.getElementById("d-datum").innerHTML = `
       <div class="dag-kop"><span class="nr">${pad(nu.getDate())}</span><div><b style="text-transform:capitalize">${nu.toLocaleDateString("nl-NL", { weekday: "long" })}</b>
@@ -1821,34 +1881,59 @@ class HuisPanel extends HTMLElement {
   }
 
   _tekenDetail() {
-    if (!this._veranderd("detail", this._sig("sensor.meldkamer_weer"))) return;
-    const w = this._a("sensor.meldkamer_weer");
-    const nu = w.nu || {};
-    const d0 = (w.dagen || [])[0] || {};
-    const uv = d0.uv ?? nu.uv_index;
-    const uvTekst = uv == null ? "" : uv < 3 ? "laag" : uv < 6 ? "matig" : uv < 8 ? "hoog" : "zeer hoog";
-    const zicht = nu.visibility != null ? (nu.visibility >= 10000 ? ">10 km" : (nu.visibility / 1000).toFixed(1) + " km") : "–";
-    const gevoel = nu.apparent_temperature != null && nu.temperature_2m != null ? Math.round(nu.apparent_temperature - nu.temperature_2m) : null;
-    this.shadowRoot.getElementById("detail").innerHTML = `
-      <h2>📋 Vandaag in detail</h2>
-      <div class="raster3">
-        <div>UV-index<b>${rond(uv, 0)} <span style="font-size:11px;color:var(--zacht)">${uvTekst}</span></b></div>
-        <div>Zicht<b>${zicht}</b></div>
-        <div>Dauwpunt<b>${rond(nu.dew_point_2m, 0)}°</b></div>
-        <div>Neerslag<b>${rond(d0.regen, 1)} mm</b></div>
-        <div>Uren regen<b>${rond(d0.regenuren, 0)} u</b></div>
-        <div>Max windstoot<b>${rond(d0.windstoten, 0)} km/u</b></div>
-        <div>Bewolking<b>${rond(nu.cloud_cover, 0)}%</b></div>
-        <div>Windchill<b>${gevoel == null ? "–" : (gevoel > 0 ? "+" : "") + gevoel + "°"}</b></div>
-        <div>Neerslag nu<b>${rond(nu.precipitation, 1)} mm</b></div>
-      </div>`;
+    if (!this._veranderd("detail", this._sig("sensor.meldkamer_weer") + new Date().getHours())) return;
+    const w = this._weerData();
+    const uren = (w.uren || []).filter((u) => new Date(u.tijd).getTime() >= Date.now() - 1800000);
+    const vandaag = new Date().toDateString();
+    const deelNaam = (d) => {
+      const h = d.getHours();
+      const deel = h < 6 ? "nacht" : h < 12 ? "ochtend" : h < 18 ? "middag" : "avond";
+      const morgen = d.toDateString() !== vandaag;
+      if (deel === "nacht") return "Vannacht";
+      return (morgen ? { ochtend: "Morgenochtend", middag: "Morgenmiddag", avond: "Morgenavond" } : { ochtend: "Vanochtend", middag: "Vanmiddag", avond: "Vanavond" })[deel];
+    };
+    const blokken = [];
+    uren.forEach((u) => {
+      const d = new Date(u.tijd);
+      const sleutel = d.toDateString() + (d.getHours() < 6 ? "n" : d.getHours() < 12 ? "o" : d.getHours() < 18 ? "m" : "a");
+      let b = blokken.find((x) => x.sleutel === sleutel);
+      if (!b) blokken.push((b = { sleutel, naam: deelNaam(d), uren: [] }));
+      b.uren.push(u);
+    });
+    const regels = blokken.slice(0, 4).map((b) => {
+      const t = b.uren.map((u) => u.temp);
+      const code = Math.max(...b.uren.map((u) => u.code ?? 0));
+      const kans = Math.max(...b.uren.map((u) => u.regenkans ?? 0));
+      const stoot = Math.max(...b.uren.map((u) => u.windstoten ?? 0));
+      const dag = b.uren.some((u) => new Date(u.tijd).getHours() >= 8 && new Date(u.tijd).getHours() < 17);
+      const extra = [];
+      if (kans >= 30) extra.push(`${kans}% kans op neerslag`);
+      if (stoot >= 50) extra.push(`windstoten tot ${Math.round(stoot)} km/u`);
+      if (Math.min(...t) <= 0) extra.push("vorst");
+      return `<div class="vw-rij"><span class="i">${weerIcoon(code, dag ? 1 : 0)}</span><div><b>${b.naam}: ${weerTekst(code).toLowerCase()}, ${Math.round(Math.min(...t))}° tot ${Math.round(Math.max(...t))}°</b>
+        <span>${extra.length ? extra.join(" · ") : "geen bijzonderheden"}</span></div></div>`;
+    });
+    const dagen = (w.dagen || []).slice(0, 5);
+    let trend = "";
+    if (dagen.length >= 3) {
+      const verschil = Math.round(dagen[dagen.length - 1].max - dagen[0].max);
+      const nat = dagen.slice(1).reduce((a, b) => ((b.regen ?? 0) > (a.regen ?? 0) ? b : a));
+      const droog = dagen.slice(1).find((d) => (d.regenkans ?? 0) < 25);
+      const naam = (d) => new Date(d.datum).toLocaleDateString("nl-NL", { weekday: "long" });
+      const zinnen = [];
+      zinnen.push(verschil >= 2 ? `📈 Het wordt de komende dagen warmer (tot ${Math.round(dagen[dagen.length - 1].max)}°).` : verschil <= -2 ? `📉 Het wordt de komende dagen kouder (max ${Math.round(dagen[dagen.length - 1].max)}°).` : "➡️ De temperatuur blijft de komende dagen ongeveer gelijk.");
+      if ((nat.regen ?? 0) >= 2) zinnen.push(`🌧️ Natste dag: ${naam(nat)} (${rond(nat.regen, 0)} mm).`);
+      if (droog) zinnen.push(`☀️ Droogste moment: ${naam(droog)}.`);
+      trend = `<div class="trend">${zinnen.join("<br>")}</div>`;
+    }
+    this.shadowRoot.getElementById("detail").innerHTML = `<h2>🔮 Wat komt er aan?</h2>${regels.join("") || '<div class="leeg">Verwachting wordt geladen…</div>'}${trend}`;
   }
 
   _toonWeerTab() {
     const r = this.shadowRoot;
     const storm = this.hasAttribute("storm");
-    if (!storm && this._weerTab === "bliksem") this._weerTab = "windy";
-    const tabs = [["windy", "🌩️ Windy · regen & onweer"], ["radar", "🌧️ Buienradar"]];
+    if (!storm && this._weerTab === "bliksem") this._weerTab = "radar";
+    const tabs = [["radar", "🌧️ Buienradar"], ["windy", "🌩️ Windy · regen & onweer"]];
     if (storm) tabs.push(["bliksem", "⚡ Bliksem live"]);
     r.getElementById("wtabs").innerHTML = tabs
       .map(([id, label]) => `<button class="tab ${this._weerTab === id ? "aan" : ""}" data-actie="wtab" data-tab="${id}">${label}</button>`)
@@ -1876,20 +1961,52 @@ class HuisPanel extends HTMLElement {
     if (img.getAttribute("src") !== src) img.src = src;
   }
 
+  _gevaren() {
+    const w = this._weerData();
+    const uren = (w.uren || []).filter((u) => new Date(u.tijd).getTime() >= Date.now() - 1800000).slice(0, 24);
+    const dagen = (w.dagen || []).slice(0, 2);
+    const max = (lijst) => (lijst.length ? Math.max(...lijst) : 0);
+    const stoot = Math.round(max([...uren.map((u) => u.windstoten ?? 0), ...dagen.map((d) => d.windstoten ?? 0)]));
+    const onweer = uren.filter((u) => (u.code ?? 0) >= 95);
+    const minT = uren.length ? Math.min(...uren.map((u) => u.temp)) : 10;
+    const glad = uren.filter((u) => u.temp <= 1 && ((u.regen ?? 0) > 0 || (u.vocht ?? 0) >= 92 || [56, 57, 66, 67, 71, 73, 75, 77, 85, 86].includes(u.code)));
+    const regen = max(dagen.map((d) => d.regen ?? 0));
+    const mist = uren.slice(0, 12).filter((u) => [45, 48].includes(u.code) || (u.vocht ?? 0) >= 97);
+    const hitte = max(dagen.map((d) => d.max ?? -99));
+    const lijst = [
+      ["💨", "Wind & storm", stoot >= 100 ? 3 : stoot >= 75 ? 2 : stoot >= 50 ? 1 : 0, stoot >= 75 ? `Zware windstoten tot ${stoot} km/u, zet losse spullen vast` : stoot >= 50 ? `Windstoten tot ${stoot} km/u` : `Rustig, windstoten tot ${stoot} km/u`],
+      ["⛈️", "Onweer", onweer.length >= 3 ? 2 : onweer.length ? 1 : 0, onweer.length ? `Onweer verwacht rond ${klokTijd(onweer[0].tijd)}` : "Geen onweer verwacht"],
+      ["🧊", "Gladheid", glad.length && minT <= -1 ? 2 : glad.length ? 1 : minT <= 0 ? 1 : 0, glad.length ? `Kans op gladde wegen (tot ${rond(minT, 0)}°)` : minT <= 0 ? `Lichte vorst (${rond(minT, 0)}°)` : "Geen gladheid verwacht"],
+      ["🌧️", "Zware regen", regen >= 25 ? 3 : regen >= 15 ? 2 : regen >= 8 ? 1 : 0, regen >= 8 ? `Veel regen: tot ${rond(regen, 0)} mm per dag` : `Weinig regen (${rond(regen, 0)} mm)`],
+      ["🌫️", "Mist", mist.length >= 3 ? 2 : mist.length ? 1 : 0, mist.length ? "Kans op mist, beperkt zicht" : "Goed zicht"],
+    ];
+    if (hitte >= 25) lijst.push(["🔥", "Hitte", hitte >= 33 ? 3 : hitte >= 30 ? 2 : 1, `Warm tot ${Math.round(hitte)}°, drink genoeg water`]);
+    const knmi = this._a("sensor.meldkamer_knmi");
+    const knmiNiveau = { geel: 1, oranje: 2, rood: 3 }[knmi.code] || 0;
+    const totaal = Math.max(knmiNiveau, ...lijst.map((x) => x[2]));
+    return { lijst, totaal, knmi };
+  }
+
   _tekenKnmi() {
-    if (!this._veranderd("knmi", this._sig("sensor.meldkamer_knmi", "input_boolean.meldkamer_stormmodus"))) return;
-    const lijst = this._a("sensor.meldkamer_knmi").waarschuwingen || [];
+    if (!this._veranderd("knmi", this._sig("sensor.meldkamer_knmi", "input_boolean.meldkamer_stormmodus", "sensor.meldkamer_weer"))) return;
+    const { lijst, totaal, knmi } = this._gevaren();
     const storm = this._aan("input_boolean.meldkamer_stormmodus");
+    const kleuren = ["#16a34a", "#d4a106", "#ea7a12", "#dc2626"];
+    const namen = ["Laag risico", "Matig risico", "Hoog risico", "Zeer hoog risico"];
+    const uitleg = ["Rustig weer, niets bijzonders.", "Let een beetje op, check het weer voor je weggaat.", "Wees voorzichtig en houd de waarschuwingen in de gaten.", "Gevaarlijk weer: blijf zoveel mogelijk binnen."];
     const tijd = (iso) => {
       const d = new Date(iso);
       return isNaN(d) ? "" : d.toLocaleString("nl-NL", { weekday: "short", hour: "2-digit", minute: "2-digit" });
     };
+    const waarsch = knmi.waarschuwingen || [];
     this.shadowRoot.getElementById("knmi").innerHTML = `
-      <h2>⚠️ KNMI <span class="r"><button class="klein-knop" data-actie="toggle" data-id="input_boolean.meldkamer_stormmodus">⚡ Stormmodus ${storm ? "uit" : "aan"}</button></span></h2>
-      ${lijst.length
-        ? lijst.map((w) => `<div class="knmi" style="border-color:${KNMI_KLEUR[w.kleur] || "#555"}"><b style="color:${KNMI_KLEUR[w.kleur] || "inherit"}">Code ${esc(w.kleur)}: ${esc(w.soort)}</b>
-            <small>${esc(w.gebied)}${w.vanaf ? " · vanaf " + tijd(w.vanaf) : ""}${w.tot ? " · tot " + tijd(w.tot) : ""}</small></div>`).join("")
-        : `<div class="ok-blok"><span style="font-size:24px">✅</span><div><b>Geen waarschuwingen</b><div style="font-size:12px;color:var(--zacht)">Rustig weer in Gelderland</div></div></div>`}`;
+      <h2>⚠️ Gevarenrisico <span class="r"><button class="klein-knop" data-actie="toggle" data-id="input_boolean.meldkamer_stormmodus">⚡ Stormmodus ${storm ? "uit" : "aan"}</button></span></h2>
+      <div class="gevaar-top" style="background:linear-gradient(135deg,${kleuren[totaal]},${kleuren[totaal]}cc)"><span class="groot">${["✅", "⚠️", "🟠", "🚨"][totaal]}</span><div><b>${namen[totaal]}</b><small>${uitleg[totaal]}</small></div></div>
+      ${waarsch.map((w) => `<div class="knmi" style="border-color:${KNMI_KLEUR[w.kleur] || "#555"}"><b style="color:${KNMI_KLEUR[w.kleur] || "inherit"}">KNMI code ${esc(w.kleur)}: ${esc(w.soort)}</b>
+        <small>${w.vanaf ? "vanaf " + tijd(w.vanaf) : ""}${w.tot ? " · tot " + tijd(w.tot) : ""}</small></div>`).join("")}
+      ${lijst.map(([ic, naam, niveau, tekst]) => `<div class="gv-rij"><span>${ic}</span><b style="font-size:12.5px">${naam}</b>
+        <div class="segmenten">${[0, 1, 2, 3].map((k) => `<i style="${k <= niveau ? `background:${kleuren[niveau]};border-color:${kleuren[niveau]}` : ""}"></i>`).join("")}</div>
+        <div class="tekst">${esc(tekst)}</div></div>`).join("")}`;
   }
 
   _tekenLucht() {
@@ -1948,7 +2065,7 @@ class HuisPanel extends HTMLElement {
     const uit = this._aan("input_boolean.meldkamer_nachtmodus_uit");
     const alarm = this.shadowRoot.getElementById("alarm").classList.contains("open");
     const deurbel = this.shadowRoot.getElementById("deurbel").classList.contains("open");
-    const toon = (this._nachtVoorbeeldTot && Date.now() < this._nachtVoorbeeldTot) || (isNacht && !uit && !alarm && !deurbel && Date.now() > this._wakkerTot);
+    const toon = !!(this._nachtVoorbeeldTot && Date.now() < this._nachtVoorbeeldTot) && !alarm && !deurbel && (isNacht || uit || true);
     el.classList.toggle("open", toon);
     if (toon) {
       const m = this._p2000().melding;
