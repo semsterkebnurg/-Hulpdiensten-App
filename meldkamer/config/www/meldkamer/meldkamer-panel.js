@@ -605,6 +605,24 @@ a{color:inherit}
 .gv-rij .tekst{grid-column:2 / -1;font-size:11.5px;color:var(--zacht);margin-top:-4px}
 .segmenten{display:flex;gap:3px}
 .segmenten i{flex:1;height:7px;border-radius:4px;background:var(--vlak);border:1px solid var(--rand)}
+.p-kaart{grid-template-columns:minmax(0,1fr)}
+.vol-kaart{padding:0!important;overflow:hidden;position:relative;min-height:0;height:100%}
+.vol-kaart iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#dfe9e2}
+.p-bieb{grid-template-columns:minmax(0,1fr) minmax(0,2.3fr)}
+.bieb-cat{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--zwak);margin:12px 0 6px;font-weight:700}
+.bieb-cat:first-child{margin-top:0}
+.boek{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:8px 10px;border-radius:12px;background:var(--vlak2);border:1px solid var(--rand);margin-bottom:6px}
+.boek:hover{border-color:var(--accent)}
+.boek.uit{opacity:.6;cursor:default}
+.boek .i{font-size:20px;width:26px;text-align:center}
+.boek b{display:block;font-size:13px}
+.boek small{font-size:11px;color:var(--zacht)}
+.boek .balkje{height:4px;border-radius:2px;background:var(--vlak);margin-top:4px;overflow:hidden}
+.boek .balkje div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.bieb-leeg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--zacht);font-size:14px;line-height:1.6}
+.bieb-leeg.zie{display:flex}
+.bieb-leeg b{color:var(--tekst);font-size:18px}
+@media (max-width:1100px){.p-bieb{grid-template-columns:1fr}.p-bieb .vol-kaart{min-height:70vh}}
 /* ---- alarm ---- */
 .alarm{position:absolute;inset:0;z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;
   background:#7a0000;animation:alarmbg 1s steps(2) infinite}
@@ -750,6 +768,8 @@ class HuisPanel extends HTMLElement {
             <button class="pag-knop aan" data-actie="pagina" data-pagina="dashboard">🏠 Dashboard</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="meldkamer">🚒 Meldkamer</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="weer">⛈️ Weer & storm</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="kaart">🗺️ Kaart</button>
+            <button class="pag-knop" data-actie="pagina" data-pagina="bibliotheek">📚 Bibliotheek</button>
             <button class="pag-knop" data-actie="pagina" data-pagina="test">🧪 Test</button>
           </nav>
           <div class="chips" id="chips"></div>
@@ -763,6 +783,8 @@ class HuisPanel extends HTMLElement {
               <button class="aan" data-actie="pagina" data-pagina="dashboard">🏠<span class="tip">Dashboard</span></button>
               <button data-actie="pagina" data-pagina="meldkamer">🚒<span class="tip">Meldkamer</span></button>
               <button data-actie="pagina" data-pagina="weer">⛈️<span class="tip">Weer & storm</span></button>
+              <button data-actie="pagina" data-pagina="kaart">🗺️<span class="tip">Kaart</span></button>
+              <button data-actie="pagina" data-pagina="bibliotheek">📚<span class="tip">Bibliotheek</span></button>
               <button data-actie="pagina" data-pagina="test">🧪<span class="tip">Test</span></button>
             </div>
           </nav>
@@ -869,6 +891,23 @@ class HuisPanel extends HTMLElement {
           </section>
         </main>
 
+        <main class="raster pagina p-kaart" id="p-kaart">
+          <div class="kaart vol-kaart"><iframe id="kaart-frame" title="Kaart"></iframe></div>
+        </main>
+
+        <main class="raster pagina p-bieb" id="p-bibliotheek">
+          <section class="kolom">
+            <div class="kaart" id="bieb-zoek">
+              <h2>🔎 Zoeken <span class="r" id="bieb-schijf"></span></h2>
+              <div class="veld"><input id="bieb-term" placeholder="Zoek in de bibliotheek…"><button data-actie="bieb-zoek">Zoek</button></div>
+              <div class="veld" style="margin:0"><select id="bieb-boek"></select></div>
+            </div>
+            <div class="kaart groei"><h2>📚 Offline bibliotheek <span class="r" id="bieb-info"></span></h2><div class="scroll" id="bieb-lijst"></div></div>
+          </section>
+          <section class="kolom">
+            <div class="kaart groei vol-kaart"><iframe id="bieb-frame" title="Bibliotheek"></iframe><div class="bieb-leeg" id="bieb-leeg"></div></div>
+          </section>
+        </main>
           </div>
         </div>
         <div class="deurbel" id="deurbel"></div>
@@ -878,6 +917,9 @@ class HuisPanel extends HTMLElement {
     const root = this.shadowRoot;
     root.addEventListener("click", (e) => this._klik(e));
     root.addEventListener("input", (e) => this._invoer(e));
+    root.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.target.id === "bieb-term") this._zoekBieb();
+    });
     root.addEventListener("contextmenu", (e) => {
       const el = e.target.closest("[data-meer]");
       if (el) {
@@ -2319,12 +2361,99 @@ class HuisPanel extends HTMLElement {
     this._isVoorbeeld = true;
   }
 
+  // ---------- offline bibliotheek ----------
+
+  _kiwix() {
+    return `${location.protocol}//${location.hostname}:8090`;
+  }
+
+  async _laadBieb() {
+    let st = null;
+    try {
+      const r = await fetch(`/local/bibliotheek/status.json?t=${Date.now()}`, { cache: "no-store" });
+      if (r.ok) st = await r.json();
+    } catch (e) {
+      st = null;
+    }
+    this._bieb = st;
+    this._tekenBieb();
+    clearTimeout(this._biebTimer);
+    if (this._pagina === "bibliotheek") this._biebTimer = setTimeout(() => this._laadBieb(), 60000);
+  }
+
+  _tekenBieb() {
+    const r = this.shadowRoot;
+    const st = this._bieb;
+    const gb = (b) => (b >= 1e9 ? (b / 1e9).toFixed(1) + " GB" : Math.max(1, Math.round(b / 1e6)) + " MB");
+    const cats = { wikipedia: ["📖", "Wikipedia"], medisch: ["🩺", "Medisch & EHBO"], survival: ["🏕️", "Survival & koken"], reparatie: ["🔧", "Reparatie"], boeken: ["📗", "Boeken"] };
+    const leeg = r.getElementById("bieb-leeg");
+    if (!st) {
+      r.getElementById("bieb-lijst").innerHTML = `<div class="leeg">De bibliotheek is nog niet gestart. Werk het dashboard bij; daarna begint het downloaden vannacht om 01:30. Meteen beginnen kan met <b>bibliotheek-nu</b> in de Terminal.</div>`;
+      leeg.innerHTML = `<div><b>📚 Offline bibliotheek</b><br>Hier lees je straks Wikipedia, EHBO-gidsen en reparatiehandleidingen, ook zonder internet.</div>`;
+      leeg.classList.add("zie");
+      return;
+    }
+    const items = st.items || [];
+    const klaar = items.filter((i) => i.status === "klaar");
+    r.getElementById("bieb-schijf").textContent = st.schijf ? `${gb(st.schijf.vrij)} vrij` : "";
+    r.getElementById("bieb-info").textContent = `${klaar.length} van ${items.length} klaar`;
+    const statusTekst = (i) => {
+      if (i.status === "klaar") return `✅ ${gb(i.grootte)}`;
+      if (i.status === "bezig") return `⏳ ${i.grootte ? Math.floor((i.gedaan / i.grootte) * 100) + "% van " + gb(i.grootte) : "bezig…"}`;
+      if (i.status === "onderbroken") return `🌙 gaat vannacht verder${i.grootte ? ` (${Math.floor((i.gedaan / i.grootte) * 100)}%)` : ""}`;
+      if (i.status === "te-weinig-ruimte") return "⚠️ te weinig schijfruimte";
+      if (i.status === "niet-gevonden") return "❔ niet gevonden op de server";
+      return "🌙 wacht op de nacht";
+    };
+    const kaart = st.kaart || {};
+    let html = `<div class="bieb-cat">🗺️ Kaart</div><button class="boek ${kaart.status === "klaar" ? "" : "uit"}" data-actie="pagina" data-pagina="kaart"><span class="i">🗺️</span><div style="flex:1"><b>Offline kaart Nederland</b><small>${kaart.status === "klaar" ? "✅ " + gb(kaart.grootte) + " · tik om te openen" : kaart.status === "bezig" ? "⏳ wordt gedownload…" : "🌙 wacht op de nacht"}</small></div></button>`;
+    Object.entries(cats).forEach(([sleutel, [icoon, naam]]) => {
+      const lijst = items.filter((i) => i.categorie === sleutel);
+      if (!lijst.length) return;
+      html += `<div class="bieb-cat">${icoon} ${naam}</div>`;
+      html += lijst
+        .map((i) => `<button class="boek ${i.status === "klaar" ? "" : "uit"}" ${i.status === "klaar" ? `data-actie="boek" data-boek="${esc(i.bestand.replace(/\.zim$/, ""))}"` : ""}>
+          <span class="i">${icoon}</span><div style="flex:1;min-width:0"><b>${esc(i.naam)}</b><small>${statusTekst(i)}</small>
+          ${i.status === "bezig" || i.status === "onderbroken" ? `<div class="balkje"><div style="width:${i.grootte ? (i.gedaan / i.grootte) * 100 : 0}%"></div></div>` : ""}</div></button>`)
+        .join("");
+    });
+    r.getElementById("bieb-lijst").innerHTML = html;
+    const sel = r.getElementById("bieb-boek");
+    const huidig = sel.value;
+    sel.innerHTML = klaar.length
+      ? klaar.map((i) => `<option value="${esc(i.bestand.replace(/\.zim$/, ""))}">${esc(i.naam)}</option>`).join("")
+      : `<option value="">Nog geen boeken klaar</option>`;
+    if (huidig) sel.value = huidig;
+    const frame = r.getElementById("bieb-frame");
+    if (klaar.length) {
+      leeg.classList.remove("zie");
+      if (!frame.getAttribute("src")) frame.setAttribute("src", this._kiwix() + "/");
+    } else {
+      leeg.innerHTML = `<div><b>📚 Nog even geduld</b><br>De boeken worden 's nachts gedownload (01:30 – 07:30).<br>Zodra het eerste boek klaar is, kun je hier lezen, ook zonder internet.</div>`;
+      leeg.classList.add("zie");
+    }
+  }
+
+  _openBoek(id) {
+    const f = this.shadowRoot.getElementById("bieb-frame");
+    f.setAttribute("src", `${this._kiwix()}/viewer#${encodeURIComponent(id)}`);
+    this.shadowRoot.getElementById("bieb-leeg").classList.remove("zie");
+  }
+
+  _zoekBieb() {
+    const r = this.shadowRoot;
+    const term = r.getElementById("bieb-term").value.trim();
+    const boek = r.getElementById("bieb-boek").value;
+    if (!term || !boek) return;
+    r.getElementById("bieb-frame").setAttribute("src", `${this._kiwix()}/search?content=${encodeURIComponent(boek)}&pattern=${encodeURIComponent(term)}`);
+  }
+
   // ---- bediening ----
 
   _toonPagina(p) {
     this._pagina = p;
     const r = this.shadowRoot;
-    ["meldkamer", "dashboard", "woonkamer", "weer", "test"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
+    ["meldkamer", "dashboard", "woonkamer", "weer", "test", "kaart", "bibliotheek"].forEach((n) => r.getElementById("p-" + n)?.classList.toggle("aan", n === p));
     if (p === "test") {
       this._vulSpeakers();
       try {
@@ -2344,6 +2473,11 @@ class HuisPanel extends HTMLElement {
     if (p === "dashboard" && this._hass) this._tekenCams();
     if (p === "woonkamer" && this._hass) this._handtekening.woonkamer = null;
     if (p === "weer") this._toonWeerTab();
+    if (p === "kaart") {
+      const f = this.shadowRoot.getElementById("kaart-frame");
+      if (!f.getAttribute("src")) f.setAttribute("src", "/local/meldkamer/kaart.html?v=" + Date.now());
+    }
+    if (p === "bibliotheek") this._laadBieb();
     if (this._hass) setTimeout(() => this._teken(), 30);
   }
 
@@ -2440,6 +2574,12 @@ class HuisPanel extends HTMLElement {
           /* geen opslag */
         }
         this._teken();
+        break;
+      case "boek":
+        this._openBoek(el.dataset.boek);
+        break;
+      case "bieb-zoek":
+        this._zoekBieb();
         break;
       case "zeg":
         this._zeg();

@@ -1,0 +1,25 @@
+# Offline bibliotheek: welke boeken worden 's nachts gedownload.
+# Opbouw per regel:  map|begin-van-bestandsnaam|naam op het dashboard|categorie
+# Een regel uitzetten? Zet er een # voor. De kleinste staan bovenaan,
+# zodat die eerst klaar zijn.
+#
+# --- Medisch & EHBO ---
+other|wikem_en_all_maxi_|Spoedeisende hulp (WikEM)|medisch
+other|mdwiki_en_all_maxi_|Medicijnen & ziektes (MDWiki)|medisch
+wikipedia|wikipedia_en_medicine_maxi_|Geneeskunde (Wikipedia)|medisch
+other|zimgit-medicine_en_|Medische naslag voor noodsituaties|medisch
+# --- Survival & koken ---
+other|zimgit-post-disaster_en_|Na een ramp: survivalgids|survival
+other|zimgit-water_en_|Schoon drinkwater maken|survival
+other|zimgit-food-preparation_en_|Voedsel bereiden en bewaren|survival
+other|zimgit-knots_en_|Knopen|survival
+stack_exchange|outdoors.stackexchange.com_en_all_|Buitenleven & survival (vragen)|survival
+stack_exchange|cooking.stackexchange.com_en_all_|Koken (vragen & recepten)|survival
+# --- Reparatie ---
+ifixit|ifixit_en_all_maxi_|iFixit reparatiehandleidingen|reparatie
+# --- Boeken ---
+wikibooks|wikibooks_nl_all_maxi_|Wikibooks Nederlands|boeken
+wikibooks|wikibooks_en_all_maxi_|Wikibooks Engels (o.a. kookboek)|boeken
+# --- Wikipedia ---
+wikipedia|wikipedia_nl_all_maxi_|Wikipedia Nederlands|wikipedia
+wikipedia|wikipedia_en_all_maxi_|Wikipedia Engels (volledig)|wikipedia

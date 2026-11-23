@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaart Nunspeet</title>
+<link rel="stylesheet" href="lib/maplibre-gl.css">
+<link rel="stylesheet" href="lib/mapbox-gl-draw.css">
+<style>
+  :root{--groen:#129e66;--groen2:#3fcf8e;--tekst:#1c2923;--zacht:#62766c;--rand:rgba(40,90,70,.14);--glas:rgba(255,255,255,.86)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;color:var(--tekst);background:#dfe9e2}
+  #kaart{position:absolute;inset:0}
+  button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+  .balk{position:absolute;top:12px;left:12px;z-index:5;display:flex;gap:6px;padding:6px;border-radius:16px;background:var(--glas);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.15);border:1px solid var(--rand)}
+  .balk button{padding:9px 13px;border-radius:11px;font-weight:700;font-size:13px}
+  .balk button:hover{background:rgba(18,158,102,.1)}
+  .balk button.aan{background:linear-gradient(135deg,var(--groen),var(--groen2));color:#fff}
+  .zij{position:absolute;top:12px;right:12px;max-height:calc(100% - 150px);width:290px;z-index:5;display:flex;flex-direction:column;gap:10px}
+  .lijst{max-height:100%}
+  .blok{background:var(--glas);backdrop-filter:blur(10px);border:1px solid var(--rand);border-radius:18px;padding:13px 14px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+  .blok h3{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--zacht)}
+  .lijst{flex:1;min-height:0;overflow:auto}
+  .item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:12px;cursor:pointer}
+  .item:hover,.item.gekozen{background:rgba(18,158,102,.1)}
+  .item i{width:14px;height:14px;border-radius:4px;flex:none}
+  .item b{display:block;font-size:13px}
+  .item small{color:var(--zacht);font-size:11px}
+  .leeg{color:var(--zacht);font-size:13px;line-height:1.5}
+  label{display:block;font-size:11px;color:var(--zacht);margin:8px 0 4px}
+  input,textarea{width:100%;font:inherit;font-size:13px;padding:8px 10px;border-radius:10px;border:1px solid var(--rand);background:#fff}
+  textarea{height:60px;resize:none}
+  .kleuren{display:flex;gap:6px;flex-wrap:wrap}
+  .kleuren button{width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--rand)}
+  .kleuren button.aan{box-shadow:0 0 0 2px var(--tekst)}
+  .rij{display:flex;gap:8px;margin-top:10px}
+  .rij button{flex:1;padding:8px;border-radius:10px;font-weight:700;font-size:12.5px;background:rgba(0,0,0,.05)}
+  .rij .weg{background:rgba(220,38,38,.1);color:#b91c1c}
+  .melding{position:absolute;left:12px;bottom:12px;z-index:5;max-width:430px;font-size:12.5px;padding:10px 13px;border-radius:14px;background:var(--glas);border:1px solid var(--rand);box-shadow:0 10px 30px rgba(0,0,0,.12)}
+  .opgeslagen{position:absolute;top:66px;left:12px;z-index:5;font-size:12px;padding:5px 10px;border-radius:999px;background:var(--glas);border:1px solid var(--rand);opacity:0;transition:opacity .4s}
+  .opgeslagen.zie{opacity:1}
+  .maplibregl-ctrl-group button{width:34px;height:34px}
+  @media (max-width:700px){.zij{top:auto;left:12px;width:auto;height:42%}.balk{flex-wrap:wrap;right:12px}}
+</style>
+</head>
+<body>
+<div id="kaart"></div>
+<div class="balk" id="balk">
+  <button data-modus="simple_select" class="aan">✋ Kijken</button>
+  <button data-modus="draw_point">📍 Punt</button>
+  <button data-modus="draw_line_string">〰️ Lijn</button>
+  <button data-modus="draw_polygon">⬠ Gebied</button>
+  <button id="klaar" style="display:none;background:#1c2923;color:#fff">✓ Klaar met tekenen</button>
+  <button id="thuis">🏠 Thuis</button>
+</div>
+<div class="opgeslagen" id="opgeslagen">✓ Opgeslagen</div>
+<div class="zij">
+  <div class="blok" id="editor" style="display:none"></div>
+  <div class="blok lijst"><h3>Mijn tekeningen</h3><div id="lijst"></div></div>
+</div>
+<div class="melding" id="melding" style="display:none"></div>
+
+<script src="lib/maplibre-gl.js"></script>
+<script src="lib/pmtiles.js"></script>
+<script src="lib/basemaps.js"></script>
+<script src="lib/mapbox-gl-draw.js"></script>
+<script>
+(async () => {
+  const NUNSPEET = [5.786, 52.378];
+  const KLEUREN = ["#129e66", "#0e7fc2", "#e0532f", "#d4a106", "#8b5cf6", "#db2777", "#1c2923"];
+  const DATA = location.origin + "/local/kaartdata";
+  const hass = () => {
+    try { return parent.document.querySelector("home-assistant")?.hass || null; } catch (e) { return null; }
+  };
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const meld = (html) => { const m = document.getElementById("melding"); m.innerHTML = html; m.style.display = html ? "block" : "none"; };
+
+  // ---------- kaartstijl: offline (pmtiles) of online terugval ----------
+  let offline = false;
+  try { offline = (await fetch(DATA + "/klaar", { cache: "no-store" })).ok; } catch (e) { offline = false; }
+  let stijl;
+  if (offline) {
+    const protocol = new pmtiles.Protocol();
+    maplibregl.addProtocol("pmtiles", protocol.tile);
+    stijl = {
+      version: 8,
+      glyphs: DATA + "/fonts/{fontstack}/{range}.pbf",
+      sprite: DATA + "/sprites/light",
+      sources: { protomaps: { type: "vector", url: "pmtiles://" + DATA + "/nederland.pmtiles", attribution: "© OpenStreetMap, Protomaps" } },
+      layers: basemaps.layers("protomaps", basemaps.namedFlavor("light"), { lang: "nl" }),
+    };
+  } else {
+    stijl = {
+      version: 8,
+      sources: { online: { type: "raster", tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"], tileSize: 256, maxzoom: 19, attribution: "© Esri, OpenStreetMap" } },
+      layers: [{ id: "online", type: "raster", source: "online" }],
+    };
+    meld("🌐 De <b>offline kaart</b> van Nederland wordt 's nachts gedownload. Tot die klaar is zie je hier de online kaart. Tekenen werkt al wel.");
+  }
+
+  const map = new maplibregl.Map({ container: "kaart", style: stijl, center: NUNSPEET, zoom: 13.5, attributionControl: { compact: true } });
+  map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "bottom-right");
+  map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-right");
+
+  // ---------- tekenen ----------
+  const C = MapboxDraw.constants.classes;
+  C.CONTROL_BASE = "maplibregl-ctrl"; C.CONTROL_PREFIX = "maplibregl-ctrl-"; C.CONTROL_GROUP = "maplibregl-ctrl-group";
+  const kleur = ["coalesce", ["get", "user_kleur"], KLEUREN[0]];
+  const draw = new MapboxDraw({
+    displayControlsDefault: false,
+    userProperties: true,
+    styles: [
+      { id: "vlak", type: "fill", filter: ["all", ["==", "$type", "Polygon"]], paint: { "fill-color": kleur, "fill-opacity": ["case", ["==", ["get", "active"], "true"], 0.35, 0.22] } },
+      { id: "vlak-rand", type: "line", filter: ["all", ["==", "$type", "Polygon"]], layout: { "line-join": "round" }, paint: { "line-color": kleur, "line-width": ["case", ["==", ["get", "active"], "true"], 3.5, 2.5] } },
+      { id: "lijn", type: "line", filter: ["all", ["==", "$type", "LineString"]], layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": kleur, "line-width": ["case", ["==", ["get", "active"], "true"], 5, 4] } },
+      { id: "punt-rand", type: "circle", filter: ["all", ["==", "$type", "Point"], ["==", "meta", "feature"]], paint: { "circle-radius": ["case", ["==", ["get", "active"], "true"], 11, 9], "circle-color": "#fff" } },
+      { id: "punt", type: "circle", filter: ["all", ["==", "$type", "Point"], ["==", "meta", "feature"]], paint: { "circle-radius": ["case", ["==", ["get", "active"], "true"], 8, 6.5], "circle-color": kleur } },
+      { id: "hoekpunt", type: "circle", filter: ["all", ["==", "meta", "vertex"], ["==", "$type", "Point"]], paint: { "circle-radius": 5, "circle-color": "#fff", "circle-stroke-color": "#129e66", "circle-stroke-width": 2 } },
+      { id: "midden", type: "circle", filter: ["all", ["==", "meta", "midpoint"], ["==", "$type", "Point"]], paint: { "circle-radius": 3.5, "circle-color": "#129e66" } },
+    ],
+  });
+  map.addControl(draw);
+
+  // ---------- labels met de naam ----------
+  let geladen = false;
+  const start = () => {
+    if (geladen) return;
+    geladen = true;
+    laad();
+    thuisPunt();
+  };
+  map.on("load", start);
+  setTimeout(start, 4000); // ook als een kaartlaag niet laadt
+
+  // ---------- meten ----------
+  const rad = (x) => (x * Math.PI) / 180;
+  const afstand = (a, b) => {
+    const R = 6371000, dLat = rad(b[1] - a[1]), dLon = rad(b[0] - a[0]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[1])) * Math.cos(rad(b[1])) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  };
+  const lengte = (c) => c.slice(1).reduce((t, p, i) => t + afstand(c[i], p), 0);
+  const oppervlak = (ring) => {
+    const lat0 = rad(ring.reduce((t, p) => t + p[1], 0) / ring.length);
+    const xy = ring.map((p) => [p[0] * 111320 * Math.cos(lat0), p[1] * 110540]);
+    let s = 0;
+    for (let i = 0; i < xy.length - 1; i++) s += xy[i][0] * xy[i + 1][1] - xy[i + 1][0] * xy[i][1];
+    return Math.abs(s / 2);
+  };
+  const maat = (f) => {
+    const g = f.geometry;
+    if (g.type === "LineString") { const m = lengte(g.coordinates); return m >= 1000 ? (m / 1000).toFixed(2) + " km" : Math.round(m) + " m"; }
+    if (g.type === "Polygon") { const m2 = oppervlak(g.coordinates[0]); return m2 >= 10000 ? (m2 / 10000).toFixed(2) + " ha" : Math.round(m2) + " m²"; }
+    return g.coordinates.map((x) => x.toFixed(5)).reverse().join(", ");
+  };
+  const soortNaam = { Point: "Punt", LineString: "Lijn", Polygon: "Gebied" };
+
+  // ---------- opslaan en laden ----------
+  let gekozen = null;
+  let bewaarTimer = null;
+  const alles = () => draw.getAll();
+  let labels = [];
+  const ververs = () => {
+    const fc = alles();
+    labels.forEach((m) => m.remove());
+    labels = fc.features.filter((f) => f.properties.naam).map((f) => {
+      const el = document.createElement("div");
+      el.textContent = f.properties.naam;
+      el.style.cssText = "font:700 12px 'Plus Jakarta Sans',Inter,sans-serif;color:#1c2923;background:rgba(255,255,255,.88);padding:2px 7px;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.15);pointer-events:none;white-space:nowrap";
+      return new maplibregl.Marker({ element: el, anchor: f.geometry.type === "Point" ? "top" : "center", offset: f.geometry.type === "Point" ? [0, 12] : [0, 0] })
+        .setLngLat(f.geometry.type === "Point" ? f.geometry.coordinates : midden(f)).addTo(map);
+    });
+    tekenLijst();
+  };
+  const midden = (f) => {
+    const c = f.geometry.type === "Polygon" ? f.geometry.coordinates[0] : f.geometry.coordinates;
+    return [c.reduce((t, p) => t + p[0], 0) / c.length, c.reduce((t, p) => t + p[1], 0) / c.length];
+  };
+  const bewaar = () => {
+    ververs();
+    clearTimeout(bewaarTimer);
+    bewaarTimer = setTimeout(async () => {
+      const fc = alles();
+      try {
+        const h = hass();
+        if (h) await h.callApi("POST", "meldkamer/kaart", fc);
+        else localStorage.setItem("kaart_tekeningen", JSON.stringify(fc));
+        const o = document.getElementById("opgeslagen");
+        o.classList.add("zie");
+        setTimeout(() => o.classList.remove("zie"), 1400);
+      } catch (e) {
+        meld("⚠️ Opslaan lukte niet. Probeer het zo nog eens.");
+      }
+    }, 700);
+  };
+  async function laad() {
+    let fc = null;
+    try {
+      const h = hass();
+      fc = h ? await h.callApi("GET", "meldkamer/kaart") : JSON.parse(localStorage.getItem("kaart_tekeningen") || "null");
+    } catch (e) { fc = null; }
+    if (fc && fc.features) draw.set(fc);
+    ververs();
+  }
+
+  // ---------- zijbalk ----------
+  function tekenLijst() {
+    const fc = alles();
+    document.getElementById("lijst").innerHTML = fc.features.length
+      ? fc.features.map((f) => `<div class="item ${gekozen === f.id ? "gekozen" : ""}" data-id="${f.id}"><i style="background:${esc(f.properties.kleur || KLEUREN[0])}"></i>
+          <div><b>${esc(f.properties.naam || soortNaam[f.geometry.type] + " zonder naam")}</b><small>${soortNaam[f.geometry.type]} · ${maat(f)}</small></div></div>`).join("")
+      : `<div class="leeg">Nog niets getekend.<br>Kies bovenaan <b>📍 Punt</b>, <b>〰️ Lijn</b> of <b>⬠ Gebied</b> en klik op de kaart. Een lijn of gebied maak je af met <b>✓ Klaar met tekenen</b>.</div>`;
+    tekenEditor();
+  }
+  function tekenEditor() {
+    const el = document.getElementById("editor");
+    const f = gekozen && draw.get(gekozen);
+    if (!f) { el.style.display = "none"; return; }
+    el.style.display = "block";
+    const k = f.properties.kleur || KLEUREN[0];
+    el.innerHTML = `<h3>${soortNaam[f.geometry.type]} · ${maat(f)}</h3>
+      <label>Naam</label><input id="e-naam" value="${esc(f.properties.naam || "")}" placeholder="bijv. Verzamelpunt, Hydrant, Wandelroute">
+      <label>Kleur</label><div class="kleuren">${KLEUREN.map((c) => `<button data-kleur="${c}" class="${c === k ? "aan" : ""}" style="background:${c}"></button>`).join("")}</div>
+      <label>Notitie</label><textarea id="e-notitie" placeholder="Extra informatie">${esc(f.properties.notitie || "")}</textarea>
+      <div class="rij"><button id="e-klaar">✓ Klaar</button><button class="weg" id="e-weg">🗑️ Verwijderen</button></div>`;
+    el.querySelector("#e-naam").oninput = (e) => zet("naam", e.target.value);
+    el.querySelector("#e-notitie").oninput = (e) => zet("notitie", e.target.value);
+    el.querySelectorAll("[data-kleur]").forEach((b) => (b.onclick = () => { zet("kleur", b.dataset.kleur); tekenEditor(); }));
+    el.querySelector("#e-klaar").onclick = () => { gekozen = null; draw.changeMode("simple_select"); tekenLijst(); };
+    el.querySelector("#e-weg").onclick = () => { if (confirm("Deze tekening verwijderen?")) { draw.delete(gekozen); gekozen = null; bewaar(); } };
+  }
+  function zet(sleutel, waarde) {
+    if (!gekozen) return;
+    draw.setFeatureProperty(gekozen, sleutel, waarde);
+    const f = draw.get(gekozen);
+    draw.add(f); // opnieuw tekenen zodat de kleur meteen klopt
+    bewaar();
+  }
+  document.getElementById("lijst").addEventListener("click", (e) => {
+    const it = e.target.closest(".item");
+    if (!it) return;
+    gekozen = it.dataset.id;
+    const f = draw.get(gekozen);
+    draw.changeMode("simple_select", { featureIds: [gekozen] });
+    map.flyTo({ center: f.geometry.type === "Point" ? f.geometry.coordinates : midden(f), zoom: Math.max(map.getZoom(), 15) });
+    tekenLijst();
+  });
+
+  // ---------- knoppen ----------
+  const knoppen = document.querySelectorAll(".balk [data-modus]");
+  const toonKlaar = (m) => (document.getElementById("klaar").style.display = m === "draw_line_string" || m === "draw_polygon" ? "block" : "none");
+  const zetModus = (m) => {
+    draw.changeMode(m);
+    knoppen.forEach((b) => b.classList.toggle("aan", b.dataset.modus === m));
+    toonKlaar(m);
+  };
+  document.getElementById("klaar").onclick = () => zetModus("simple_select");
+  knoppen.forEach((b) => (b.onclick = () => zetModus(b.dataset.modus)));
+  document.getElementById("thuis").onclick = () => map.flyTo({ center: thuis || NUNSPEET, zoom: 15 });
+  map.on("draw.create", (e) => {
+    const f = e.features[0];
+    draw.setFeatureProperty(f.id, "kleur", KLEUREN[0]);
+    gekozen = f.id;
+    // Na dit event pas van modus wisselen (anders roept Draw zichzelf eindeloos aan)
+    setTimeout(() => {
+      knoppen.forEach((b) => b.classList.toggle("aan", b.dataset.modus === "simple_select"));
+      toonKlaar("simple_select");
+      draw.changeMode("simple_select", { featureIds: [f.id] });
+      bewaar();
+      tekenLijst();
+      setTimeout(() => document.getElementById("e-naam")?.focus(), 50);
+    }, 0);
+  });
+  map.on("draw.update", bewaar);
+  map.on("draw.delete", bewaar);
+  map.on("draw.selectionchange", (e) => {
+    gekozen = e.features[0]?.id || gekozen;
+    if (!e.features.length && draw.getMode() === "simple_select") gekozen = null;
+    tekenLijst();
+  });
+  map.on("draw.modechange", (e) => toonKlaar(e.mode));
+  map.on("draw.modechange", (e) => knoppen.forEach((b) => b.classList.toggle("aan", b.dataset.modus === (e.mode === "direct_select" ? "simple_select" : e.mode))));
+
+  // ---------- thuis en recente meldingen ----------
+  let thuis = null;
+  function thuisPunt() {
+    const h = hass();
+    const inst = h?.states?.["sensor.meldkamer_instellingen"]?.attributes;
+    if (inst?.lat) {
+      thuis = [inst.lon, inst.lat];
+      const el = document.createElement("div");
+      el.style.cssText = "width:16px;height:16px;border-radius:50%;background:#0e7fc2;border:3px solid #fff;box-shadow:0 0 0 6px rgba(14,127,194,.25)";
+      new maplibregl.Marker({ element: el }).setLngLat(thuis).setPopup(new maplibregl.Popup({ offset: 12 }).setText("Thuis")).addTo(map);
+    }
+    const meldingen = (h?.states?.["sensor.meldkamer_laatste_melding"]?.attributes?.meldingen || []).filter((m) => m.lat && !m.proef).slice(0, 15);
+    meldingen.forEach((m) => {
+      const el = document.createElement("div");
+      el.style.cssText = "width:12px;height:12px;border-radius:50%;background:#e0532f;border:2px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.3)";
+      new maplibregl.Marker({ element: el }).setLngLat([m.lon, m.lat])
+        .setPopup(new maplibregl.Popup({ offset: 10 }).setHTML(`<b>${esc(m.kort || m.titel)}</b><br>${new Date(m.tijd).toLocaleString("nl-NL")}`)).addTo(map);
+    });
+  }
+  window.__kaart = { map, draw };
+})();
+</script>
+</body>
+</html>

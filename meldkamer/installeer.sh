@@ -219,6 +219,54 @@ chmod +x "$BUREAUBLAD/Meldkamer.desktop"
 gio set "$BUREAUBLAD/Meldkamer.desktop" metadata::trusted true 2>/dev/null || true
 ok "Het dashboard opent voortaan vanzelf. Er staat ook een Meldkamer-icoon op je bureaublad."
 
+# ---------------------------------------------------------------
+stap "Extra: offline bibliotheek en kaart (downloadt 's nachts)"
+# ---------------------------------------------------------------
+BIB="$HOME/bibliotheek"
+mkdir -p "$BIB/zim" "$CONFIG/www/bibliotheek" "$CONFIG/www/kaartdata"
+[ -f "$BIB/keuze.txt" ] || cp "$CODE/meldkamer/bibliotheek-keuze.txt" "$BIB/keuze.txt"
+sudo install -m 755 "$CODE/meldkamer/bibliotheek.sh" /usr/local/bin/meldkamer-bibliotheek
+sudo tee /etc/systemd/system/meldkamer-bibliotheek.service >/dev/null <<EOF
+[Unit]
+Description=Offline bibliotheek en kaart downloaden
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=BIB=$BIB
+Environment=CONFIG=$CONFIG
+Environment=EIGENAAR=$(id -u):$(id -g)
+Nice=15
+IOSchedulingClass=idle
+ExecStart=/usr/bin/timeout 6h /usr/local/bin/meldkamer-bibliotheek
+EOF
+sudo tee /etc/systemd/system/meldkamer-bibliotheek.timer >/dev/null <<EOF
+[Unit]
+Description=Offline bibliotheek elke nacht bijwerken
+
+[Timer]
+OnCalendar=*-*-* 01:30:00
+
+[Install]
+WantedBy=timers.target
+EOF
+sudo tee /usr/local/bin/bibliotheek-nu >/dev/null <<'EOF'
+#!/usr/bin/env bash
+# Start het downloaden van de offline bibliotheek meteen (in plaats van vannacht)
+sudo systemctl start --no-block meldkamer-bibliotheek.service
+echo "Gestart. Voortgang zie je op het tabblad Bibliotheek, of met: journalctl -fu meldkamer-bibliotheek"
+EOF
+sudo chmod +x /usr/local/bin/bibliotheek-nu
+sudo systemctl daemon-reload
+sudo systemctl enable --now meldkamer-bibliotheek.timer >/dev/null 2>&1
+# Bibliotheek-server starten als er al boeken zijn
+if ls "$BIB/zim"/*.zim >/dev/null 2>&1 && ! sudo docker ps --format '{{.Names}}' | grep -q '^bibliotheek$'; then
+  sudo docker rm -f bibliotheek >/dev/null 2>&1 || true
+  sudo docker run -d --name bibliotheek --restart unless-stopped -p 8090:8080 -v "$BIB/zim":/data ghcr.io/kiwix/kiwix-serve:3.7.0 '*.zim' >/dev/null
+fi
+ok "De bibliotheek en de kaart worden elke nacht om 01:30 gedownload. Nu meteen beginnen? Typ: bibliotheek-nu"
+
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 cat <<EOF
 

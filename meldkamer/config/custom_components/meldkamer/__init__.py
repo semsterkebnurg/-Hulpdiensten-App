@@ -13,6 +13,7 @@ from urllib.parse import quote
 import aiohttp
 import voluptuous as vol
 
+from homeassistant.components.http import HomeAssistantView
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.helpers import config_validation as cv, discovery
@@ -96,6 +97,9 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         hass.bus.async_fire("meldkamer_deurbel", {"test": True})
 
     hass.services.async_register(DOMAIN, "test_deurbel", test_deurbel)
+
+    # Eigen tekeningen op de offline kaart (punten, lijnen, gebieden)
+    hass.http.register_view(KaartView(Store(hass, 1, f"{DOMAIN}.kaart")))
 
     hass.async_create_task(
         discovery.async_load_platform(hass, Platform.SENSOR, DOMAIN, {}, config)
@@ -777,3 +781,30 @@ class P2000Coordinator(DataUpdateCoordinator):
         (self.politie if soort == "politie" else self.meldingen).insert(0, melding)
         self.hass.bus.async_fire(EVENT_MELDING, melding)
         self.async_set_updated_data(self._samenvatting())
+
+
+class KaartView(HomeAssistantView):
+    """Bewaart de tekeningen van de kaart als GeoJSON."""
+
+    url = "/api/meldkamer/kaart"
+    name = "api:meldkamer:kaart"
+    requires_auth = True
+
+    def __init__(self, store: Store) -> None:
+        self.store = store
+
+    async def get(self, request):
+        data = await self.store.async_load()
+        return self.json(data or {"type": "FeatureCollection", "features": []})
+
+    async def post(self, request):
+        try:
+            data = await request.json()
+        except ValueError:
+            return self.json_message("Ongeldige JSON", 400)
+        if not isinstance(data, dict) or data.get("type") != "FeatureCollection" or not isinstance(data.get("features"), list):
+            return self.json_message("Verwacht een GeoJSON FeatureCollection", 400)
+        if len(data["features"]) > 5000 or len(str(data)) > 3_000_000:
+            return self.json_message("Te veel tekeningen", 400)
+        await self.store.async_save(data)
+        return self.json({"ok": True, "aantal": len(data["features"])})
