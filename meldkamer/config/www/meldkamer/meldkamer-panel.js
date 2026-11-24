@@ -619,6 +619,10 @@ a{color:inherit}
 .boek small{font-size:11px;color:var(--zacht)}
 .boek .balkje{height:4px;border-radius:2px;background:var(--vlak);margin-top:4px;overflow:hidden}
 .boek .balkje div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.bieb-lezer{display:flex;flex-direction:column}
+.bieb-balk{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--rand);flex:none}
+.bieb-titel{flex:1;text-align:center;font-size:12.5px;font-weight:700;color:var(--zacht);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.bieb-frame-houder{position:relative;flex:1;min-height:0}
 .bieb-leeg{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--zacht);font-size:14px;line-height:1.6}
 .bieb-leeg.zie{display:flex}
 .bieb-leeg b{color:var(--tekst);font-size:18px}
@@ -1022,7 +1026,10 @@ class HuisPanel extends HTMLElement {
             <div class="kaart groei"><h2>📚 Offline bibliotheek <span class="r" id="bieb-info"></span></h2><div class="scroll" id="bieb-lijst"></div></div>
           </section>
           <section class="kolom">
-            <div class="kaart groei vol-kaart"><iframe id="bieb-frame" title="Bibliotheek"></iframe><div class="bieb-leeg" id="bieb-leeg"></div></div>
+            <div class="kaart groei vol-kaart bieb-lezer">
+              <div class="bieb-balk"><button class="klein-knop" data-actie="bieb-terug" id="bieb-terug">← Terug</button><button class="klein-knop" data-actie="bieb-start">🏠 Begin van het boek</button><span class="bieb-titel" id="bieb-titel"></span><button class="klein-knop" data-actie="bieb-alles">📚 Alle boeken</button></div>
+              <div class="bieb-frame-houder"><iframe id="bieb-frame" title="Bibliotheek"></iframe><div class="bieb-leeg" id="bieb-leeg"></div></div>
+            </div>
           </section>
         </main>
           </div>
@@ -2533,7 +2540,7 @@ class HuisPanel extends HTMLElement {
     const frame = r.getElementById("bieb-frame");
     if (klaar.length) {
       leeg.classList.remove("zie");
-      if (!frame.getAttribute("src")) frame.setAttribute("src", this._kiwix() + "/");
+      if (!frame.getAttribute("src")) this._openBoek(klaar[0].bestand.replace(/\.zim$/, ""));
     } else {
       leeg.innerHTML = `<div><b>📚 Nog even geduld</b><br>De boeken worden 's nachts gedownload (01:30 – 07:30).<br>Zodra het eerste boek klaar is, kun je hier lezen, ook zonder internet.</div>`;
       leeg.classList.add("zie");
@@ -2541,9 +2548,26 @@ class HuisPanel extends HTMLElement {
   }
 
   _openBoek(id) {
-    const f = this.shadowRoot.getElementById("bieb-frame");
-    f.setAttribute("src", `${this._kiwix()}/viewer#${encodeURIComponent(id)}`);
-    this.shadowRoot.getElementById("bieb-leeg").classList.remove("zie");
+    const r = this.shadowRoot;
+    this._biebBoek = id;
+    this._biebStappen = 0;
+    const item = (this._bieb?.items || []).find((i) => (i.bestand || "").replace(/\.zim$/, "") === id);
+    r.getElementById("bieb-titel").textContent = item ? item.naam : "";
+    this._biebLaad(`${this._kiwix()}/content/${encodeURIComponent(id)}/`);
+  }
+
+  _biebLaad(url) {
+    const r = this.shadowRoot;
+    const f = r.getElementById("bieb-frame");
+    if (!f._luistert) {
+      f._luistert = true;
+      f.addEventListener("load", () => {
+        this._biebStappen = (this._biebStappen || 0) + 1;
+        r.getElementById("bieb-terug").disabled = this._biebStappen < 2;
+      });
+    }
+    f.setAttribute("src", url);
+    r.getElementById("bieb-leeg").classList.remove("zie");
   }
 
   _zoekBieb() {
@@ -2551,7 +2575,8 @@ class HuisPanel extends HTMLElement {
     const term = r.getElementById("bieb-term").value.trim();
     const boek = r.getElementById("bieb-boek").value;
     if (!term || !boek) return;
-    r.getElementById("bieb-frame").setAttribute("src", `${this._kiwix()}/search?content=${encodeURIComponent(boek)}&pattern=${encodeURIComponent(term)}`);
+    this._biebBoek = boek;
+    this._biebLaad(`${this._kiwix()}/search?content=${encodeURIComponent(boek)}&pattern=${encodeURIComponent(term)}`);
   }
 
   // ---- bediening ----
@@ -2683,6 +2708,20 @@ class HuisPanel extends HTMLElement {
         break;
       case "boek":
         this._openBoek(el.dataset.boek);
+        break;
+      case "bieb-terug":
+        // Het boekvenster heeft zijn eigen geschiedenis; 'terug' gaat daar één stap terug
+        if ((this._biebStappen || 0) > 1) {
+          this._biebStappen -= 2;
+          history.back();
+        }
+        break;
+      case "bieb-start":
+        if (this._biebBoek) this._openBoek(this._biebBoek);
+        break;
+      case "bieb-alles":
+        this.shadowRoot.getElementById("bieb-titel").textContent = "Alle boeken";
+        this._biebLaad(this._kiwix() + "/");
         break;
       case "bieb-zoek":
         this._zoekBieb();
