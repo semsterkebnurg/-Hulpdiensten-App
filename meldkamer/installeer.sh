@@ -267,6 +267,38 @@ if ls "$BIB/zim"/*.zim >/dev/null 2>&1 && ! sudo docker ps --format '{{.Names}}'
 fi
 # Tussenstation zodat PDF's in de bibliotheek openen
 BIB="$BIB" CONFIG="$CONFIG" sudo -E /usr/local/bin/meldkamer-bibliotheek --proxy || true
+# ---------- Automatische updates (elke 10 minuten) ----------
+sudo install -m 755 "$CODE/meldkamer/autoupdate.sh" /usr/local/bin/meldkamer-autoupdate
+sudo tee /etc/systemd/system/meldkamer-autoupdate.service >/dev/null <<EOF
+[Unit]
+Description=Dashboard automatisch bijwerken
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=GEBRUIKER=$(id -un)
+Environment=CODE=$CODE
+Environment=CONFIG=$CONFIG
+Environment=BRANCH=$BRANCH
+ExecStart=/usr/local/bin/meldkamer-autoupdate
+EOF
+sudo tee /etc/systemd/system/meldkamer-autoupdate.timer >/dev/null <<EOF
+[Unit]
+Description=Elke 10 minuten kijken of er een nieuwe versie van het dashboard is
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=10min
+
+[Install]
+WantedBy=timers.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable --now meldkamer-autoupdate.timer >/dev/null 2>&1
+git -C "$CODE" rev-parse HEAD > "$CONFIG/www/meldkamer/versie.txt"
+ok "Automatische updates staan aan: nieuwe versies komen er binnen 10 minuten vanzelf op."
+
 ok "De bibliotheek en de kaart worden elke nacht om 01:30 gedownload. Nu meteen beginnen? Typ: bibliotheek-nu"
 
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')

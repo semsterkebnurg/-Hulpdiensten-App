@@ -858,11 +858,31 @@ class HuisPanel extends HTMLElement {
     this._tik = setInterval(() => this._seconde(), 1000);
     this._traag = setInterval(() => this._laadExtra(), 5 * 60 * 1000);
     this._cam = setInterval(() => this._ververstCams(), 10000);
+    // Nieuwe versie geïnstalleerd? Dan het scherm vanzelf verversen.
+    this._versieCheck = setInterval(() => this._controleerVersie(), 2 * 60 * 1000);
+    this._controleerVersie();
+  }
+
+  async _controleerVersie() {
+    try {
+      const r = await fetch(`/local/meldkamer/versie.txt?t=${Date.now()}`, { cache: "no-store" });
+      if (!r.ok) return;
+      const v = (await r.text()).trim();
+      if (!this._versie) this._versie = v;
+      else if (v && v !== this._versie) {
+        const alarm = this.shadowRoot.getElementById("alarm")?.classList.contains("open");
+        const deurbel = this.shadowRoot.getElementById("deurbel")?.classList.contains("open");
+        if (!alarm && !deurbel) setTimeout(() => location.reload(), 20000); // even wachten tot Home Assistant weer draait
+      }
+    } catch (e) {
+      /* geen verbinding */
+    }
   }
   disconnectedCallback() {
     clearInterval(this._tik);
     clearInterval(this._traag);
     clearInterval(this._cam);
+    clearInterval(this._versieCheck);
     this._stopGeluid();
   }
 
