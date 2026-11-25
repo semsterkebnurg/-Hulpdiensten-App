@@ -2477,7 +2477,7 @@ class HuisPanel extends HTMLElement {
   // ---------- offline bibliotheek ----------
 
   _kiwix() {
-    return `${location.protocol}//${location.hostname}:8090`;
+    return `${location.protocol}//${location.hostname}:8091`;
   }
 
   async _laadBieb() {

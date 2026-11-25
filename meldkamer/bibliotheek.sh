@@ -17,6 +17,7 @@ STATUS_JSON="$CONFIG/www/bibliotheek/status.json"
 KAART="$CONFIG/www/kaartdata"
 BASIS="${BASIS:-https://download.kiwix.org/zim}"
 KIWIX_IMAGE="ghcr.io/kiwix/kiwix-serve:3.7.0"
+PROXY_IMAGE="caddy:2.8.4-alpine"
 MARGE=$((15 * 1024 * 1024 * 1024))   # altijd 15 GB vrij laten
 
 mkdir -p "$ZIM" "$(dirname "$STATUS_JSON")" "$KAART"
@@ -80,6 +81,26 @@ start_kiwix() {
   docker rm -f bibliotheek >/dev/null 2>&1 || true
   docker run -d --name bibliotheek --restart unless-stopped -p 8090:8080 \
     -v "$ZIM":/data "$KIWIX_IMAGE" '*.zim' >/dev/null && log "Bibliotheek-server (her)start"
+}
+
+# Tussenstation op poort 8091: haalt de beveiligingsregel (Content-Security-Policy
+# met 'sandbox') weg die Kiwix meestuurt, want daardoor weigert Chrome PDF's te tonen.
+start_proxy() {
+  cat > "$BIB/Caddyfile" <<'EOC'
+:8091 {
+	reverse_proxy 127.0.0.1:8090 {
+		header_down -Content-Security-Policy
+		header_down -X-Frame-Options
+	}
+}
+EOC
+  if docker ps --format '{{.Names}}' | grep -q '^bibliotheek-proxy$'; then
+    docker restart bibliotheek-proxy >/dev/null
+  else
+    docker rm -f bibliotheek-proxy >/dev/null 2>&1 || true
+    docker run -d --name bibliotheek-proxy --restart unless-stopped --network host \
+      -v "$BIB/Caddyfile":/etc/caddy/Caddyfile:ro "$PROXY_IMAGE" >/dev/null && log "Tussenstation gestart (poort 8091)"
+  fi
 }
 
 # Nieuwste versie van een boek zoeken op download.kiwix.org
@@ -167,6 +188,9 @@ download_kaart() {
   log "Kaart klaar"
 }
 
+# ---------- alleen het tussenstation (her)starten ----------
+if [ "${1:-}" = "--proxy" ]; then start_proxy; exit 0; fi
+
 # ---------- start ----------
 log "Start offline bibliotheek"
 schrijf_json
@@ -179,6 +203,7 @@ if [ -f "$KEUZE" ]; then
   done 3< <(grep -v '^[[:space:]]*$' "$KEUZE")
 fi
 docker ps --format '{{.Names}}' | grep -q '^bibliotheek$' || start_kiwix
+start_proxy
 schrijf_json
 if [ -n "$EIGENAAR" ]; then chown -R "$EIGENAAR" "$BIB" "$CONFIG/www/bibliotheek" "$KAART" 2>/dev/null || true; fi
 log "Klaar voor vannacht"

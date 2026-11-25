@@ -265,6 +265,8 @@ if ls "$BIB/zim"/*.zim >/dev/null 2>&1 && ! sudo docker ps --format '{{.Names}}'
   sudo docker rm -f bibliotheek >/dev/null 2>&1 || true
   sudo docker run -d --name bibliotheek --restart unless-stopped -p 8090:8080 -v "$BIB/zim":/data ghcr.io/kiwix/kiwix-serve:3.7.0 '*.zim' >/dev/null
 fi
+# Tussenstation zodat PDF's in de bibliotheek openen
+BIB="$BIB" CONFIG="$CONFIG" sudo -E /usr/local/bin/meldkamer-bibliotheek --proxy || true
 ok "De bibliotheek en de kaart worden elke nacht om 01:30 gedownload. Nu meteen beginnen? Typ: bibliotheek-nu"
 
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
