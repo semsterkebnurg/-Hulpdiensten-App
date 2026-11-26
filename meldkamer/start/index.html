@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Thuis">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icoon.svg">
+<title>Huis Sterkenburg</title>
+<style>
+  :root{--bg:#f2f2f7;--kaart:#fff;--tekst:#1d1d1f;--zacht:#6e6e73;--rand:rgba(0,0,0,.07);--accent:#1d1d1f;--opaccent:#fff;--goed:#16a34a;--let:#d97706}
+  @media (prefers-color-scheme: dark){:root{--bg:#000;--kaart:#1c1c1e;--tekst:#f5f5f7;--zacht:#98989d;--rand:rgba(255,255,255,.08);--accent:#f5f5f7;--opaccent:#000;--goed:#30d158;--let:#ff9f0a}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tekst);font-family:-apple-system,BlinkMacSystemFont,"Plus Jakarta Sans",Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  main{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 30px)}
+  h1{margin:0;font-size:32px;letter-spacing:-.02em}
+  .sub{color:var(--zacht);margin:4px 0 22px;font-size:15px}
+  .raster{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  a.tegel{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;background:var(--kaart);border:1px solid var(--rand);text-decoration:none;color:inherit;min-height:124px;transition:transform .15s}
+  a.tegel:active{transform:scale(.97)}
+  .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;background:var(--bg)}
+  .tegel b{font-size:16px}
+  .tegel small{color:var(--zacht);font-size:13px;line-height:1.35}
+  .tegel.breed{grid-column:1/-1;flex-direction:row;align-items:center;min-height:0}
+  .tegel.breed .ic{flex:none}
+  h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--zacht);margin:26px 4px 10px}
+  .blok{background:var(--kaart);border:1px solid var(--rand);border-radius:20px;padding:16px;font-size:14.5px;line-height:1.5}
+  .blok + .blok{margin-top:10px}
+  .stip{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--zacht)}
+  .stip.aan{background:var(--goed)} .stip.let{background:var(--let)}
+  .knop{display:inline-block;margin-top:10px;padding:10px 16px;border-radius:12px;background:var(--accent);color:var(--opaccent);text-decoration:none;font-weight:700;font-size:14px}
+  code{font-size:13px;background:var(--bg);padding:2px 6px;border-radius:6px}
+  ol{margin:6px 0 0;padding-left:20px} li{margin:4px 0}
+</style>
+</head>
+<body>
+<main>
+  <h1>Huis Sterkenburg</h1>
+  <div class="sub" id="sub">Alles op één plek</div>
+
+  <div class="raster">
+    <a class="tegel breed" id="l-dashboard"><span class="ic">🏠</span><div><b>Dashboard</b><br><small>Lampen, rolluiken, meldingen en weer</small></div></a>
+    <a class="tegel" id="l-kaart"><span class="ic">🗺️</span><b>Noodkaart</b><small>AED's, brandkranen, ziekenhuizen en je eigen tekeningen</small></a>
+    <a class="tegel" id="l-bieb"><span class="ic">📚</span><b>Bibliotheek</b><small>Wikipedia, EHBO, survival en reparatie, ook zonder internet</small></a>
+    <a class="tegel" id="l-meldkamer"><span class="ic">🚒</span><b>Meldkamer</b><small>Uitrukken post Nunspeet en politie in de buurt</small></a>
+    <a class="tegel" id="l-weer"><span class="ic">⛈️</span><b>Weer & storm</b><small>Buienradar, verwachting en gevarenrisico</small></a>
+    <a class="tegel" id="l-pihole"><span class="ic">🛡️</span><b>Reclameblokker</b><small id="pihole-tekst">Pi-hole: hoeveel reclame er is tegengehouden</small></a>
+    <a class="tegel" id="l-cams"><span class="ic">📷</span><b>Camera's</b><small>Alle camera's live</small></a>
+  </div>
+
+  <h2>Buiten de deur</h2>
+  <div class="blok" id="tailscale">Status wordt geladen…</div>
+
+  <h2>Reclame blokkeren op je iPhone</h2>
+  <div class="blok">
+    Thuis op de wifi:
+    <ol>
+      <li>Instellingen → Wifi → tik op <b>ⓘ</b> naast je netwerk</li>
+      <li>DNS configureren → <b>Handmatig</b></li>
+      <li>Verwijder wat er staat en voeg toe: <code id="dns-ip">…</code></li>
+    </ol>
+  </div>
+
+  <h2>Op je beginscherm zetten</h2>
+  <div class="blok">Tik in Safari op <b>Deel</b> (vierkantje met pijl) → <b>Zet op beginscherm</b>. Dan heb je een eigen app-icoontje.</div>
+</main>
+<script>
+  const host = location.hostname;
+  const ha = `http://${host}:8123`;
+  const links = {
+    "l-dashboard": `${ha}/meldkamer?tab=dashboard`,
+    "l-kaart": `${ha}/meldkamer?tab=kaart`,
+    "l-bieb": `http://${host}:8091/`,
+    "l-meldkamer": `${ha}/meldkamer?tab=meldkamer`,
+    "l-weer": `${ha}/meldkamer?tab=weer`,
+    "l-pihole": `http://${host}:8081/admin/`,
+    "l-cams": `${ha}/meldkamer?tab=cams`,
+  };
+  for (const [id, url] of Object.entries(links)) document.getElementById(id).href = url;
+  const u = new Date().getHours();
+  document.getElementById("sub").textContent =
+    (u < 6 ? "Goedenacht" : u < 12 ? "Goedemorgen" : u < 18 ? "Goedemiddag" : "Goedenavond") + " · alles op één plek";
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  fetch("status.json?t=" + Date.now(), { cache: "no-store" })
+    .then((r) => r.json())
+    .then((st) => {
+      document.getElementById("dns-ip").textContent = st.lan || host;
+      if (st.pihole !== "aan") document.getElementById("pihole-tekst").textContent = "Wordt geïnstalleerd…";
+      const t = st.tailscale || {};
+      const el = document.getElementById("tailscale");
+      if (t.status === "Running" && t.ip) {
+        el.innerHTML = `<span class="stip aan"></span><b>Werkt overal</b><br>
+          Buiten de deur open je deze pagina via <code>http://${esc(t.ip)}/</code> (zet de <b>Tailscale</b>-app aan op je iPhone).
+          <br><a class="knop" href="http://${esc(t.ip)}/">Open via Tailscale</a>`;
+      } else if (t.inloglink) {
+        el.innerHTML = `<span class="stip let"></span><b>Nog één keer inloggen</b><br>
+          <ol><li>Installeer de gratis app <b>Tailscale</b> op je iPhone en log in (bijv. met Google of Apple).</li>
+          <li>Tik hieronder en log met <b>hetzelfde account</b> in om de laptop toe te voegen.</li></ol>
+          <a class="knop" href="${esc(t.inloglink)}" target="_blank" rel="noopener">Laptop koppelen</a>`;
+      } else {
+        el.innerHTML = `<span class="stip"></span>Tailscale wordt geïnstalleerd. Kijk over 10 minuten nog eens.`;
+      }
+    })
+    .catch(() => {
+      document.getElementById("tailscale").textContent = "Status nog niet beschikbaar. Kijk over 10 minuten nog eens.";
+      document.getElementById("dns-ip").textContent = host;
+    });
+</script>
+</body>
+</html>

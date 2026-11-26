@@ -1077,7 +1077,9 @@ class HuisPanel extends HTMLElement {
     this._audio();
     this._laadExtra();
     this._toonWeerTab();
-    this._toonPagina(this._thuis);
+    const gevraagd = new URLSearchParams(location.search).get("tab") || (location.hash || "").replace("#", "");
+    this._toonPagina(["dashboard", "meldkamer", "cams", "weer", "kaart", "bibliotheek", "test"].includes(gevraagd) ? gevraagd : this._thuis);
+    if (gevraagd) this._actief = Date.now();
     const naam = (this._hass.user?.name || "S").trim();
     this.shadowRoot.getElementById("avatar").textContent = naam[0].toUpperCase();
     try {

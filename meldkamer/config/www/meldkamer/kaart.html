@@ -37,7 +37,12 @@
   .rij button{flex:1;padding:8px;border-radius:10px;font-weight:700;font-size:12.5px;background:rgba(0,0,0,.05)}
   .rij .weg{background:rgba(220,38,38,.1);color:#b91c1c}
   .melding{position:absolute;left:12px;bottom:12px;z-index:5;max-width:430px;font-size:12.5px;padding:10px 13px;border-radius:14px;background:var(--glas);border:1px solid var(--rand);box-shadow:0 10px 30px rgba(0,0,0,.12)}
-  .opgeslagen{position:absolute;top:66px;left:12px;z-index:5;font-size:12px;padding:5px 10px;border-radius:999px;background:var(--glas);border:1px solid var(--rand);opacity:0;transition:opacity .4s}
+  .lagen{position:absolute;top:66px;left:12px;z-index:5;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 330px)}
+  .lagen button{padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;background:var(--glas);border:1px solid var(--rand);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+  .lagen button.uit{opacity:.45}
+  .lagen button i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle}
+  @media (max-width:700px){.lagen{max-width:calc(100% - 24px)}}
+  .opgeslagen{position:absolute;top:112px;left:12px;z-index:5;font-size:12px;padding:5px 10px;border-radius:999px;background:var(--glas);border:1px solid var(--rand);opacity:0;transition:opacity .4s}
   .opgeslagen.zie{opacity:1}
   .maplibregl-ctrl-group button{width:34px;height:34px}
   @media (max-width:700px){.zij{top:auto;left:12px;width:auto;height:42%}.balk{flex-wrap:wrap;right:12px}}
@@ -54,6 +59,7 @@
   <button id="thuis">🏠 Thuis</button>
 </div>
 <div class="opgeslagen" id="opgeslagen">✓ Opgeslagen</div>
+<div class="lagen" id="lagen"></div>
 <div class="zij">
   <div class="blok" id="editor" style="display:none"></div>
   <div class="blok lijst"><h3>Mijn tekeningen</h3><div id="lijst"></div></div>
@@ -128,7 +134,52 @@
     geladen = true;
     laad();
     thuisPunt();
+    noodLaag();
   };
+
+  // ---------- noodlaag uit OpenStreetMap ----------
+  const SOORTEN = {
+    aed: ["❤️ AED", "#e11d48"], brandkraan: ["🚒 Brandkranen", "#0e7fc2"], kazerne: ["🏠 Kazernes", "#dc2626"],
+    ziekenhuis: ["🏥 Ziekenhuizen", "#16a34a"], huisartsenpost: ["🩺 Huisartsenpost", "#0d9488"], politie: ["👮 Politie", "#1d4ed8"],
+    apotheek: ["💊 Apotheken", "#7c3aed"], verzamelpunt: ["🚩 Verzamelpunten", "#d97706"],
+  };
+  const BESCHRIJF = { aed: "AED", brandkraan: "Brandkraan", kazerne: "Brandweerkazerne", ziekenhuis: "Ziekenhuis", huisartsenpost: "Huisartsenpost", politie: "Politie", apotheek: "Apotheek", verzamelpunt: "Verzamelpunt" };
+  let uitgezet;
+  try { uitgezet = JSON.parse(localStorage.getItem("kaart_lagen_uit") || '["brandkraan","apotheek"]'); } catch (e) { uitgezet = ["brandkraan", "apotheek"]; }
+  async function noodLaag() {
+    let data = null;
+    try { const r = await fetch(DATA + "/nood.geojson", { cache: "no-store" }); if (r.ok) data = await r.json(); } catch (e) { data = null; }
+    const balk = document.getElementById("lagen");
+    if (!data || !data.features?.length) { balk.innerHTML = `<button class="uit" disabled>❤️ AED's worden 's nachts opgehaald</button>`; return; }
+    map.addSource("nood", { type: "geojson", data });
+    const aanwezig = Object.keys(SOORTEN).filter((k) => data.features.some((f) => f.properties.soort === k));
+    aanwezig.forEach((k) => {
+      map.addLayer({ id: "nood-" + k, type: "circle", source: "nood", filter: ["==", ["get", "soort"], k],
+        layout: { visibility: uitgezet.includes(k) ? "none" : "visible" },
+        paint: { "circle-radius": k === "brandkraan" ? 4.5 : 7, "circle-color": SOORTEN[k][1], "circle-stroke-color": "#fff", "circle-stroke-width": 2 } });
+      map.on("click", "nood-" + k, (e) => {
+        const p = e.features[0].properties;
+        const regels = [p.plek && "📍 " + p.plek, p.open && "🕐 " + p.open.replace("24/7", "dag en nacht"), p.toegang && "🔓 " + ({ yes: "openbaar", private: "alleen voor personeel", customers: "alleen voor bezoekers", permissive: "toegankelijk" }[p.toegang] || p.toegang),
+          (p.straat || p.nr) && "🏠 " + [p.straat, p.nr].filter(Boolean).join(" "), p.telefoon && "📞 " + p.telefoon, p.uitleg].filter(Boolean);
+        new maplibregl.Popup({ offset: 10 }).setLngLat(e.lngLat)
+          .setHTML(`<b>${esc(p.naam || BESCHRIJF[k])}</b>${p.naam ? `<br><small>${BESCHRIJF[k]}</small>` : ""}${regels.length ? "<br>" + regels.map(esc).join("<br>") : ""}
+            <br><a href="https://www.google.com/maps/dir/?api=1&destination=${e.lngLat.lat},${e.lngLat.lng}&travelmode=walking" target="_blank" rel="noopener">🚶 Route</a>`).addTo(map);
+      });
+      map.on("mouseenter", "nood-" + k, () => (map.getCanvas().style.cursor = "pointer"));
+      map.on("mouseleave", "nood-" + k, () => (map.getCanvas().style.cursor = ""));
+    });
+    const teken = () => (balk.innerHTML = aanwezig.map((k) => `<button data-laag="${k}" class="${uitgezet.includes(k) ? "uit" : ""}"><i style="background:${SOORTEN[k][1]}"></i>${SOORTEN[k][0].replace(/^\S+ /, "")} (${data.features.filter((f) => f.properties.soort === k).length})</button>`).join(""));
+    teken();
+    balk.onclick = (e) => {
+      const b = e.target.closest("[data-laag]");
+      if (!b) return;
+      const k = b.dataset.laag;
+      uitgezet = uitgezet.includes(k) ? uitgezet.filter((x) => x !== k) : [...uitgezet, k];
+      try { localStorage.setItem("kaart_lagen_uit", JSON.stringify(uitgezet)); } catch (e2) {}
+      map.setLayoutProperty("nood-" + k, "visibility", uitgezet.includes(k) ? "none" : "visible");
+      teken();
+    };
+  }
   map.on("load", start);
   setTimeout(start, 4000); // ook als een kaartlaag niet laadt
 

@@ -86,21 +86,78 @@ start_kiwix() {
 # Tussenstation op poort 8091: haalt de beveiligingsregel (Content-Security-Policy
 # met 'sandbox') weg die Kiwix meestuurt, want daardoor weigert Chrome PDF's te tonen.
 start_proxy() {
+  mkdir -p "$CONFIG/www/start"
   cat > "$BIB/Caddyfile" <<'EOC'
+# Bibliotheek zonder de 'sandbox'-regel, zodat PDF's openen
 :8091 {
 	reverse_proxy 127.0.0.1:8090 {
 		header_down -Content-Security-Policy
 		header_down -X-Frame-Options
 	}
 }
+# Startpagina voor je telefoon (http://<laptop>/)
+:80 {
+	root * /srv/start
+	file_server
+}
 EOC
-  if docker ps --format '{{.Names}}' | grep -q '^bibliotheek-proxy$'; then
-    docker restart bibliotheek-proxy >/dev/null
+  docker rm -f bibliotheek-proxy >/dev/null 2>&1 || true
+  docker run -d --name bibliotheek-proxy --restart unless-stopped --network host \
+    -v "$BIB/Caddyfile":/etc/caddy/Caddyfile:ro -v "$CONFIG/www/start":/srv/start:ro \
+    "$PROXY_IMAGE" >/dev/null && log "Tussenstation en startpagina gestart (poort 8091 en 80)"
+}
+
+# ---------- noodkaart: AED's, brandkranen, ziekenhuizen enz. uit OpenStreetMap ----------
+NOOD_BBOX="${NOOD_BBOX:-52.20,5.50,52.55,6.05}"   # zuid,west,noord,oost (Nunspeet en omgeving)
+download_nood() {
+  local uit="$KAART/nood.geojson" q
+  q="[out:json][timeout:180];(
+node[\"emergency\"=\"defibrillator\"]($NOOD_BBOX);
+node[\"emergency\"=\"fire_hydrant\"]($NOOD_BBOX);
+nwr[\"emergency\"=\"assembly_point\"]($NOOD_BBOX);
+nwr[\"amenity\"=\"hospital\"]($NOOD_BBOX);
+nwr[\"amenity\"=\"fire_station\"]($NOOD_BBOX);
+nwr[\"amenity\"=\"police\"]($NOOD_BBOX);
+nwr[\"amenity\"=\"pharmacy\"]($NOOD_BBOX);
+nwr[\"healthcare\"=\"doctor\"][\"emergency\"=\"yes\"]($NOOD_BBOX);
+);out center tags;"
+  log "Noodkaart ophalen uit OpenStreetMap"
+  if curl -fsS --max-time 240 -A "Huis-dashboard/1.0" --data-urlencode "data=$q" \
+      "${OVERPASS:-https://overpass-api.de/api/interpreter}" -o "$KAART/nood.osm.json"; then
+    python3 - "$KAART/nood.osm.json" "$uit.tmp" <<'EOP' && mv "$uit.tmp" "$uit" && log "Noodkaart klaar"
+import json, sys
+d = json.load(open(sys.argv[1], encoding="utf-8"))
+def soort(t):
+    e, a = t.get("emergency"), t.get("amenity")
+    if e == "defibrillator": return "aed"
+    if e == "fire_hydrant": return "brandkraan"
+    if e == "assembly_point": return "verzamelpunt"
+    if a == "hospital": return "ziekenhuis"
+    if a == "fire_station": return "kazerne"
+    if a == "police": return "politie"
+    if a == "pharmacy": return "apotheek"
+    return "huisartsenpost"
+feats = []
+for el in d.get("elements", []):
+    t = el.get("tags", {})
+    lat = el.get("lat") or (el.get("center") or {}).get("lat")
+    lon = el.get("lon") or (el.get("center") or {}).get("lon")
+    if lat is None or lon is None:
+        continue
+    props = {"soort": soort(t), "naam": t.get("name", "")}
+    for k_osm, k in (("opening_hours", "open"), ("defibrillator:location", "plek"), ("access", "toegang"),
+                     ("addr:street", "straat"), ("addr:housenumber", "nr"), ("phone", "telefoon"),
+                     ("description", "uitleg"), ("fire_hydrant:type", "type")):
+        if t.get(k_osm):
+            props[k] = t[k_osm]
+    feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [lon, lat]}, "properties": props})
+json.dump({"type": "FeatureCollection", "features": feats}, open(sys.argv[2], "w", encoding="utf-8"), ensure_ascii=False)
+print(len(feats), "punten")
+EOP
   else
-    docker rm -f bibliotheek-proxy >/dev/null 2>&1 || true
-    docker run -d --name bibliotheek-proxy --restart unless-stopped --network host \
-      -v "$BIB/Caddyfile":/etc/caddy/Caddyfile:ro "$PROXY_IMAGE" >/dev/null && log "Tussenstation gestart (poort 8091)"
+    log "Noodkaart ophalen mislukt (volgende nacht opnieuw)"
   fi
+  rm -f "$KAART/nood.osm.json"
 }
 
 # Nieuwste versie van een boek zoeken op download.kiwix.org
@@ -190,11 +247,13 @@ download_kaart() {
 
 # ---------- alleen het tussenstation (her)starten ----------
 if [ "${1:-}" = "--proxy" ]; then start_proxy; exit 0; fi
+if [ "${1:-}" = "--nood" ]; then download_nood; exit 0; fi
 
 # ---------- start ----------
 log "Start offline bibliotheek"
 schrijf_json
 [ "${ZONDER_KAART:-}" = "1" ] || download_kaart
+if [ ! -f "$KAART/nood.geojson" ] || [ -n "$(find "$KAART/nood.geojson" -mtime +7 2>/dev/null)" ]; then download_nood; fi
 if [ -f "$KEUZE" ]; then
   while IFS='|' read -r map prefix naam cat <&3; do
     [ -z "${map// }" ] && continue

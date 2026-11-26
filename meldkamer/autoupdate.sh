@@ -16,7 +16,18 @@ log() { echo "[$(date '+%F %T')] $*"; }
 als_gebruiker git -C "$CODE" fetch -q origin "$BRANCH" || { log "Geen verbinding met GitHub"; exit 0; }
 oud=$(als_gebruiker git -C "$CODE" rev-parse HEAD)
 nieuw=$(als_gebruiker git -C "$CODE" rev-parse "origin/$BRANCH")
-if [ "$oud" = "$nieuw" ]; then exit 0; fi
+if [ "$oud" = "$nieuw" ]; then
+  # Niets nieuws: alleen de status van de startpagina bijwerken
+  if [ -f "$CODE/meldkamer/diensten.sh" ]; then
+    if [ ! -f "$CONFIG/www/start/index.html" ]; then
+      # Eerste keer: de diensten nog installeren
+      GEBRUIKER="$GEBRUIKER" CODE="$CODE" CONFIG="$CONFIG" bash "$CODE/meldkamer/diensten.sh" || log "Diensten: er ging iets mis"
+    else
+      GEBRUIKER="$GEBRUIKER" CODE="$CODE" CONFIG="$CONFIG" bash "$CODE/meldkamer/diensten.sh" --status >/dev/null 2>&1
+    fi
+  fi
+  exit 0
+fi
 
 log "Nieuwe versie gevonden: ${nieuw:0:7}"
 gewijzigd=$(als_gebruiker git -C "$CODE" diff --name-only "$oud" "$nieuw")
@@ -43,5 +54,8 @@ if echo "$gewijzigd" | grep -qE '^meldkamer/config/(custom_components|packages|b
 fi
 if echo "$gewijzigd" | grep -q '^meldkamer/bibliotheek.sh'; then
   BIB="/home/$GEBRUIKER/bibliotheek" CONFIG="$CONFIG" /usr/local/bin/meldkamer-bibliotheek --proxy || true
+fi
+if echo "$gewijzigd" | grep -qE '^meldkamer/(diensten\.sh|start/)'; then
+  GEBRUIKER="$GEBRUIKER" CODE="$CODE" CONFIG="$CONFIG" bash "$CODE/meldkamer/diensten.sh" || log "Diensten: er ging iets mis"
 fi
 log "Bijgewerkt naar ${nieuw:0:7}"

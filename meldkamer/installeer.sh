@@ -297,6 +297,7 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable --now meldkamer-autoupdate.timer >/dev/null 2>&1
 git -C "$CODE" rev-parse HEAD > "$CONFIG/www/meldkamer/versie.txt"
+sudo GEBRUIKER="$(id -un)" CODE="$CODE" CONFIG="$CONFIG" bash "$CODE/meldkamer/diensten.sh" || true
 ok "Automatische updates staan aan: nieuwe versies komen er binnen 10 minuten vanzelf op."
 
 ok "De bibliotheek en de kaart worden elke nacht om 01:30 gedownload. Nu meteen beginnen? Typ: bibliotheek-nu"
